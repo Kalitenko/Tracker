@@ -132,6 +132,10 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    // MARK: - Public Properties
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
+    
     // MARK: - Actions
     @objc private func didTapAddTrackerButton(_ sender: Any) {
         Logger.info("didTapAddTrackerButton was clicked")
