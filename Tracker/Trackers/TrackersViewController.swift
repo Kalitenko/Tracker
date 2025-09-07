@@ -29,6 +29,7 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         
         return datePicker
     }()
@@ -59,22 +60,6 @@ final class TrackersViewController: UIViewController {
         return appearance
     }()
     
-    private func configureUINavigationBar() {
-        navigationItem.title = Layout.trackersLabelText
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
-        
-        let appearance = uiNavigationBarAppearance
-        
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        navigationController?.navigationBar.compactAppearance = appearance
-        
-        navigationController?.navigationBar.prefersLargeTitles = true
-    }
-    
     private lazy var emptyStateImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(resource: .emptyState))
         imageView.contentMode = .center
@@ -92,6 +77,17 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private lazy var collectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: UICollectionViewFlowLayout()
+        )
+        collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        
+        return collectionView
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -100,6 +96,9 @@ final class TrackersViewController: UIViewController {
         setupSubViews()
         setupConstraints()
         configureUINavigationBar()
+        
+        dumbData()
+        checkEmptyState()
     }
     
     // MARK: - Setup Methods
@@ -108,7 +107,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        [emptyStateImageView, emptyStateLabel].forEach {
+        [emptyStateImageView, emptyStateLabel, collectionView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -129,16 +128,200 @@ final class TrackersViewController: UIViewController {
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Layout.emptyStateLabelTopSpacing),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.emptyStateLabelHorizontalInset),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.emptyStateLabelHorizontalInset),
+            
+            collectionView.topAnchor.constraint(equalTo: guide.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
     
+    private func configureUINavigationBar() {
+        navigationItem.title = Layout.trackersLabelText
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        
+        let appearance = uiNavigationBarAppearance
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+    
     // MARK: - Public Properties
+    var trackers: [Tracker] = []
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
+    
+    func dumbData() {
+        let workTrackers = TrackerCategory(
+            id: 1,
+            title: "Работа",
+            trackers: [
+                Tracker(
+                    id: 101,
+                    name: "Утренняя планёрка",
+                    color: .systemBlue,
+                    emoji: "📋",
+                    schedule: [.monday, .wednesday, .friday]
+                ),
+                Tracker(
+                    id: 102,
+                    name: "Проверка почты",
+                    color: .systemTeal,
+                    emoji: "📧",
+                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday]
+                ),
+                Tracker(
+                    id: 103,
+                    name: "Код-ревью",
+                    color: .systemOrange,
+                    emoji: "💻",
+                    schedule: [.tuesday, .thursday]
+                )
+            ]
+        )
+        
+        let healthTrackers = TrackerCategory(
+            id: 2,
+            title: "Здоровье",
+            trackers: [
+                Tracker(
+                    id: 201,
+                    name: "Утренняя пробежка",
+                    color: .systemGreen,
+                    emoji: "🏃‍♂️",
+                    schedule: [.monday, .wednesday, .friday, .sunday]
+                ),
+                Tracker(
+                    id: 202,
+                    name: "Медитация",
+                    color: .systemPurple,
+                    emoji: "🧘‍♀️",
+                    schedule: [.wednesday]
+                )
+            ]
+        )
+        
+        let hobbyTrackers = TrackerCategory(
+            id: 3,
+            title: "Хобби",
+            trackers: [
+                Tracker(
+                    id: 301,
+                    name: "Играть на гитаре",
+                    color: .systemRed,
+                    emoji: "🎸",
+                    schedule: [.saturday, .sunday]
+                )
+            ]
+        )
+        
+        categories = [workTrackers, healthTrackers, hobbyTrackers]
+        trackers = categories.flatMap { $0.trackers }
+        
+    }
+    
+    //
+    
+    private func checkEmptyState() {
+        if trackers.isEmpty {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+        } else {
+            emptyStateImageView.isHidden = true
+            emptyStateLabel.isHidden = true
+        }
+    }
+    
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton(_ sender: Any) {
         Logger.info("didTapAddTrackerButton was clicked")
     }
     
+    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        Logger.info("Выбранная дата: \(formattedDate)")
+    }
+    
+}
+
+// MARK: - UICollectionViewDataSource
+extension TrackersViewController: UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return categories.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        categories[section].trackers.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.identifier, for: indexPath) as? TrackerCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        let category = categories[indexPath.section]
+        let tracker = category.trackers[indexPath.row]
+        
+        cell.configure(title: tracker.name,
+                      emoji: tracker.emoji,
+                      counter: 123,
+                      ifGenerateColor: true)
+        
+        return cell
+    }
+    
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let cellsPerRow: CGFloat = 2
+        let leftInset: CGFloat = 16
+        let rightInset: CGFloat = 16
+        let cellSpacing: CGFloat = 9
+        let paddingWidth: CGFloat = leftInset + rightInset + (cellsPerRow - 1) * cellSpacing
+        let availableWidth = collectionView.frame.width - paddingWidth
+        let cellWidth =  availableWidth / CGFloat(cellsPerRow)
+        
+        return CGSize(width: cellWidth, height: 148)
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 9 // cellSpacing
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 24, left: 16, bottom: 0, right: 16)
+    }
+}
+
+// MARK: - Preview
+#Preview("Only Tracker Controller") {
+    let vc = TrackersViewController()
+    //    vc.trackers = []
+    return vc
+}
+
+#Preview("TabBarController") {
+    let vc = TabBarController()
+    
+    return vc
 }
