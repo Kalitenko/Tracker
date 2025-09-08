@@ -83,6 +83,8 @@ final class TrackersViewController: UIViewController {
             collectionViewLayout: UICollectionViewFlowLayout()
         )
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
+        collectionView.register(TrackerCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackerCollectionHeaderView.identifier)
+        
         collectionView.dataSource = self
         collectionView.delegate = self
         
@@ -129,7 +131,7 @@ final class TrackersViewController: UIViewController {
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.emptyStateLabelHorizontalInset),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.emptyStateLabelHorizontalInset),
             
-            collectionView.topAnchor.constraint(equalTo: guide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 24),
             collectionView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -281,6 +283,14 @@ extension TrackersViewController: UICollectionViewDataSource {
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: TrackerCollectionHeaderView.identifier, for: indexPath) as? TrackerCollectionHeaderView else {
+            return UICollectionReusableView()
+        }
+        header.headerLabel.text = categories[indexPath.section].title
+        
+        return header
+    }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -301,7 +311,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        return 12
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -309,8 +319,13 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 24, left: 16, bottom: 0, right: 16)
+        return UIEdgeInsets(top: 12, left: 16, bottom: 0, right: 16)
     }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 30)
+    }
+    
 }
 
 // MARK: - Preview

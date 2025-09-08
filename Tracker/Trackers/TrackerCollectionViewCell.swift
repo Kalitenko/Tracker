@@ -12,6 +12,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         static let trackersTitle = "Трекеры"
     }
     
+    // MARK: - Public Static Properties
     static let identifier = "TrackerCollectionViewCell"
     
     // MARK: - Layout
@@ -160,20 +161,20 @@ extension TrackerCollectionViewCell {
     }
 }
 
-#Preview("Card") {
-    let screenWidth = UIScreen.main.bounds.width
-    let containerHeight: CGFloat = 500
-    
-    let container = UIView(frame: CGRect(x: 0, y: 0, width: screenWidth, height: containerHeight))
-    container.backgroundColor = .systemGray2
-    
-    let cellHeight: CGFloat = 160
-    let cell = TrackerCollectionViewCell(frame: CGRect(x: 0, y: 0, width: screenWidth/2, height: cellHeight))
-    
-    cell.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
-    
-    cell.configure(title: "Tracker 1", emoji: "📈", counter: 123)
-    
-    container.addSubview(cell)
-    return container
-}
+//#Preview("Card") {
+//    let screenWidth = UIScreen.main.bounds.width
+//    let containerHeight: CGFloat = 500
+//    
+//    let container = UIView(frame: CGRect(x: 0, y: 0, width: screenWidth, height: containerHeight))
+//    container.backgroundColor = .systemGray2
+//    
+//    let cellHeight: CGFloat = 160
+//    let cell = TrackerCollectionViewCell(frame: CGRect(x: 0, y: 0, width: screenWidth/2, height: cellHeight))
+//    
+//    cell.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
+//    
+//    cell.configure(title: "Tracker 1", emoji: "📈", counter: 123)
+//    
+//    container.addSubview(cell)
+//    return container
+//}
