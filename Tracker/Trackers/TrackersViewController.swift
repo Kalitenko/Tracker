@@ -57,6 +57,9 @@ final class TrackersViewController: UIViewController {
             .font: font
         ]
         
+        appearance.shadowColor = .clear
+        appearance.backgroundColor = UIColor(resource: .white)
+        
         return appearance
     }()
     
@@ -276,9 +279,9 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = category.trackers[indexPath.row]
         
         cell.configure(title: tracker.name,
-                      emoji: tracker.emoji,
-                      counter: 123,
-                      ifGenerateColor: true)
+                       emoji: tracker.emoji,
+                       counter: 123,
+                       ifGenerateColor: true)
         
         return cell
     }

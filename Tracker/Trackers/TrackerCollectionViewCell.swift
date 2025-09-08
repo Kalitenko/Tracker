@@ -39,15 +39,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         label.font = UIFont.medium12
         label.textColor = UIColor(resource: .ypWhite)
         
-        // TODO: - delete
-        label.text = "Test"
-        
         return label
     }()
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.medium16
+        label.textAlignment = .center
+        label.backgroundColor = UIColor(resource: .ypWhite).withAlphaComponent(0.3)
+        label.layer.cornerRadius = 12
+        label.clipsToBounds = true
         
         return label
     }()
@@ -56,9 +57,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont.medium12
         label.textColor = UIColor(resource: .black)
-        
-        // TODO: - delete
-        label.text = "Test"
         
         return label
     }()
@@ -161,20 +159,20 @@ extension TrackerCollectionViewCell {
     }
 }
 
-//#Preview("Card") {
-//    let screenWidth = UIScreen.main.bounds.width
-//    let containerHeight: CGFloat = 500
-//    
-//    let container = UIView(frame: CGRect(x: 0, y: 0, width: screenWidth, height: containerHeight))
-//    container.backgroundColor = .systemGray2
-//    
-//    let cellHeight: CGFloat = 160
-//    let cell = TrackerCollectionViewCell(frame: CGRect(x: 0, y: 0, width: screenWidth/2, height: cellHeight))
-//    
-//    cell.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
-//    
-//    cell.configure(title: "Tracker 1", emoji: "📈", counter: 123)
-//    
-//    container.addSubview(cell)
-//    return container
-//}
+#Preview("Card") {
+    let screenWidth = UIScreen.main.bounds.width
+    let containerHeight: CGFloat = 500
+    
+    let container = UIView(frame: CGRect(x: 0, y: 0, width: screenWidth, height: containerHeight))
+    container.backgroundColor = .systemGray2
+    
+    let cellHeight: CGFloat = 160
+    let cell = TrackerCollectionViewCell(frame: CGRect(x: 0, y: 0, width: screenWidth/2, height: cellHeight))
+    
+    cell.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
+    
+    cell.configure(title: "Tracker 1", emoji: "📈", counter: 123)
+    
+    container.addSubview(cell)
+    return container
+}
