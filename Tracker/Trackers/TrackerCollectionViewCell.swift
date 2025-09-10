@@ -1,5 +1,10 @@
 import UIKit
 
+// MARK: -
+protocol TrackerCellDelegate: AnyObject {
+    func didTapQuantityManagementButton(id: UInt, at: IndexPath)
+}
+
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Constants
@@ -62,9 +67,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }()
     
     private lazy var quantityManagementButton: UIButton = {
-        let button = UIButton(type: .system)
+        var config = UIButton.Configuration.plain()
+        config.baseBackgroundColor = .clear
+        config.background.backgroundColor = .clear
+        
+        let button = UIButton(configuration: config, primaryAction: nil)
         button.setImage(UIImage(resource: .plus), for: .normal)
         button.setImage(UIImage(resource: .done), for: .selected)
+        button.addTarget(self, action: #selector(quantityManagementButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -134,12 +144,59 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
     
+    
     // MARK: - Public Properties
+    weak var delegate: TrackerCellDelegate?
+    
+    // MARK: - Private Properties
+    private var isCompletedToday: Bool = false
+    private var trackerId: UInt?
+    private var indexPath: IndexPath?
     
     // MARK: - Public Methods
+    func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath, completedDays counter: Int, datePickerDate date: Date) {
+        let name = tracker.name
+        let color = tracker.color
+        let emoji = tracker.emoji
+        
+        trackerLabel.text = name
+        emojiLabel.text = emoji
+        cardView.backgroundColor = color
+        quantityManagementButton.tintColor = color
+        let dayCountString = Utils.dayCountString(for: counter)
+        counterLabel.text = dayCountString
+        
+        self.isCompletedToday = isCompletedToday
+        quantityManagementButton.isSelected = isCompletedToday
+        self.trackerId = tracker.id
+        self.indexPath = indexPath
+        
+        let today = Calendar.current.startOfDay(for: Date())
+        let datePickerDay = Calendar.current.startOfDay(for: date)
+
+        let isFuture = datePickerDay > today
+        
+        quantityManagementButton.isEnabled = !isFuture
+        
+    }
     
     // MARK: - IB Actions
-
+    @objc
+    private func quantityManagementButtonTapped() {
+        guard let trackerId else {
+            assertionFailure("No trackerId❗️")
+            Logger.error("Нет trackerId")
+            return
+        }
+        guard let indexPath else {
+            assertionFailure("No indexPath❗️")
+            Logger.error("Нет indexPath")
+            return
+        }
+        Logger.info("Кнопка трекера нажата")
+        delegate?.didTapQuantityManagementButton(id: trackerId, at: indexPath)
+    }
+    
 }
 
 // MARK: - Preview
@@ -147,7 +204,7 @@ extension TrackerCollectionViewCell {
     func configure(title: String, emoji: String, counter: Int) {
         trackerLabel.text = title
         emojiLabel.text = emoji
-        counterLabel.text = "\(counter)"
+        counterLabel.text = Utils.dayCountString(for: counter)
     }
     func configure(title: String, emoji: String, counter: Int, ifGenerateColor: Bool) {
         trackerLabel.text = title

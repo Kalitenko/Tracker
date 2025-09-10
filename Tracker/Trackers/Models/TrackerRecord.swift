@@ -1,7 +1,6 @@
 import Foundation
 
 struct TrackerRecord {
-    let id: UInt
-    let trackerId: Int
+    let trackerId: UInt
     let date: Date
 }

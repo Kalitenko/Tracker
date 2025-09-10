@@ -229,10 +229,23 @@ final class TrackersViewController: UIViewController {
         categories = [workTrackers, healthTrackers, hobbyTrackers]
         trackers = categories.flatMap { $0.trackers }
         
+        let today = Date()
+        let calendar = Calendar.current
+        
+        let trackerRecords: [TrackerRecord] = [
+            TrackerRecord(trackerId: 101, date: today),
+            TrackerRecord(trackerId: 101, date: calendar.date(byAdding: .day, value: -1, to: today)!),
+            TrackerRecord(trackerId: 101, date: calendar.date(byAdding: .day, value: -2, to: today)!),
+            
+            TrackerRecord(trackerId: 102, date: today),
+            TrackerRecord(trackerId: 103, date: today)
+        ]
+        
+        completedTrackers = trackerRecords
+        
     }
     
-    //
-    
+    // MARK: - Private Methods
     private func checkEmptyState() {
         if trackers.isEmpty {
             emptyStateImageView.isHidden = false
@@ -241,6 +254,19 @@ final class TrackersViewController: UIViewController {
             emptyStateImageView.isHidden = true
             emptyStateLabel.isHidden = true
         }
+    }
+    
+    private func isTrackerCompletedTodayPredicate(record: TrackerRecord, for id: UInt) -> Bool {
+        let isSameDay = Calendar.current.isDate(record.date, inSameDayAs: datePicker.date)
+        return record.trackerId == id && isSameDay
+    }
+    
+    private func isTrackerCompletedToday(id: UInt) -> Bool {
+        completedTrackers.contains { isTrackerCompletedTodayPredicate(record: $0, for: id) }
+    }
+    
+    private func countCompletedTrackers(id: UInt) -> Int {
+        completedTrackers.filter { $0.trackerId == id }.count
     }
     
     
@@ -255,6 +281,7 @@ final class TrackersViewController: UIViewController {
         dateFormatter.dateFormat = "dd.MM.yyyy"
         let formattedDate = dateFormatter.string(from: selectedDate)
         Logger.info("Выбранная дата: \(formattedDate)")
+        collectionView.reloadData()
     }
     
 }
@@ -278,10 +305,10 @@ extension TrackersViewController: UICollectionViewDataSource {
         let category = categories[indexPath.section]
         let tracker = category.trackers[indexPath.row]
         
-        cell.configure(title: tracker.name,
-                       emoji: tracker.emoji,
-                       counter: 123,
-                       ifGenerateColor: true)
+        cell.delegate = self
+        let isCompletedToday = isTrackerCompletedToday(id: tracker.id)
+        let count = countCompletedTrackers(id: tracker.id)
+        cell.configure(with: tracker, isCompletedToday: isCompletedToday, indexPath: indexPath, completedDays: count, datePickerDate: datePicker.date)
         
         return cell
     }
@@ -327,6 +354,34 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: 30)
+    }
+    
+}
+
+// MARK: - TrackerCellDelegate
+extension TrackersViewController: TrackerCellDelegate {
+    func didTapQuantityManagementButton(id: UInt, at indexPath: IndexPath) {
+        let isCompletedToday = isTrackerCompletedToday(id: id)
+        if isCompletedToday {
+            removeTrackerRecord(id: id, at: indexPath)
+        } else {
+            addTrackerRecord(id: id, at: indexPath )
+        }
+    }
+    
+    private func addTrackerRecord(id: UInt, at indexPath: IndexPath) {
+        let trackerRecord = TrackerRecord(trackerId: id, date: datePicker.date)
+        completedTrackers.append(trackerRecord)
+        Logger.info("Выполнен трекер \(trackerRecord.trackerId) на \(trackerRecord.date)")
+        collectionView.reloadItems(at: [indexPath])
+    }
+    
+    private func removeTrackerRecord(id: UInt, at indexPath: IndexPath) {
+        completedTrackers.removeAll {
+            isTrackerCompletedTodayPredicate(record: $0, for: id)
+        }
+        Logger.info("Удалена отметка о выполнении трекера \(id)")
+        collectionView.reloadItems(at: [indexPath])
     }
     
 }
