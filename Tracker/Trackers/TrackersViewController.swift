@@ -38,6 +38,9 @@ final class TrackersViewController: UIViewController {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.searchBar.placeholder = Layout.searchBarText
         searchController.searchBar.backgroundImage = UIImage()
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchResultsUpdater = self
         
         return searchController
     }()
@@ -102,7 +105,7 @@ final class TrackersViewController: UIViewController {
         setupConstraints()
         configureUINavigationBar()
         
-        dumbData()
+        reloadData()
         checkEmptyState()
     }
     
@@ -116,10 +119,11 @@ final class TrackersViewController: UIViewController {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+        view.bringSubviewToFront(emptyStateLabel)
+        view.bringSubviewToFront(emptyStateImageView)
     }
     
     private func setupNavigationBar() {
-        navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.title = "Трекеры"
     }
     
@@ -158,96 +162,23 @@ final class TrackersViewController: UIViewController {
     }
     
     // MARK: - Public Properties
-    var trackers: [Tracker] = []
     var categories: [TrackerCategory] = []
+    var visibleCategories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
     
-    func dumbData() {
-        let workTrackers = TrackerCategory(
-            id: 1,
-            title: "Работа",
-            trackers: [
-                Tracker(
-                    id: 101,
-                    name: "Утренняя планёрка",
-                    color: .systemBlue,
-                    emoji: "📋",
-                    schedule: [.monday, .wednesday, .friday]
-                ),
-                Tracker(
-                    id: 102,
-                    name: "Проверка почты",
-                    color: .systemTeal,
-                    emoji: "📧",
-                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday]
-                ),
-                Tracker(
-                    id: 103,
-                    name: "Код-ревью",
-                    color: .systemOrange,
-                    emoji: "💻",
-                    schedule: [.tuesday, .thursday]
-                )
-            ]
-        )
-        
-        let healthTrackers = TrackerCategory(
-            id: 2,
-            title: "Здоровье",
-            trackers: [
-                Tracker(
-                    id: 201,
-                    name: "Утренняя пробежка",
-                    color: .systemGreen,
-                    emoji: "🏃‍♂️",
-                    schedule: [.monday, .wednesday, .friday, .sunday]
-                ),
-                Tracker(
-                    id: 202,
-                    name: "Медитация",
-                    color: .systemPurple,
-                    emoji: "🧘‍♀️",
-                    schedule: [.wednesday]
-                )
-            ]
-        )
-        
-        let hobbyTrackers = TrackerCategory(
-            id: 3,
-            title: "Хобби",
-            trackers: [
-                Tracker(
-                    id: 301,
-                    name: "Играть на гитаре",
-                    color: .systemRed,
-                    emoji: "🎸",
-                    schedule: [.saturday, .sunday]
-                )
-            ]
-        )
-        
-        categories = [workTrackers, healthTrackers, hobbyTrackers]
-        trackers = categories.flatMap { $0.trackers }
-        
-        let today = Date()
-        let calendar = Calendar.current
-        
-        let trackerRecords: [TrackerRecord] = [
-            TrackerRecord(trackerId: 101, date: today),
-            TrackerRecord(trackerId: 101, date: calendar.date(byAdding: .day, value: -1, to: today)!),
-            TrackerRecord(trackerId: 101, date: calendar.date(byAdding: .day, value: -2, to: today)!),
-            
-            TrackerRecord(trackerId: 102, date: today),
-            TrackerRecord(trackerId: 103, date: today)
-        ]
-        
-        completedTrackers = trackerRecords
-        
+    // MARK: - Private Properties
+    let dataManager: DataManager = MockDataManager.shared
+    
+    // MARK: - Data
+    private func reloadData() {
+        categories = dataManager.categories
+        completedTrackers = dataManager.completedTrackers
+        filterCategories()
     }
     
     // MARK: - Private Methods
     private func checkEmptyState() {
-        if trackers.isEmpty {
+        if visibleCategories.isEmpty {
             emptyStateImageView.isHidden = false
             emptyStateLabel.isHidden = false
         } else {
@@ -270,18 +201,48 @@ final class TrackersViewController: UIViewController {
     }
     
     
+    
     // MARK: - Actions
     @objc private func didTapAddTrackerButton(_ sender: Any) {
         Logger.info("didTapAddTrackerButton was clicked")
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        let formattedDate = dateFormatter.string(from: selectedDate)
-        Logger.info("Выбранная дата: \(formattedDate)")
+        Logger.info("Выбранная дата: \(sender.date)")
+        filterCategories()
+    }
+    
+    private func filterCategories() {
+        let calendar = Calendar.current
+        let filterWeekday = calendar.component(.weekday, from: datePicker.date)
+        let filterText = searchController.searchBar.text ?? ""
+        
+        visibleCategories = categories.compactMap { category in
+            
+            let trackers = category.trackers.filter { tracker in
+                
+                
+                let textCondition = filterText.isEmpty || tracker.name.range(
+                    of: filterText,
+                    options: [.caseInsensitive, .diacriticInsensitive],
+                    locale: .current
+                ) != nil
+                
+                let dateCondition = tracker.schedule.contains {
+                    $0.calendarWeekday == filterWeekday
+                }
+                return textCondition && dateCondition
+            }
+            
+            if trackers.isEmpty { return nil }
+            
+            return TrackerCategory(
+                title: category.title,
+                trackers: trackers
+            )
+        }
         collectionView.reloadData()
+        checkEmptyState()
     }
     
 }
@@ -290,11 +251,11 @@ final class TrackersViewController: UIViewController {
 extension TrackersViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return visibleCategories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        categories[section].trackers.count
+        visibleCategories[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -302,7 +263,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        let category = categories[indexPath.section]
+        let category = visibleCategories[indexPath.section]
         let tracker = category.trackers[indexPath.row]
         
         cell.delegate = self
@@ -317,7 +278,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: TrackerCollectionHeaderView.identifier, for: indexPath) as? TrackerCollectionHeaderView else {
             return UICollectionReusableView()
         }
-        header.headerLabel.text = categories[indexPath.section].title
+        header.headerLabel.text = visibleCategories[indexPath.section].title
         
         return header
     }
@@ -384,6 +345,19 @@ extension TrackersViewController: TrackerCellDelegate {
         collectionView.reloadItems(at: [indexPath])
     }
     
+}
+
+// MARK: -
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let searchText = searchController.searchBar.text ?? ""
+        if !searchText.isEmpty {
+            Logger.info("Поиск по тексту: \(searchText)")
+        }
+        
+        filterCategories()
+        collectionView.reloadData()
+    }
 }
 
 // MARK: - Preview

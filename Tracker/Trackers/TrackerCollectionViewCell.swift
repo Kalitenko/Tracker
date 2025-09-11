@@ -173,7 +173,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         let today = Calendar.current.startOfDay(for: Date())
         let datePickerDay = Calendar.current.startOfDay(for: date)
-
+        
         let isFuture = datePickerDay > today
         
         quantityManagementButton.isEnabled = !isFuture
