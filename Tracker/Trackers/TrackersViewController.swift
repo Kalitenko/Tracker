@@ -105,7 +105,6 @@ final class TrackersViewController: UIViewController {
         setupConstraints()
         configureUINavigationBar()
         
-        reloadData()
         checkEmptyState()
     }
     
@@ -361,14 +360,24 @@ extension TrackersViewController: UISearchResultsUpdating {
 }
 
 // MARK: - Preview
+#if DEBUG
+extension TrackersViewController {
+    func loadPreviewData() {
+        categories = dataManager.categories
+        completedTrackers = dataManager.completedTrackers
+        filterCategories()
+    }
+}
+#endif
+
 #Preview("Only Tracker Controller") {
     let vc = TrackersViewController()
-    //    vc.trackers = []
+    vc.loadPreviewData()
     return vc
 }
 
 #Preview("TabBarController") {
     let vc = TabBarController()
-    
+    vc.loadPreviewData()
     return vc
 }

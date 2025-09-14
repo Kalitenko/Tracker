@@ -200,22 +200,15 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 }
 
 // MARK: - Preview
+#if DEBUG
 extension TrackerCollectionViewCell {
     func configure(title: String, emoji: String, counter: Int) {
         trackerLabel.text = title
         emojiLabel.text = emoji
         counterLabel.text = Utils.dayCountString(for: counter)
     }
-    func configure(title: String, emoji: String, counter: Int, ifGenerateColor: Bool) {
-        trackerLabel.text = title
-        emojiLabel.text = emoji
-        counterLabel.text = "\(counter)"
-        let randomColor: UIColor = .random()
-        cardView.backgroundColor = randomColor
-        quantityManagementButton.tintColor = randomColor
-    }
 }
-
+#endif
 #Preview("Card") {
     let screenWidth = UIScreen.main.bounds.width
     let containerHeight: CGFloat = 500
