@@ -204,6 +204,9 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func didTapAddTrackerButton(_ sender: Any) {
         Logger.info("didTapAddTrackerButton was clicked")
+        let vc = NewHabitController()
+        
+        present(vc, animated: true)
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {

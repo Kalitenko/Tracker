@@ -1,6 +1,7 @@
 import UIKit
 
-final class NewHabitController: UIViewController {
+final class NewHabitController: ModalController {
+    
     // MARK: - Constants
     private enum Layout {
         static let titleText = "Новая привычка"
@@ -14,12 +15,6 @@ final class NewHabitController: UIViewController {
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private lazy var titleLabel: UILabel = {
-        let label = Label(text: Layout.titleText, style: .modalControllerTitle)
-        
-        return label
-    }()
-    
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = Layout.textFieldPlaceholderText
@@ -31,7 +26,7 @@ final class NewHabitController: UIViewController {
         textField.layer.cornerRadius = 16
         textField.clearButtonMode = .whileEditing
         textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
-
+        
         
         return textField
     }()
@@ -80,15 +75,15 @@ final class NewHabitController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
+        setupTitleLabel()
         setupSubViews()
         setupConstraints()
         
     }
     
     // MARK: - Setup Methods
-    private func setupView() {
-        view.backgroundColor = UIColor(resource: .white)
+    private func setupTitleLabel() {
+        self.titleLabel.text = Layout.titleText
     }
     
     private func setupSubViews() {
