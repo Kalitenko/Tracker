@@ -203,7 +203,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton(_ sender: Any) {
-        let vc = NewHabitController()
+        let vc = CreateTrackerController()
         vc.delegate = self
         
         present(vc, animated: true)
@@ -361,17 +361,17 @@ extension TrackersViewController: UISearchResultsUpdating {
     }
 }
 
-// MARK: - NewHabitDelegate
-extension TrackersViewController: NewHabitDelegate {
-    func didCreateNewHabit(tracker: Tracker, categoryTitle: String) {
+// MARK: - NewTrackerDelegate
+extension TrackersViewController: NewTrackerDelegate {
+    func didCreateNewTracker(tracker: Tracker, categoryTitle: String) {
         
-        addNewHabit(tracker: tracker, categoryTitle: categoryTitle)
+        addNewTracker(tracker: tracker, categoryTitle: categoryTitle)
         
         filterCategories()
         dismiss(animated: true, completion: nil)
     }
     
-    private func addNewHabit(tracker: Tracker, categoryTitle: String) {
+    private func addNewTracker(tracker: Tracker, categoryTitle: String) {
         if let index = categories.firstIndex(where: { $0.title == categoryTitle }) {
             Logger.info("Категория найдена")
             let old = categories[index]
