@@ -1,6 +1,5 @@
 import UIKit
 
-// MARK: -
 protocol TrackerCellDelegate: AnyObject {
     func didTapQuantityManagementButton(id: UInt, at: IndexPath)
 }
@@ -9,24 +8,33 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Constants
     private enum Layout {
+        // Texts
         static let trackersTitle = "Трекеры"
         static let statisticsTitle = "Статистика"
-    }
-    
-    private enum Constants {
-        static let trackersTitle = "Трекеры"
+        
+        // Sizes
+        static let cardHeight: CGFloat = 90
+        static let quantityViewHeight: CGFloat = 58
+        static let emojiSize: CGFloat = 24
+        static let quantityButtonSize: CGFloat = 34
+        static let cornerRadius: CGFloat = 16
+        
+        // Insets
+        static let cardSideInset: CGFloat = 12
+        static let cardBottomInset: CGFloat = 12
+        static let quantityTopInset: CGFloat = 16
+        static let quantityButtonTopInset: CGFloat = 8
+        static let quantitySideInset: CGFloat = 12
     }
     
     // MARK: - Public Static Properties
     static let identifier = "TrackerCollectionViewCell"
     
-    // MARK: - Layout
-    
     // MARK: - UI Elements
     private lazy var cardView: UIView = {
         let view = UIView()
         view.backgroundColor = .brown
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = Layout.cornerRadius
         view.layer.masksToBounds = true
         
         return view
@@ -52,7 +60,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         label.font = UIFont.medium16
         label.textAlignment = .center
         label.backgroundColor = UIColor(resource: .ypWhite).withAlphaComponent(0.3)
-        label.layer.cornerRadius = 12
+        label.layer.cornerRadius = Layout.emojiSize / 2
         label.clipsToBounds = true
         
         return label
@@ -82,7 +90,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         setupView()
         setupSubViews()
         setupConstraints()
@@ -94,22 +101,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Setup Methods
     private func setupView() {
-        contentView.backgroundColor = UIColor.clear
+        contentView.backgroundColor = .clear
     }
     
     private func setupSubViews() {
         [cardView, quantityManagementView, trackerLabel, emojiLabel, counterLabel, quantityManagementButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-        [cardView, quantityManagementView].forEach {
-            contentView.addSubview($0)
-        }
-        [trackerLabel, emojiLabel].forEach {
-            cardView.addSubview($0)
-        }
-        [counterLabel, quantityManagementButton].forEach {
-            quantityManagementView.addSubview($0)
-        }
+        [cardView, quantityManagementView].forEach { contentView.addSubview($0) }
+        [trackerLabel, emojiLabel].forEach { cardView.addSubview($0) }
+        [counterLabel, quantityManagementButton].forEach { quantityManagementView.addSubview($0) }
     }
     
     private func setupConstraints() {
@@ -117,33 +118,31 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            cardView.heightAnchor.constraint(equalToConstant: 90),
+            cardView.heightAnchor.constraint(equalToConstant: Layout.cardHeight),
             
-            emojiLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
-            emojiLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            emojiLabel.widthAnchor.constraint(equalToConstant: 24),
+            emojiLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: Layout.cardSideInset),
+            emojiLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: Layout.cardSideInset),
+            emojiLabel.widthAnchor.constraint(equalToConstant: Layout.emojiSize),
             emojiLabel.heightAnchor.constraint(equalTo: emojiLabel.widthAnchor),
             
-            trackerLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            trackerLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
-            trackerLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+            trackerLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: Layout.cardSideInset),
+            trackerLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Layout.cardSideInset),
+            trackerLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -Layout.cardBottomInset),
             
             quantityManagementView.topAnchor.constraint(equalTo: cardView.bottomAnchor),
             quantityManagementView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             quantityManagementView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            quantityManagementView.heightAnchor.constraint(equalToConstant: 58),
+            quantityManagementView.heightAnchor.constraint(equalToConstant: Layout.quantityViewHeight),
             
-            counterLabel.topAnchor.constraint(equalTo: quantityManagementView.topAnchor, constant: 16),
-            counterLabel.leadingAnchor.constraint(equalTo: quantityManagementView.leadingAnchor, constant: 12),
+            counterLabel.topAnchor.constraint(equalTo: quantityManagementView.topAnchor, constant: Layout.quantityTopInset),
+            counterLabel.leadingAnchor.constraint(equalTo: quantityManagementView.leadingAnchor, constant: Layout.quantitySideInset),
             
-            
-            quantityManagementButton.topAnchor.constraint(equalTo: quantityManagementView.topAnchor, constant: 8),
-            quantityManagementButton.trailingAnchor.constraint(equalTo: quantityManagementView.trailingAnchor, constant: -12),
-            quantityManagementButton.widthAnchor.constraint(equalToConstant: 34),
+            quantityManagementButton.topAnchor.constraint(equalTo: quantityManagementView.topAnchor, constant: Layout.quantityButtonTopInset),
+            quantityManagementButton.trailingAnchor.constraint(equalTo: quantityManagementView.trailingAnchor, constant: -Layout.quantitySideInset),
+            quantityManagementButton.widthAnchor.constraint(equalToConstant: Layout.quantityButtonSize),
             quantityManagementButton.heightAnchor.constraint(equalTo: quantityManagementButton.widthAnchor)
         ])
     }
-    
     
     // MARK: - Public Properties
     weak var delegate: TrackerCellDelegate?
@@ -155,16 +154,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Public Methods
     func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath, completedDays counter: Int, datePickerDate date: Date) {
-        let name = tracker.name
-        let color = tracker.color
-        let emoji = tracker.emoji
-        
-        trackerLabel.text = name
-        emojiLabel.text = emoji
-        cardView.backgroundColor = color
-        quantityManagementButton.tintColor = color
-        let dayCountString = Utils.dayCountString(for: counter)
-        counterLabel.text = dayCountString
+        trackerLabel.text = tracker.name
+        emojiLabel.text = tracker.emoji
+        cardView.backgroundColor = tracker.color
+        quantityManagementButton.tintColor = tracker.color
+        counterLabel.text = Utils.dayCountString(for: counter)
         
         self.isCompletedToday = isCompletedToday
         quantityManagementButton.isSelected = isCompletedToday
@@ -173,30 +167,19 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         let today = Calendar.current.startOfDay(for: Date())
         let datePickerDay = Calendar.current.startOfDay(for: date)
-        
-        let isFuture = datePickerDay > today
-        
-        quantityManagementButton.isEnabled = !isFuture
-        
+        quantityManagementButton.isEnabled = datePickerDay <= today
     }
     
     // MARK: - IB Actions
-    @objc
-    private func quantityManagementButtonTapped() {
-        guard let trackerId else {
-            assertionFailure("No trackerId❗️")
-            Logger.error("Нет trackerId")
-            return
-        }
-        guard let indexPath else {
-            assertionFailure("No indexPath❗️")
-            Logger.error("Нет indexPath")
+    @objc private func quantityManagementButtonTapped() {
+        guard let trackerId, let indexPath else {
+            assertionFailure("Missing trackerId or indexPath")
+            Logger.error("Нет trackerId или indexPath")
             return
         }
         Logger.info("Кнопка трекера нажата")
         delegate?.didTapQuantityManagementButton(id: trackerId, at: indexPath)
     }
-    
 }
 
 // MARK: - Preview

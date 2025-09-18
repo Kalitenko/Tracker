@@ -9,6 +9,9 @@ final class CreateTrackerController: ModalController {
         static let irregularEventButtonText = "Нерегулярное событие"
         
         static let cellHeight: CGFloat = 75
+        static let stackSpacing: CGFloat = 16
+        static let stackSideInset: CGFloat = 20
+        static let titleTopInset: CGFloat = 27
     }
     
     // MARK: - Layout
@@ -31,7 +34,7 @@ final class CreateTrackerController: ModalController {
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [habitButton, irregularEventButton])
         stackView.axis = .vertical
-        stackView.spacing = 16
+        stackView.spacing = Layout.stackSpacing
         stackView.distribution = .fillEqually
         
         return stackView
@@ -62,14 +65,13 @@ final class CreateTrackerController: ModalController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 27),
+            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-            
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.stackSideInset),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.stackSideInset)
         ])
     }
     

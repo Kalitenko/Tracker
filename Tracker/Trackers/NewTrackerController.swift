@@ -35,6 +35,7 @@ final class NewTrackerController: ModalController {
     private var selectedCategory: String?
     private var defaultCategory = "Важное"
     private var currentId: UInt = UInt.random(in: 1...100_000)
+    private var trackerColor: UIColor = UIColor.random()
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -49,12 +50,28 @@ final class NewTrackerController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
+        // Texts
         static let textFieldPlaceholderText = "Введите название трекера"
-        static let limitSymbolsNumber = 38
-        static let limitLabelText = "Ограничение \(Layout.limitSymbolsNumber) символов"
+        static let limitLabelText = "Ограничение \(limitSymbolsNumber) символов"
         static let cancelButtonText = "Отменить"
         static let createButtonText = "Создать"
+        
+        // Limits
+        static let limitSymbolsNumber = 38
+        
+        // Sizes
         static let cellHeight: CGFloat = 75
+        static let textFieldHeight: CGFloat = 75
+        static let cornerRadius: CGFloat = 16
+        
+        // Insets / Spacing
+        static let titleTopInset: CGFloat = 27
+        static let textFieldTopInset: CGFloat = 38
+        static let limitLabelTopInset: CGFloat = 8
+        static let optionsTableTopInset: CGFloat = 24
+        static let sideInset: CGFloat = 16
+        static let buttonsStackSideInset: CGFloat = 20
+        static let buttonsStackSpacing: CGFloat = 8
     }
     
     // MARK: - UI Elements
@@ -63,10 +80,10 @@ final class NewTrackerController: ModalController {
         textField.placeholder = Layout.textFieldPlaceholderText
         textField.font = UIFont.regular17
         textField.textColor = UIColor(resource: .black)
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: Layout.sideInset, height: 0))
         textField.leftViewMode = .always
         textField.backgroundColor = UIColor(resource: .background)
-        textField.layer.cornerRadius = 16
+        textField.layer.cornerRadius = Layout.cornerRadius
         textField.clearButtonMode = .whileEditing
         textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         return textField
@@ -98,7 +115,7 @@ final class NewTrackerController: ModalController {
     private lazy var buttonsStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [cancelButton, createButton])
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = Layout.buttonsStackSpacing
         stackView.distribution = .fillEqually
         return stackView
     }()
@@ -107,7 +124,7 @@ final class NewTrackerController: ModalController {
         let table = Table(style: tableStyle)
         table.delegate = self
         table.dataSource = self
-        table.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        table.separatorInset = UIEdgeInsets(top: 0, left: Layout.sideInset, bottom: 0, right: Layout.sideInset)
         table.tableFooterView = UIView()
         return table
     }()
@@ -136,24 +153,24 @@ final class NewTrackerController: ModalController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 27),
+            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            nameTextField.heightAnchor.constraint(equalToConstant: 75),
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
-            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
+            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Layout.textFieldTopInset),
+            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
+            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
             
-            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
             limitLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             buttonsStackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
-            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.buttonsStackSideInset),
+            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.buttonsStackSideInset),
             
-            optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: 24),
-            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: Layout.optionsTableTopInset),
+            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
+            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
             optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight)
         ])
     }
@@ -161,20 +178,15 @@ final class NewTrackerController: ModalController {
     // MARK: - Private Methods
     private func validateName(from textField: UITextField) -> String? {
         guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !text.isEmpty else {
-            return nil
-        }
+              !text.isEmpty else { return nil }
         return text
     }
     
     private func createNewTracker(name: String, category: String, schedule: [Day]) {
         let id = currentId
         let emoji = "🩼"
-        let color = UIColor.random()
-        Logger.debug("id: \(id)")
-        Logger.debug("currentId: \(currentId)")
+        let color = trackerColor
         let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
-        
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
     }
     
@@ -184,23 +196,18 @@ final class NewTrackerController: ModalController {
     }
     
     @objc private func didTapCreateButton(_ sender: Any) {
-        Logger.info("Попытка создания нового трекера")
         guard let name = validateName(from: nameTextField),
               let category = selectedCategory else { return }
         
-        if trackerType == .habit && selectedDays.isEmpty {
-            return
-        }
+        if trackerType == .habit && selectedDays.isEmpty { return }
         
         let schedule = trackerType == .habit ? selectedDays : Day.allCases
         createNewTracker(name: name, category: category, schedule: schedule)
-        
         dismiss(animated: true)
     }
     
     @objc private func textDidChange(_ textField: UITextField) {
-        let shouldShowWarning = (textField.text?.count ?? 0) > Layout.limitSymbolsNumber
-        limitLabel.isHidden = !shouldShowWarning
+        limitLabel.isHidden = (textField.text?.count ?? 0) <= Layout.limitSymbolsNumber
     }
 }
 

@@ -8,9 +8,12 @@ final class ScheduleController: ModalController {
         static let doneButtonText = "Готово"
         
         static let cellHeight: CGFloat = 75
+        static let titleTopInset: CGFloat = 27
+        static let tableTopInset: CGFloat = 38
+        static let tableSideInset: CGFloat = 16
+        static let stackSideInset: CGFloat = 20
+        static let stackSpacing: CGFloat = 8
     }
-    
-    // MARK: - Layout
     
     // MARK: - UI Elements
     private lazy var optionsTableView: Table = {
@@ -31,7 +34,7 @@ final class ScheduleController: ModalController {
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [doneButton])
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = Layout.stackSpacing
         stackView.distribution = .fillEqually
         
         return stackView
@@ -43,7 +46,6 @@ final class ScheduleController: ModalController {
         setupTitleLabel()
         setupSubViews()
         setupConstraints()
-        
     }
     
     // MARK: - Setup Methods
@@ -63,21 +65,19 @@ final class ScheduleController: ModalController {
         let optionsTableViewHeight = CGFloat(options.count) * Layout.cellHeight
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 27),
+            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             optionsTableView.heightAnchor.constraint(equalToConstant: optionsTableViewHeight),
-            optionsTableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
-            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            optionsTableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Layout.tableTopInset),
+            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.tableSideInset),
+            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.tableSideInset),
             
             stackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-            
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.stackSideInset),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.stackSideInset)
         ])
     }
-    
     
     // MARK: - Public Properties
     var onDaysSelected: (([Day]) -> Void)?
@@ -87,21 +87,22 @@ final class ScheduleController: ModalController {
     private let options: [Day] = Day.allCases
     private let tableStyle: TableStyle = .toggle
     
-    // MARK: - Private Methods
-    
     // MARK: - Actions
     @objc private func didTapDoneButton(_ sender: Any) {
         Logger.info("Расписание выбрано")
         dismiss(animated: true) { [weak self] in
             guard let self else { return }
-            self.onDaysSelected?(selectedDays)
+            self.onDaysSelected?(self.selectedDays)
         }
     }
-    
 }
 
 // MARK: - UITableViewDataSource
 extension ScheduleController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        options.count
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = optionsTableView.dequeueReusableCell(withIdentifier: tableStyle.reuseIdentifier, for: indexPath)
         if let toggleCell = cell as? ToggleCell {
@@ -118,28 +119,16 @@ extension ScheduleController: UITableViewDataSource {
         }
         return cell
     }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return options.count
-    }
-    
 }
 
-// MARK: - UITableViewDataSource
+// MARK: - UITableViewDelegate
 extension ScheduleController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         Layout.cellHeight
     }
-    
 }
 
 // MARK: - Preview
-#if DEBUG
-extension ScheduleController {
-    
-}
-#endif
-
 #Preview("ScheduleController") {
     let vc = ScheduleController()
     

@@ -6,6 +6,7 @@ final class TrackerCollectionHeaderView: UICollectionReusableView {
     private enum Layout {
         static let trackersTitle = "Трекеры"
         static let statisticsTitle = "Статистика"
+        static let leadingTrailingInset: CGFloat = 28
     }
     
     // MARK: - Public Static Properties
@@ -47,8 +48,8 @@ final class TrackerCollectionHeaderView: UICollectionReusableView {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
-            headerLabel.leadingAnchor.constraint(equalTo: trailingAnchor, constant: -28)
+            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Layout.leadingTrailingInset),
+            headerLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Layout.leadingTrailingInset)
         ])
     }
     
