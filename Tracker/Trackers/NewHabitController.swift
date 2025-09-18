@@ -1,5 +1,9 @@
 import UIKit
 
+protocol NewHabitDelegate: AnyObject {
+    func didCreateNewHabit(tracker: Tracker, categoryTitle: String)
+}
+
 final class NewHabitController: ModalController {
     
     // MARK: - Constants
@@ -10,6 +14,7 @@ final class NewHabitController: ModalController {
         static let limitLabelText = "Ограничение \(Layout.limitSymbolsNumber) символов"
         static let cancelButtonText = "Отменить"
         static let createButtonText = "Создать"
+        static let cellHeight: CGFloat = 75
     }
     
     // MARK: - Layout
@@ -27,7 +32,6 @@ final class NewHabitController: ModalController {
         textField.clearButtonMode = .whileEditing
         textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         
-        
         return textField
     }()
     
@@ -41,14 +45,14 @@ final class NewHabitController: ModalController {
     
     private lazy var cancelButton: UIButton = {
         let button = OutlineRedButton(title: Layout.cancelButtonText)
-        button.addTarget(self, action: #selector(Self.didTapAddTrackerButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(Self.didTapCancelButton), for: .touchUpInside)
         
         return button
     }()
     
     private lazy var createButton: UIButton = {
         let button = BlackButton(title: Layout.createButtonText)
-        button.addTarget(self, action: #selector(Self.didTapAddTrackerButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(Self.didTapCreateButton), for: .touchUpInside)
         
         return button
     }()
@@ -62,7 +66,7 @@ final class NewHabitController: ModalController {
         return stackView
     }()
     
-    private lazy var settingsTableView: Table = {
+    private lazy var optionsTableView: Table = {
         let table = Table(style: tableStyle)
         table.delegate = self
         table.dataSource = self
@@ -87,7 +91,7 @@ final class NewHabitController: ModalController {
     }
     
     private func setupSubViews() {
-        [titleLabel, nameTextField, limitLabel, stackView, settingsTableView].forEach {
+        [titleLabel, nameTextField, limitLabel, stackView, optionsTableView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -112,28 +116,60 @@ final class NewHabitController: ModalController {
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            settingsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: 24),
-            settingsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            settingsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            settingsTableView.heightAnchor.constraint(equalToConstant: CGFloat(settings.count * 75))
+            optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: 24),
+            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(options.count) * Layout.cellHeight)
             
         ])
     }
     
     
     // MARK: - Public Properties
-    
+    var delegate: NewHabitDelegate?
     
     // MARK: - Private Properties
-    private let settings: [String] = ["Категория", "Расписание"]
+    private let options: [String] = ["Категория", "Расписание"]
     private let tableStyle: TableStyle = .arrow
-    
+    private var selectedDays: [Day] = []
+    private var selectedCategory: String?
+    private var defaultCategory = "Важное"
+    private var currentId: UInt = 1
     
     // MARK: - Private Methods
+    private func validateName(from textField: UITextField) -> String? {
+        guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty else {
+            return nil
+        }
+        return text
+    }
+    
+    private func createNewTracker(name: String, category: String, schedule: [Day]) {
+        let id = currentId
+        let emoji = "🩼"
+        let color = UIColor.random()
+        
+        let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+        currentId += 1
+        
+        delegate?.didCreateNewHabit(tracker: tracker, categoryTitle: category)
+    }
     
     // MARK: - Actions
-    @objc private func didTapAddTrackerButton(_ sender: Any) {
-        Logger.info("didTapAddTrackerButton was clicked")
+    @objc private func didTapCancelButton(_ sender: Any) {
+        dismiss(animated: true)
+    }
+    
+    @objc private func didTapCreateButton(_ sender: Any) {
+        Logger.info("Попытка создания нового трекера")
+        guard let name = validateName(from: nameTextField),
+              let category = selectedCategory,
+              !selectedDays.isEmpty else {return}
+        
+        createNewTracker(name: name, category: category, schedule: selectedDays)
+        
+        dismiss(animated: true)
     }
     
     @objc private func textDidChange(_ textField: UITextField) {
@@ -146,15 +182,15 @@ final class NewHabitController: ModalController {
 // MARK: - UITableViewDataSource
 extension NewHabitController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = settingsTableView.dequeueReusableCell(withIdentifier: tableStyle.reuseIdentifier, for: indexPath)
+        let cell = optionsTableView.dequeueReusableCell(withIdentifier: tableStyle.reuseIdentifier, for: indexPath)
         if let arrowCell = cell as? ArrowCell {
-            arrowCell.configure(title: settings[indexPath.row], subtitle: nil)
+            arrowCell.configure(title: options[indexPath.row], subtitle: nil)
         }
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return settings.count
+        return options.count
     }
     
 }
@@ -162,8 +198,33 @@ extension NewHabitController: UITableViewDataSource {
 // MARK: - UITableViewDataSource
 extension NewHabitController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        75
+        Layout.cellHeight
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let option = options[indexPath.row]
+        if indexPath.row == 0 {
+            selectedCategory = defaultCategory
+            Logger.info("Выбрана категория: \(selectedCategory)")
+            if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
+                cell.configure(title: option, subtitle: selectedCategory)
+            }
+        } else {
+            let vc = ScheduleController()
+            vc.selectedDays = selectedDays
+            vc.onDaysSelected = { [weak self] days in
+                self?.selectedDays = days
+                let daysText = days.displayText
+                if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
+                    cell.configure(title: option, subtitle: daysText)
+                }
+                Logger.info("Выбраны дни: \(daysText)")
+            }
+            present(vc, animated: true)
+        }
+    }
+    
 }
 
 // MARK: - Preview

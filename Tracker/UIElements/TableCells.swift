@@ -3,10 +3,24 @@ import UIKit
 class TableCell: UITableViewCell {
     
     // MARK: - UI Elements
-    lazy var label: UILabel = {
+    lazy var titleLabel: UILabel = {
         let label = Label(style: .standard)
         
         return label
+    }()
+    
+    lazy var subtitleLabel: UILabel = {
+        let label = Label(style: .subtitle)
+        
+        return label
+    }()
+    
+    lazy var labelsStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 2
+        
+        return stackView
     }()
     
     lazy var rightContainer = UIView()
@@ -30,7 +44,7 @@ class TableCell: UITableViewCell {
     }
     
     private func setupSubViews() {
-        [label, rightContainer].forEach {
+        [labelsStackView, rightContainer].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
@@ -38,12 +52,19 @@ class TableCell: UITableViewCell {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            label.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-
+            labelsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            labelsStackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
             rightContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             rightContainer.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
+    }
+    
+    // MARK: - Public Methods
+    func configure(title: String, subtitle: String? = nil) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
+        subtitleLabel.isHidden = (subtitle == nil)
     }
 }
 
@@ -51,16 +72,16 @@ class TableCell: UITableViewCell {
 final class CheckmarkCell: TableCell {
     
     private lazy var checkmark = UIImageView(image: UIImage(resource: .checkmark))
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupCheckmark()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setupCheckmark() {
         checkmark.isHidden = true
         rightContainer.addSubview(checkmark)
@@ -72,9 +93,11 @@ final class CheckmarkCell: TableCell {
             checkmark.trailingAnchor.constraint(equalTo: rightContainer.trailingAnchor),
         ])
     }
-
-    func configure(title: String, selected: Bool) {
-        label.text = title
+    
+    func configure(title: String, subtitle: String? = nil, selected: Bool) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
+        subtitleLabel.isHidden = (subtitle == nil)
         checkmark.isHidden = !selected
     }
 }
@@ -83,16 +106,16 @@ final class CheckmarkCell: TableCell {
 final class ArrowCell: TableCell {
     
     private lazy var arrow = UIImageView(image: UIImage(resource: .chevron))
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupArrow()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setupArrow() {
         rightContainer.addSubview(arrow)
         arrow.translatesAutoresizingMaskIntoConstraints = false
@@ -103,29 +126,28 @@ final class ArrowCell: TableCell {
             arrow.trailingAnchor.constraint(equalTo: rightContainer.trailingAnchor),
         ])
     }
-
-    func configure(title: String, subtitle: String?) {
-        label.text = title
-    }
+    
 }
 
 // MARK: - Toggle Cell
 final class ToggleCell: TableCell {
     
     private lazy var  toggle = UISwitch()
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupToggle()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setupToggle() {
         rightContainer.addSubview(toggle)
         toggle.translatesAutoresizingMaskIntoConstraints = false
+        toggle.onTintColor = .systemBlue
+        toggle.addTarget(self, action: #selector(didToggleSwitch(_:)), for: .valueChanged)
         NSLayoutConstraint.activate([
             toggle.topAnchor.constraint(equalTo: rightContainer.topAnchor),
             toggle.bottomAnchor.constraint(equalTo: rightContainer.bottomAnchor),
@@ -133,11 +155,20 @@ final class ToggleCell: TableCell {
             toggle.trailingAnchor.constraint(equalTo: rightContainer.trailingAnchor),
         ])
     }
-
-    func configure(title: String, isOn: Bool) {
-        label.text = title
+    
+    func configure(title: String, subtitle: String? = nil, isOn: Bool) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
+        subtitleLabel.isHidden = (subtitle == nil)
         toggle.isOn = isOn
     }
+    
+    @objc private func didToggleSwitch(_ sender: UISwitch) {
+        onToggle?(sender.isOn)
+    }
+    
+    var onToggle: ((Bool) -> Void)?
+    
 }
 
 // MARK: - Controller
@@ -147,7 +178,7 @@ final class TableStylesViewController: UITableViewController {
         case arrow(String, String?)
         case toggle(String, Bool)
     }
-
+    
     private var rows: [Row] = [
         .checkmark("Выбор 1", false),
         .checkmark("Выбор 2", true),
@@ -156,14 +187,14 @@ final class TableStylesViewController: UITableViewController {
         .arrow("Открыть список", "Выбрано: 3 элемента"),
         .toggle("Включить уведомления", true)
     ]
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(CheckmarkCell.self, forCellReuseIdentifier: "CheckmarkCell")
         tableView.register(ArrowCell.self, forCellReuseIdentifier: "ArrowCell")
         tableView.register(ToggleCell.self, forCellReuseIdentifier: "ToggleCell")
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         rows.count
     }
@@ -171,8 +202,8 @@ final class TableStylesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         100
     }
-
-
+    
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch rows[indexPath.row] {
         case let .checkmark(title, selected):
@@ -189,4 +220,9 @@ final class TableStylesViewController: UITableViewController {
             return cell
         }
     }
+}
+#Preview("ScheduleController") {
+    let vc = TableStylesViewController()
+    
+    return vc
 }

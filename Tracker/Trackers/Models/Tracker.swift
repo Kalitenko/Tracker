@@ -29,4 +29,25 @@ enum Day: String, CaseIterable {
         case .saturday: return 7
         }
     }
+    var shortName: String {
+        switch self {
+        case .monday: return "Пн"
+        case .tuesday: return "Вт"
+        case .wednesday: return "Ср"
+        case .thursday: return "Чт"
+        case .friday: return "Пт"
+        case .saturday: return "Сб"
+        case .sunday: return "Вс"
+        }
+    }
+}
+
+extension Array where Element == Day {
+    var displayText: String {
+        if self.count == Day.allCases.count {
+            return "Каждый день"
+        } else {
+            return self.sorted { $0.calendarWeekday < $1.calendarWeekday }.map { $0.shortName }.joined(separator: ", ")
+        }
+    }
 }

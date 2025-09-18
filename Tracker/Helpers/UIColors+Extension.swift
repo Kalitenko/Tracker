@@ -20,7 +20,7 @@ extension UIColor {
         UIColor(resource: .colorSelection16),
         UIColor(resource: .colorSelection17),
         UIColor(resource: .colorSelection18)
-        ]
+    ]
     
     static func random() -> UIColor {
         return appColors.randomElement() ?? UIColor.black

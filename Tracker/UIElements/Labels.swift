@@ -4,12 +4,14 @@ enum LabelStyle {
     case modalControllerTitle
     case buttonTitle
     case standard
+    case subtitle
     
     var font: UIFont {
         switch self {
         case .modalControllerTitle: .medium16
         case .buttonTitle: .medium16
         case .standard: .regular17
+        case .subtitle: .regular17
         }
     }
     
@@ -18,6 +20,7 @@ enum LabelStyle {
         case .modalControllerTitle: UIColor(resource: .black)
         case .buttonTitle: UIColor(resource: .white)
         case .standard: UIColor(resource: .black)
+        case .subtitle: UIColor(resource: .gray)
         }
     }
     
@@ -26,6 +29,7 @@ enum LabelStyle {
         case .modalControllerTitle: .center
         case .buttonTitle: .center
         case .standard: .left
+        case .subtitle: .left
         }
     }
 }
@@ -73,6 +77,6 @@ final class Label: UILabel {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
 }
 

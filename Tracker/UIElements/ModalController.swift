@@ -27,7 +27,9 @@ class ModalController: UIViewController {
     // MARK: - Setup Methods
     private func setupView() {
         view.backgroundColor = UIColor(resource: .white)
+        view.layer.masksToBounds = true
         view.layer.cornerRadius = 10
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     }
     
     private func setupSubViews() {
@@ -42,8 +44,7 @@ class ModalController: UIViewController {
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 27),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
