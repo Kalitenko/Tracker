@@ -34,7 +34,7 @@ final class NewTrackerController: ModalController {
     private var selectedDays: [Day] = []
     private var selectedCategory: String?
     private var defaultCategory = "Важное"
-    private var currentId: UInt = 1
+    private var currentId: UInt = UInt.random(in: 1...100_000)
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -171,9 +171,10 @@ final class NewTrackerController: ModalController {
         let id = currentId
         let emoji = "🩼"
         let color = UIColor.random()
-        
+        Logger.debug("id: \(id)")
+        Logger.debug("currentId: \(currentId)")
         let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
-        currentId += 1
+        
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
     }
     

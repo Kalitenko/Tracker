@@ -269,7 +269,9 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = category.trackers[indexPath.row]
         
         cell.delegate = self
+        Logger.debug("id: \(tracker.id)")
         let isCompletedToday = isTrackerCompletedToday(id: tracker.id)
+        Logger.debug("isTrackerCompletedToday: \(isCompletedToday)")
         let count = countCompletedTrackers(id: tracker.id)
         cell.configure(with: tracker, isCompletedToday: isCompletedToday, indexPath: indexPath, completedDays: count, datePickerDate: datePicker.date)
         
