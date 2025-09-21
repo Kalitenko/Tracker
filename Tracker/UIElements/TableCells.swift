@@ -2,6 +2,13 @@ import UIKit
 
 class TableCell: UITableViewCell {
     
+    // MARK: - Constants
+    private enum Layout {
+        static let horizontalInset: CGFloat = 16
+        static let separatorHeight: CGFloat = 1
+        static let stackSpacing: CGFloat = 1
+    }
+    
     // MARK: - UI Elements
     lazy var titleLabel: UILabel = {
         let label = Label(style: .standard)
@@ -18,12 +25,19 @@ class TableCell: UITableViewCell {
     lazy var labelsStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
         stackView.axis = .vertical
-        stackView.spacing = 2
+        stackView.spacing = Layout.stackSpacing
         
         return stackView
     }()
     
     lazy var rightContainer = UIView()
+    
+    private let separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(resource: .gray)
+        
+        return view
+    }()
     
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -44,7 +58,7 @@ class TableCell: UITableViewCell {
     }
     
     private func setupSubViews() {
-        [labelsStackView, rightContainer].forEach {
+        [labelsStackView, rightContainer, separatorView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
@@ -52,20 +66,27 @@ class TableCell: UITableViewCell {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            labelsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            labelsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.horizontalInset),
             labelsStackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            rightContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            rightContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.horizontalInset),
             rightContainer.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.horizontalInset),
+            separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.horizontalInset),
+            separatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            separatorView.heightAnchor.constraint(equalToConstant: Layout.separatorHeight)
         ])
     }
     
     // MARK: - Public Methods
-    func configure(title: String, subtitle: String? = nil) {
+    func configure(title: String, subtitle: String? = nil, isLastElement: Bool) {
         titleLabel.text = title
         subtitleLabel.text = subtitle
         subtitleLabel.isHidden = (subtitle == nil)
+        separatorView.isHidden = isLastElement
     }
+    
 }
 
 // MARK: - Checkmark Cell
@@ -94,9 +115,8 @@ final class CheckmarkCell: TableCell {
         ])
     }
     
-    func configure(title: String, subtitle: String? = nil, selected: Bool) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
+    func configure(title: String, subtitle: String? = nil, isLastElement: Bool, selected: Bool) {
+        super.configure(title: title, subtitle: subtitle, isLastElement: isLastElement)
         subtitleLabel.isHidden = (subtitle == nil)
         checkmark.isHidden = !selected
     }
@@ -156,9 +176,8 @@ final class ToggleCell: TableCell {
         ])
     }
     
-    func configure(title: String, subtitle: String? = nil, isOn: Bool) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
+    func configure(title: String, subtitle: String? = nil, isLastElement: Bool, isOn: Bool) {
+        super.configure(title: title, subtitle: subtitle, isLastElement: isLastElement)
         subtitleLabel.isHidden = (subtitle == nil)
         toggle.isOn = isOn
     }
@@ -205,18 +224,19 @@ final class TableStylesViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let isLastElement = indexPath.isLastRow(in: tableView)
         switch rows[indexPath.row] {
         case let .checkmark(title, selected):
             let cell = tableView.dequeueReusableCell(withIdentifier: "CheckmarkCell", for: indexPath) as! CheckmarkCell
-            cell.configure(title: title, selected: selected)
+            cell.configure(title: title, isLastElement: isLastElement, selected: selected)
             return cell
         case let .arrow(title, subtitle):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ArrowCell", for: indexPath) as! ArrowCell
-            cell.configure(title: title, subtitle: subtitle)
+            cell.configure(title: title, subtitle: subtitle, isLastElement: isLastElement)
             return cell
         case let .toggle(title, isOn):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ToggleCell", for: indexPath) as! ToggleCell
-            cell.configure(title: title, isOn: isOn)
+            cell.configure(title: title, isLastElement: isLastElement, isOn: isOn)
             return cell
         }
     }

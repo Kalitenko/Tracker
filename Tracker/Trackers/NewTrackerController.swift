@@ -222,8 +222,11 @@ extension NewTrackerController: UITableViewDataSource {
             withIdentifier: tableStyle.reuseIdentifier,
             for: indexPath
         )
+        
+        let isLastElement = indexPath.isLastRow(in: tableView)
+        
         if let arrowCell = cell as? ArrowCell {
-            arrowCell.configure(title: trackerType.options[indexPath.row], subtitle: nil)
+            arrowCell.configure(title: trackerType.options[indexPath.row], subtitle: nil, isLastElement: isLastElement)
         }
         return cell
     }
@@ -238,11 +241,11 @@ extension NewTrackerController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let option = trackerType.options[indexPath.row]
-        
+        let isLastElement = indexPath.isLastRow(in: tableView)
         if option == "Категория" {
             selectedCategory = defaultCategory
             if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                cell.configure(title: option, subtitle: selectedCategory)
+                cell.configure(title: option, subtitle: selectedCategory, isLastElement: isLastElement)
             }
         } else if option == "Расписание" {
             let vc = ScheduleController()
@@ -250,7 +253,7 @@ extension NewTrackerController: UITableViewDelegate {
             vc.onDaysSelected = { [weak self] days in
                 self?.selectedDays = days
                 if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                    cell.configure(title: option, subtitle: days.displayText)
+                    cell.configure(title: option, subtitle: days.displayText, isLastElement: isLastElement)
                 }
             }
             present(vc, animated: true)

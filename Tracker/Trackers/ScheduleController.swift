@@ -105,9 +105,11 @@ extension ScheduleController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = optionsTableView.dequeueReusableCell(withIdentifier: tableStyle.reuseIdentifier, for: indexPath)
+        let isLastElement = indexPath.row == options.count - 1
+        
         if let toggleCell = cell as? ToggleCell {
             let day = options[indexPath.row]
-            toggleCell.configure(title: day.rawValue, isOn: selectedDays.contains(day))
+            toggleCell.configure(title: day.rawValue, isLastElement: isLastElement, isOn: selectedDays.contains(day))
             toggleCell.onToggle = { [weak self] isOn in
                 guard let self else { return }
                 if isOn {
