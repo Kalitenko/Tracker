@@ -66,7 +66,7 @@ final class NewTrackerController: ModalController {
         
         // Insets / Spacing
         static let titleTopInset: CGFloat = 27
-        static let textFieldTopInset: CGFloat = 38
+        static let textFieldTopInset: CGFloat = 24
         static let limitLabelTopInset: CGFloat = 8
         static let optionsTableTopInset: CGFloat = 24
         static let sideInset: CGFloat = 16
@@ -75,6 +75,18 @@ final class NewTrackerController: ModalController {
     }
     
     // MARK: - UI Elements
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        
+        return scrollView
+    }()
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        
+        return view
+    }()
+    
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = Layout.textFieldPlaceholderText
@@ -129,6 +141,50 @@ final class NewTrackerController: ModalController {
         return table
     }()
     
+    private lazy var emojiHandler = EmojiCollectionHandler { emoji in
+        Logger.debug("Выбран эмоджи: \(emoji)")
+    }
+    
+    private lazy var colorHandler = ColorCollectionHandler { color in
+        Logger.debug("Выбран цвет: \(color)")
+    }
+    
+    private lazy var emojiCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: EmojiCollectionHandler.makeLayout()
+        )
+        collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: String(describing: EmojiCell.self))
+        collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
+        
+        collectionView.dataSource = emojiHandler
+        collectionView.delegate = emojiHandler
+        
+        return collectionView
+    }()
+    
+    private lazy var colorCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: ColorCollectionHandler.makeLayout()
+        )
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: String(describing: ColorCell.self))
+        collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
+        
+        collectionView.dataSource = colorHandler
+        collectionView.delegate = colorHandler
+        
+        return collectionView
+    }()
+    
+    private lazy var collectionsStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [emojiCollectionView, colorCollectionView])
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,9 +199,17 @@ final class NewTrackerController: ModalController {
     }
     
     private func setupSubViews() {
-        [titleLabel, nameTextField, limitLabel, buttonsStackView, optionsTableView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
+        [nameTextField, limitLabel, optionsTableView, collectionsStackView].forEach {
+            contentView.addSubview($0)
+        }
+        scrollView.addSubview(contentView)
+        
+        [scrollView, buttonsStackView].forEach {
             view.addSubview($0)
+        }
+        
+        [scrollView, contentView, titleLabel, nameTextField, limitLabel, buttonsStackView, optionsTableView, collectionsStackView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
         }
     }
     
@@ -153,27 +217,44 @@ final class NewTrackerController: ModalController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 14),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -16),
             
-            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Layout.textFieldTopInset),
-            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
-            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
-            
-            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
-            limitLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
             buttonsStackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.buttonsStackSideInset),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.buttonsStackSideInset),
             
+            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
+            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.textFieldTopInset),
+            nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            
+            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
+            limitLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
             optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: Layout.optionsTableTopInset),
-            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
-            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
-            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight)
+            optionsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            optionsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight),
+            
+            collectionsStackView.topAnchor.constraint(equalTo: optionsTableView.bottomAnchor, constant: 32),
+            collectionsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 18),
+            collectionsStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -18),
+            collectionsStackView.heightAnchor.constraint(equalToConstant: 224 * 2),
+            
+            collectionsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ])
     }
+    
+    
     
     // MARK: - Private Methods
     private func validateName(from textField: UITextField) -> String? {

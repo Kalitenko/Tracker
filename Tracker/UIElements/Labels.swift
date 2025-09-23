@@ -5,6 +5,7 @@ enum LabelStyle {
     case buttonTitle
     case standard
     case subtitle
+    case collectionHeader
     
     var font: UIFont {
         switch self {
@@ -12,6 +13,7 @@ enum LabelStyle {
         case .buttonTitle: .medium16
         case .standard: .regular17
         case .subtitle: .regular17
+        case .collectionHeader: .bold19
         }
     }
     
@@ -21,6 +23,7 @@ enum LabelStyle {
         case .buttonTitle: UIColor(resource: .white)
         case .standard: UIColor(resource: .black)
         case .subtitle: UIColor(resource: .gray)
+        case .collectionHeader: UIColor(resource: .black)
         }
     }
     
@@ -30,6 +33,7 @@ enum LabelStyle {
         case .buttonTitle: .center
         case .standard: .left
         case .subtitle: .left
+        case .collectionHeader: .left
         }
     }
 }
@@ -74,9 +78,18 @@ final class Label: UILabel {
         textAlignment = alignment ?? style.alignment
     }
     
+    init(font: UIFont,
+         color: UIColor = UIColor(resource: .black),
+         alignment: NSTextAlignment = .left) {
+        super.init(frame: .zero)
+        self.text = text
+        self.font = font
+        textColor = color
+        textAlignment = alignment
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
 }
-
