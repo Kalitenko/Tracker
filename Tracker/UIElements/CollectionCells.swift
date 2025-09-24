@@ -26,6 +26,7 @@ class CollectionCell: UICollectionViewCell {
     // MARK: - Setup Methods
     private func setupView() {
         contentView.backgroundColor = .clear
+        contentView.layer.cornerRadius = 16
     }
     
     private func setupSubViews() {
@@ -63,6 +64,7 @@ final class EmojiCell: CollectionCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupEmojiLabel()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -79,44 +81,73 @@ final class EmojiCell: CollectionCell {
             emojiLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
     }
+    
+    // MARK: - Public Methods
+    func configure(emoji: String, isSelected: Bool = false) {
+        emojiLabel.text = emoji
+        contentView.backgroundColor = isSelected ? UIColor(resource: .lightGray) : .clear
+    }
 }
 
-// MARK: - Color Cell
 final class ColorCell: CollectionCell {
     
-    // MARK: - Public Static Properties
     static let identifier = "ColorCollectionViewCell"
     
-    // MARK: - UI Elements
     lazy var colorView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
         view.layer.cornerRadius = 8
-        view.layer.masksToBounds = true
-        
         return view
     }()
     
-    // MARK: - Init
+    lazy var borderView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.layer.cornerRadius = 8
+        return view
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupColorView()
+        setupSubViews()
+        setupConstraints()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setup Methods
-    private func setupColorView() {
-        colorView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(colorView)
-        
+    private func setupSubViews() {
+        [borderView, colorView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        container.addSubview(borderView)
+        borderView.addSubview(colorView)
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            colorView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            colorView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            borderView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            borderView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            borderView.widthAnchor.constraint(equalToConstant: 49),
+            borderView.heightAnchor.constraint(equalTo: borderView.widthAnchor),
+            
+            colorView.centerXAnchor.constraint(equalTo: borderView.centerXAnchor),
+            colorView.centerYAnchor.constraint(equalTo: borderView.centerYAnchor),
             colorView.widthAnchor.constraint(equalToConstant: 40),
             colorView.heightAnchor.constraint(equalTo: colorView.widthAnchor)
         ])
+    }
+    
+    func configure(color: UIColor, isSelected: Bool = false) {
+        colorView.backgroundColor = color
+        let borderLayer = borderView.layer
+        if isSelected {
+            borderLayer.borderWidth = 3
+            borderLayer.borderColor = color.withAlphaComponent(0.3).cgColor
+        } else {
+            borderLayer.borderWidth = 0
+            borderLayer.borderColor = UIColor.clear.cgColor
+        }
     }
 }

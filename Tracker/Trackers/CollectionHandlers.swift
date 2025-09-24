@@ -4,15 +4,14 @@ import UIKit
 // MARK: - Base Handler
 class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
     
-    
     private let items: [Item]
-    private let configure: (Cell, Item) -> Void
+    private let configure: (Cell, Item, Bool) -> Void
     private let onSelect: (Item) -> Void
     private let configureHeader: ((UICollectionReusableView) -> Void)?
     
     init(
         items: [Item],
-        configure: @escaping (Cell, Item) -> Void,
+        configure: @escaping (Cell, Item, Bool) -> Void,
         onSelect: @escaping (Item) -> Void,
         configureHeader: ((UICollectionReusableView) -> Void)? = nil
     ) {
@@ -34,13 +33,20 @@ class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UIColle
             for: indexPath
         ) as! Cell
         
-        configure(cell, items[indexPath.row])
+        configure(cell, items[indexPath.row], false)
         return cell
     }
     
     // MARK: - Delegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? Cell else { return }
+        configure(cell, items[indexPath.row], true)
         onSelect(items[indexPath.row])
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? Cell else { return }
+        configure(cell, items[indexPath.row], false)
     }
     
     func collectionView(
@@ -93,10 +99,12 @@ final class EmojiCollectionHandler: BaseCollectionHandler<String, EmojiCell> {
         ]
         super.init(
             items: emojis,
-            configure: { cell, emoji in
-                cell.emojiLabel.text = emoji
+            configure: { cell, emoji, isSelected in
+                cell.configure(emoji: emoji, isSelected: isSelected)
             },
-            onSelect: onSelect,
+            onSelect: { emoji in
+                onSelect(emoji)
+            },
             configureHeader: { header in
                 guard let header = header as? CollectionHeaderView else { return }
                 header.headerLabel.text = "Emoji"
@@ -118,10 +126,12 @@ final class ColorCollectionHandler: BaseCollectionHandler<UIColor, ColorCell> {
         ]
         super.init(
             items: colors,
-            configure: { cell, color in
-                cell.colorView.backgroundColor = color
+            configure: { cell, color, isSelected in
+                cell.configure(color: color, isSelected: isSelected)
             },
-            onSelect: onSelect,
+            onSelect: { color in
+                onSelect(color)
+            },
             configureHeader: { header in
                 guard let header = header as? CollectionHeaderView else { return }
                 header.headerLabel.text = "Цвет"

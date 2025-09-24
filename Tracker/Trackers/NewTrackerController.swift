@@ -35,7 +35,8 @@ final class NewTrackerController: ModalController {
     private var selectedCategory: String?
     private var defaultCategory = "Важное"
     private var currentId: UInt = UInt.random(in: 1...100_000)
-    private var trackerColor: UIColor = UIColor.random()
+    private var selectedColor: UIColor?
+    private var selectedEmoji: String?
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -143,10 +144,12 @@ final class NewTrackerController: ModalController {
     
     private lazy var emojiHandler = EmojiCollectionHandler { emoji in
         Logger.debug("Выбран эмоджи: \(emoji)")
+        self.selectedEmoji = emoji
     }
     
     private lazy var colorHandler = ColorCollectionHandler { color in
         Logger.debug("Выбран цвет: \(color)")
+        self.selectedColor = color
     }
     
     private lazy var emojiCollectionView: UICollectionView = {
@@ -265,8 +268,10 @@ final class NewTrackerController: ModalController {
     
     private func createNewTracker(name: String, category: String, schedule: [Day]) {
         let id = currentId
-        let emoji = "🩼"
-        let color = trackerColor
+        guard let emoji = selectedEmoji, let color = selectedColor else {
+            Logger.error("Emoji или цвет не выбраны")
+            return
+        }
         let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
     }
