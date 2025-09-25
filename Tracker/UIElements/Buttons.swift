@@ -38,14 +38,29 @@ class Button: UIButton {
 }
 
 final class BlackButton: Button {
-    init(title: String) {
+    
+    override var isEnabled: Bool {
+        didSet {
+            updateState()
+        }
+    }
+    
+    private let enabledColor = UIColor(resource: .black)
+    private let disabledColor = UIColor(resource: .gray)
+    
+    init(title: String, isInitiallyEnabled: Bool = true) {
         super.init(title: title,
-                   backgroundColor: UIColor(resource: .black),
+                   backgroundColor: enabledColor,
                    textColor: UIColor(resource: .white))
+        isEnabled = isInitiallyEnabled
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func updateState() {
+        backgroundColor = isEnabled ? enabledColor : disabledColor
     }
 }
 

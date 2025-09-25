@@ -31,12 +31,20 @@ final class NewTrackerController: ModalController {
     // MARK: - Private Properties
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
-    private var selectedDays: [Day] = []
-    private var selectedCategory: String?
     private var defaultCategory = "Важное"
     private var currentId: UInt = UInt.random(in: 1...100_000)
-    private var selectedColor: UIColor?
-    private var selectedEmoji: String?
+    private var selectedCategory: String? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedEmoji: String? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedColor: UIColor? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedDays: [Day] = [] {
+        didSet { updateCreateButtonState() }
+    }
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -120,7 +128,7 @@ final class NewTrackerController: ModalController {
     }()
     
     private lazy var createButton: UIButton = {
-        let button = BlackButton(title: Layout.createButtonText)
+        let button = BlackButton(title: Layout.createButtonText, isInitiallyEnabled: false)
         button.addTarget(self, action: #selector(Self.didTapCreateButton), for: .touchUpInside)
         return button
     }()
@@ -276,6 +284,16 @@ final class NewTrackerController: ModalController {
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
     }
     
+    private func updateCreateButtonState() {
+        let isValid = validateName(from: nameTextField) != nil &&
+                      selectedCategory != nil &&
+                      selectedEmoji != nil &&
+                      selectedColor != nil &&
+                      !(trackerType == .habit && selectedDays.isEmpty)
+        
+        createButton.isEnabled = isValid
+    }
+    
     // MARK: - Actions
     @objc private func didTapCancelButton(_ sender: Any) {
         dismiss(animated: true)
@@ -294,6 +312,7 @@ final class NewTrackerController: ModalController {
     
     @objc private func textDidChange(_ textField: UITextField) {
         limitLabel.isHidden = (textField.text?.count ?? 0) <= Layout.limitSymbolsNumber
+        updateCreateButtonState()
     }
 }
 
@@ -325,6 +344,7 @@ extension NewTrackerController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: true)
         let option = trackerType.options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
