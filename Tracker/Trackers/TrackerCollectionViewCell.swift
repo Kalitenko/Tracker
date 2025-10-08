@@ -1,7 +1,7 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func didTapQuantityManagementButton(id: UInt, at: IndexPath)
+    func didTapQuantityManagementButton(id: Int32, at: IndexPath)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -149,7 +149,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Private Properties
     private var isCompletedToday: Bool = false
-    private var trackerId: UInt?
+    private var trackerId: Int32?
     private var indexPath: IndexPath?
     
     // MARK: - Public Methods

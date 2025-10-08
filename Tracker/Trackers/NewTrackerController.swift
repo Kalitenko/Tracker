@@ -32,7 +32,7 @@ final class NewTrackerController: ModalController {
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
     private var defaultCategory = "Важное"
-    private var currentId: UInt = UInt.random(in: 1...100_000)
+    private var currentId: Int32 = Int32.random(in: 1...100)
     private var selectedCategory: String? {
         didSet { updateCreateButtonState() }
     }

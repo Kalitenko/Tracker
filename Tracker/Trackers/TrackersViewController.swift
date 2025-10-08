@@ -186,16 +186,16 @@ final class TrackersViewController: UIViewController {
         }
     }
     
-    private func isTrackerCompletedTodayPredicate(record: TrackerRecord, for id: UInt) -> Bool {
+    private func isTrackerCompletedTodayPredicate(record: TrackerRecord, for id: Int32) -> Bool {
         let isSameDay = Calendar.current.isDate(record.date, inSameDayAs: datePicker.date)
         return record.trackerId == id && isSameDay
     }
     
-    private func isTrackerCompletedToday(id: UInt) -> Bool {
+    private func isTrackerCompletedToday(id: Int32) -> Bool {
         completedTrackers.contains { isTrackerCompletedTodayPredicate(record: $0, for: id) }
     }
     
-    private func countCompletedTrackers(id: UInt) -> Int {
+    private func countCompletedTrackers(id: Int32) -> Int {
         completedTrackers.filter { $0.trackerId == id }.count
     }
     
@@ -325,7 +325,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
-    func didTapQuantityManagementButton(id: UInt, at indexPath: IndexPath) {
+    func didTapQuantityManagementButton(id: Int32, at indexPath: IndexPath) {
         let isCompletedToday = isTrackerCompletedToday(id: id)
         if isCompletedToday {
             removeTrackerRecord(id: id, at: indexPath)
@@ -334,14 +334,14 @@ extension TrackersViewController: TrackerCellDelegate {
         }
     }
     
-    private func addTrackerRecord(id: UInt, at indexPath: IndexPath) {
+    private func addTrackerRecord(id: Int32, at indexPath: IndexPath) {
         let trackerRecord = TrackerRecord(trackerId: id, date: datePicker.date)
         completedTrackers.append(trackerRecord)
         Logger.info("Выполнен трекер \(trackerRecord.trackerId) на \(trackerRecord.date)")
         collectionView.reloadItems(at: [indexPath])
     }
     
-    private func removeTrackerRecord(id: UInt, at indexPath: IndexPath) {
+    private func removeTrackerRecord(id: Int32, at indexPath: IndexPath) {
         completedTrackers.removeAll {
             isTrackerCompletedTodayPredicate(record: $0, for: id)
         }
