@@ -13,16 +13,16 @@ final class TrackerStore {
         self.context = context
     }
 
-    func add(_ tracker: Tracker) throws {
+    func add(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws {
         let trackerCoreData = TrackerCoreData(context: context)
         updateExisting(trackerCoreData, with: tracker)
+        trackerCoreData.category = category
         try context.save()
     }
     
     func updateExisting(_ trackerCoreData: TrackerCoreData, with tracker: Tracker) {
         trackerCoreData.color = tracker.color
         trackerCoreData.emoji = tracker.emoji
-        trackerCoreData.id = tracker.id
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
     }

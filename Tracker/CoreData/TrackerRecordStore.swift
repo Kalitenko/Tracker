@@ -23,4 +23,44 @@ final class TrackerRecordStore {
         trackerRecordCoreData.trackerID = record.trackerId
         trackerRecordCoreData.date = record.date
     }
+    
+    func deleteEntity(_ entity: TrackerRecordCoreData) throws {
+        context.delete(entity)
+        try context.save()
+    }
+    
+    func delete(_ record: TrackerRecord) throws {
+        let trackerRecordCoreData = try fetch(byTrackerId: record.trackerId, date: record.date)
+        try deleteEntity(trackerRecordCoreData)
+    }
+    
+    func fetch(byTrackerId trackerId: Int32, date: Date) throws -> TrackerRecordCoreData {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+
+        let trackerPredicate = NSPredicate(format: "%K == %d", #keyPath(TrackerRecordCoreData.trackerID), trackerId)
+        let datePredicate = NSPredicate(format: "%K == %@", #keyPath(TrackerRecordCoreData.date), date as NSDate)
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [trackerPredicate, datePredicate])
+        fetchRequest.fetchLimit = 1
+
+        guard let result = try context.fetch(fetchRequest).first else {
+            throw NSError(domain: "TrackerRecordStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Record not found"])
+        }
+
+        return result
+    }
+    
+    func fetchAll() throws -> [TrackerRecordCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        let coreDataRecords = try context.fetch(fetchRequest)
+        
+        return coreDataRecords
+    }
+    
+    func fetchRecords() throws -> [TrackerRecord] {
+        let categories = try fetchAll().compactMap(EntityMapper.convertToTrackerRecord)
+        
+        return categories
+    }
+    
 }

@@ -6,6 +6,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         DaysValueTransformer.register()
+        preloadInitialData()
         return true
     }
     
@@ -26,15 +27,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Core Data stack
     
     lazy var persistentContainer: NSPersistentContainer = {
+        
         let container = NSPersistentContainer(name: "Tracker")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
+            } else {
+                Logger.debug("Core Data store loaded: \(storeDescription.url?.path ?? "no URL")")
             }
         })
         return container
     }()
-
+    
     // MARK: - Core Data Saving support
     
     func saveContext () {
@@ -48,7 +52,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
+
+    // MARK: - Initial Data
     
-    
+    private func preloadInitialData() {
+        let context = persistentContainer.viewContext
+        let initializer = DataInitializer(context: context)
+        initializer.preloadDataIfNeeded()
+    }
+
 }
 

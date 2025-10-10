@@ -166,12 +166,12 @@ final class TrackersViewController: UIViewController {
     var completedTrackers: [TrackerRecord] = []
     
     // MARK: - Private Properties
-    let dataManager: DataManager = MockDataManager.shared
+    let dataProvider: DataProviderProtocol = DataProvider.shared
     
     // MARK: - Data
     private func reloadData() {
-        categories = dataManager.categories
-        completedTrackers = dataManager.completedTrackers
+        categories = dataProvider.categories
+        completedTrackers = dataProvider.completedTrackers
         filterCategories()
     }
     
@@ -390,8 +390,8 @@ extension TrackersViewController: NewTrackerDelegate {
 #if DEBUG
 extension TrackersViewController {
     func loadPreviewData() {
-        categories = dataManager.categories
-        completedTrackers = dataManager.completedTrackers
+        categories = dataProvider.categories
+        completedTrackers = dataProvider.completedTrackers
         filterCategories()
     }
 }
