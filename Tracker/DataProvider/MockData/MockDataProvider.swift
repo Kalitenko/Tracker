@@ -14,7 +14,20 @@ final class MockDataProvider: DataProviderProtocol {
         self.categories = MockDataProvider.makeCategories()
         self.completedTrackers = MockDataProvider.makeCompletedTrackers()
     }
+    
+    func createTracker(_ tracker: Tracker, to categoryTitle: String) {
+    
+    }
+    
+    func addRecord(_ record: TrackerRecord) {
+        
+    }
+    
+    func deleteRecord(_ record: TrackerRecord) {
+        
+    }
 }
+
 
 // MARK: - Mock data
 private extension MockDataProvider {

@@ -2,10 +2,10 @@ import UIKit
 import CoreData
 
 protocol TrackerCategoryStoreDelegate: AnyObject {
-    func didUpdateCategories()
+    func trackerCategoryStoreDidChange()
 }
 
-final class TrackerCategoryStore {
+final class TrackerCategoryStore: NSObject {
     
     // MARK: Properties
     weak var delegate: TrackerCategoryStoreDelegate?
@@ -19,17 +19,14 @@ final class TrackerCategoryStore {
             sectionNameKeyPath: nil,
             cacheName: nil
         )
+        controller.delegate = self
         return controller
     }()
     
     // MARK: - Init
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-    
     init(context: NSManagedObjectContext) {
         self.context = context
+        super.init()
         performFetch()
     }
     
@@ -61,6 +58,9 @@ final class TrackerCategoryStore {
     
     func fetchAll() throws -> [TrackerCategoryCoreData] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.relationshipKeyPathsForPrefetching = ["trackers"]
+                
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: #keyPath(TrackerCategoryCoreData.title), ascending: true)]
         let coreDataCategories = try context.fetch(fetchRequest)
         
         return coreDataCategories
@@ -69,6 +69,7 @@ final class TrackerCategoryStore {
     func fetchCategories() throws -> [TrackerCategory] {
         let categories = try fetchAll().compactMap(EntityMapper.convertToTrackerCategory)
         
+        Logger.debug("Количество категорий: \(categories.count)")
         return categories
     }
     
@@ -84,4 +85,10 @@ final class TrackerCategoryStore {
         return coreDataCategory
     }
 
+}
+
+extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.trackerCategoryStoreDidChange()
+    }
 }

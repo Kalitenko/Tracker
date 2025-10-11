@@ -32,7 +32,6 @@ final class NewTrackerController: ModalController {
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
     private var defaultCategory = "Важное"
-    private var currentId: Int32 = Int32.random(in: 1...100)
     private var selectedCategory: String? {
         didSet { updateCreateButtonState() }
     }
@@ -45,6 +44,7 @@ final class NewTrackerController: ModalController {
     private var selectedDays: [Day] = [] {
         didSet { updateCreateButtonState() }
     }
+    private let dataProvider: DataProviderProtocol = DataProvider.shared
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -275,12 +275,12 @@ final class NewTrackerController: ModalController {
     }
     
     private func createNewTracker(name: String, category: String, schedule: [Day]) {
-        let id = currentId
         guard let emoji = selectedEmoji, let color = selectedColor else {
             Logger.error("Emoji или цвет не выбраны")
             return
         }
-        let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+        let tracker = Tracker(name: name, color: color, emoji: emoji, schedule: schedule)
+        dataProvider.createTracker(tracker, to: category)
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
     }
     

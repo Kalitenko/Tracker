@@ -1,16 +1,41 @@
 import UIKit
 import CoreData
 
-final class TrackerRecordStore {
+protocol TrackerRecordStoreDelegate: AnyObject {
+    func trackerRecordStoreDidChange()
+}
+
+final class TrackerRecordStore: NSObject {
+    
+    // MARK: Properties
+    weak var delegate: TrackerRecordStoreDelegate?
     private let context: NSManagedObjectContext
-
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-
+    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData> = {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: #keyPath(TrackerRecordCoreData.trackerID), ascending: true)]
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        controller.delegate = self
+        return controller
+    }()
+    
+    // MARK: - Init
     init(context: NSManagedObjectContext) {
         self.context = context
+        super.init()
+        performFetch()
+    }
+    
+    private func performFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            Logger.error("Ошибка выполнения performFetch: \(error)")
+        }
     }
     
     func add(_ record: TrackerRecord) throws {
@@ -31,6 +56,7 @@ final class TrackerRecordStore {
     
     func delete(_ record: TrackerRecord) throws {
         let trackerRecordCoreData = try fetch(byTrackerId: record.trackerId, date: record.date)
+        Logger.debug("trackerRecordCoreData: \(trackerRecordCoreData)")
         try deleteEntity(trackerRecordCoreData)
     }
     
@@ -63,4 +89,10 @@ final class TrackerRecordStore {
         return categories
     }
     
+}
+
+extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.trackerRecordStoreDidChange()
+    }
 }

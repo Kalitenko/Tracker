@@ -3,19 +3,17 @@ import UIKit
 protocol DataProviderProtocol {
     var categories: [TrackerCategory] { get }
     var completedTrackers: [TrackerRecord] { get }
+    func createTracker(_ tracker: Tracker, to categoryTitle: String)
+    func addRecord(_ record: TrackerRecord)
+    func deleteRecord(_ record: TrackerRecord)
 }
 
-protocol DataProviderDelegate: AnyObject {
-    func didUpdateCategories()
-    func didUpdateRecords()
-}
-
-final class DataProvider: DataProviderProtocol {
+final class DataProvider {
     
     // MARK: - Shared Instance
     static let shared = DataProvider()
     
-    weak var delegate: DataProviderDelegate?
+    var observer: DataObserver
     
     private let categoryStore: TrackerCategoryStore
     private let trackerStore: TrackerStore
@@ -26,15 +24,13 @@ final class DataProvider: DataProviderProtocol {
         categoryStore = TrackerCategoryStore(context: context)
         trackerStore = TrackerStore(context: context)
         recordStore = TrackerRecordStore(context: context)
+        
+        observer = DataObserver(
+            categoryStore: categoryStore,
+            trackerStore: trackerStore,
+            recordStore: recordStore
+        )
     }
-    
-    lazy var categories: [TrackerCategory] = {
-        (try? categoryStore.fetchCategories()) ?? []
-    }()
-    
-    lazy var completedTrackers: [TrackerRecord] = {
-        (try? recordStore.fetchRecords()) ?? []
-    }()
     
     func addTracker(_ tracker: Tracker, to categoryTitle: String) {
         do {
@@ -47,9 +43,22 @@ final class DataProvider: DataProviderProtocol {
             Logger.error("Ошибка добавления трекера: \(error)")
         }
     }
+   
+}
+
+extension DataProvider: DataProviderProtocol {
+    var categories: [TrackerCategory] {
+        (try? categoryStore.fetchCategories()) ?? []
+    }
+    
+    var completedTrackers: [TrackerRecord] {
+        (try? recordStore.fetchRecords()) ?? []
+    }
     
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {
-        
+        Logger.debug("Создание трекера: \(tracker)")
+        let newTracker = addTracker(tracker, to: categoryTitle)
+        Logger.debug("Создан трекер: \(newTracker)")
     }
     
     func addRecord(_ record: TrackerRecord) {
@@ -67,6 +76,4 @@ final class DataProvider: DataProviderProtocol {
             Logger.error("Ошибка удаления записи: \(error)")
         }
     }
-    
-    
 }

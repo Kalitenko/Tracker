@@ -5,6 +5,7 @@ enum Emoji: String {
     case success = "✅ SUCCESS"
     case error = "❌ ERROR"
     case debug = "🪲 DEBUG"
+    case warning = "⚠️ WARNING"
 }
 
 struct Logger {
@@ -62,6 +63,13 @@ struct Logger {
                       function: String = #function,
                       line: Int = #line) {
         log(message, emoji: .error, file: file, function: function, line: line, column: nil)
+    }
+    
+    static func warning(_ message: String,
+                      file: String = #fileID,
+                      function: String = #function,
+                      line: Int = #line) {
+        log(message, emoji: .warning, file: file, function: function, line: line, column: nil)
     }
     
     // MARK: - Private Methods

@@ -1,23 +1,50 @@
 import UIKit
 import CoreData
 
-final class TrackerStore {
+protocol TrackerStoreDelegate: AnyObject {
+    func trackerStoreDidChange()
+}
+
+final class TrackerStore: NSObject {
+    
+    // MARK: Properties
+    weak var delegate: TrackerCategoryStoreDelegate?
     private let context: NSManagedObjectContext
-
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-
+    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: #keyPath(TrackerCoreData.name), ascending: true)]
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        controller.delegate = self
+        return controller
+    }()
+    
+    // MARK: - Init
     init(context: NSManagedObjectContext) {
         self.context = context
+        super.init()
+        performFetch()
     }
-
-    func add(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws {
+    
+    private func performFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            Logger.error("Ошибка выполнения performFetch: \(error)")
+        }
+    }
+    
+    func add(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws -> Tracker {
         let trackerCoreData = TrackerCoreData(context: context)
         updateExisting(trackerCoreData, with: tracker)
         trackerCoreData.category = category
         try context.save()
+        
+        return try EntityMapper.convertToTracker(trackerCoreData)
     }
     
     func updateExisting(_ trackerCoreData: TrackerCoreData, with tracker: Tracker) {
@@ -25,5 +52,11 @@ final class TrackerStore {
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
+    }
+}
+
+extension TrackerStore: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        Logger.info("Таблица трекеров обновлена")
     }
 }
