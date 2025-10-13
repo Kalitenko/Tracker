@@ -1,8 +1,20 @@
+import Foundation
+
 protocol DataObserverDelegate: AnyObject {
-    func didUpdateTrackers()
+    func didUpdateTrackers(_ changes: [DataChange])
     func didUpdateCategories()
     func didUpdateRecords()
 }
+
+enum DataChange {
+    case insert(IndexPath)
+    case delete(IndexPath)
+    case update(IndexPath)
+    case move(from: IndexPath, to: IndexPath)
+    case insertSection(Int)
+    case deleteSection(Int)
+}
+
 
 final class DataObserver {
     weak var delegate: DataObserverDelegate?
@@ -29,9 +41,15 @@ final class DataObserver {
 }
 
 extension DataObserver: TrackerStoreDelegate {
-    func trackerStoreDidChange() {
-        delegate?.didUpdateTrackers()
+    func trackerStoreDidChange(_ changes: [DataChange]) {
+        delegate?.didUpdateTrackers(changes)
     }
+    
+
+    
+//    func trackerStoreDidChange() {
+//        delegate?.didUpdateTrackers()
+//    }
 }
 
 extension DataObserver: TrackerCategoryStoreDelegate {

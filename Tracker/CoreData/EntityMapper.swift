@@ -49,6 +49,7 @@ final class EntityMapper {
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
+        trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
         
         return trackerCoreData
     }

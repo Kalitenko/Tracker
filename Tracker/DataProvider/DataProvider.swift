@@ -43,6 +43,14 @@ final class DataProvider {
             Logger.error("Ошибка добавления трекера: \(error)")
         }
     }
+    
+    func trackers(for date: Date) -> [Tracker] {
+        trackerStore.fetchTrackers(for: date)
+    }
+    
+    func categories(for date: Date) -> [TrackerCategory] {
+        trackerStore.fetchTrackersGroupedByCategory(for: date)
+    }
    
 }
 
@@ -76,4 +84,5 @@ extension DataProvider: DataProviderProtocol {
             Logger.error("Ошибка удаления записи: \(error)")
         }
     }
+    
 }

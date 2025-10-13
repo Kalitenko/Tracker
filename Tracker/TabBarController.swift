@@ -29,6 +29,12 @@ final class TabBarController: UITabBarController {
             image: UIImage(resource: .tabBarTrackers),
             selectedImage: nil
         )
+        let ntvc = NewTrackersViewController()
+        ntvc.tabBarItem = UITabBarItem(
+            title: Layout.trackersTitle,
+            image: UIImage(resource: .tabBarTrackers),
+            selectedImage: nil
+        )
         let statisticsViewController = StatisticsViewController()
         statisticsViewController.tabBarItem = UITabBarItem(
             title: Layout.statisticsTitle,
@@ -38,8 +44,9 @@ final class TabBarController: UITabBarController {
         
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        let ntvcnc = UINavigationController(rootViewController: ntvc)
         
-        self.viewControllers = [trackersNavigationController, statisticsNavigationController]
+        self.viewControllers = [trackersNavigationController, statisticsNavigationController, ntvcnc]
         
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()

@@ -66,11 +66,14 @@ final class TrackerCategoryStore: NSObject {
         return coreDataCategories
     }
     
+    func fetchCategoriesOnce() throws -> [TrackerCategory] {
+        let coreDataCategories = try fetchAll()
+        return try coreDataCategories.compactMap(EntityMapper.convertToTrackerCategory)
+    }
+
     func fetchCategories() throws -> [TrackerCategory] {
-        let categories = try fetchAll().compactMap(EntityMapper.convertToTrackerCategory)
-        
-        Logger.debug("Количество категорий: \(categories.count)")
-        return categories
+        guard let coreDataCategories = fetchedResultsController.fetchedObjects else { return [] }
+        return try coreDataCategories.compactMap(EntityMapper.convertToTrackerCategory)
     }
     
     func fetch(byTitle title: String) throws -> TrackerCategoryCoreData? {
