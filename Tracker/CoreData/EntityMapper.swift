@@ -6,6 +6,7 @@ enum EntityMapperError: Error {
 
 final class EntityMapper {
     
+    // MARK: - Public Methods
     static func convertToTrackerCategory(_ entity: TrackerCategoryCoreData) throws -> TrackerCategory? {
         guard let title = entity.title else { throw EntityMapperError.conversionFailed }
         

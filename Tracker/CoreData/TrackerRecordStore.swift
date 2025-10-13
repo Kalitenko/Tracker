@@ -2,13 +2,15 @@ import UIKit
 import CoreData
 
 protocol TrackerRecordStoreDelegate: AnyObject {
-    func trackerRecordStoreDidChange()
+    func trackerRecordStoreDidChange(record: TrackerRecord, changeType: DataChangeType)
 }
 
 final class TrackerRecordStore: NSObject {
     
-    // MARK: Properties
+    // MARK: - Public Properties
     weak var delegate: TrackerRecordStoreDelegate?
+    
+    // MARK: - Private Properties
     private let context: NSManagedObjectContext
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData> = {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
@@ -23,21 +25,14 @@ final class TrackerRecordStore: NSObject {
         return controller
     }()
     
-    // MARK: - Init
+    // MARK: - Initializers
     init(context: NSManagedObjectContext) {
         self.context = context
         super.init()
         performFetch()
     }
     
-    private func performFetch() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            Logger.error("Ошибка выполнения performFetch: \(error)")
-        }
-    }
-    
+    // MARK: - Public Methods
     func add(_ record: TrackerRecord) throws {
         let trackerRecordCoreData = TrackerRecordCoreData(context: context)
         updateExisting(trackerRecordCoreData, with: record)
@@ -62,17 +57,17 @@ final class TrackerRecordStore: NSObject {
     
     func fetch(byTrackerId trackerId: Int32, date: Date) throws -> TrackerRecordCoreData {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-
+        
         let trackerPredicate = NSPredicate(format: "%K == %d", #keyPath(TrackerRecordCoreData.trackerID), trackerId)
         let datePredicate = NSPredicate(format: "%K == %@", #keyPath(TrackerRecordCoreData.date), date as NSDate)
-
+        
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [trackerPredicate, datePredicate])
         fetchRequest.fetchLimit = 1
-
+        
         guard let result = try context.fetch(fetchRequest).first else {
             throw NSError(domain: "TrackerRecordStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Record not found"])
         }
-
+        
         return result
     }
     
@@ -84,15 +79,53 @@ final class TrackerRecordStore: NSObject {
     }
     
     func fetchRecords() throws -> [TrackerRecord] {
-        let categories = try fetchAll().compactMap(EntityMapper.convertToTrackerRecord)
+        try fetchedResultsController.performFetch()
         
-        return categories
+        let objects = fetchedResultsController.fetchedObjects ?? []
+        let records = try objects.map(EntityMapper.convertToTrackerRecord)
+        
+        return records
+    }
+    
+    // MARK: - Private Methods
+    private func performFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            Logger.error("Ошибка выполнения performFetch: \(error)")
+        }
     }
     
 }
 
+// MARK: - NSFetchedResultsControllerDelegate
 extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.trackerRecordStoreDidChange()
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange anObject: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?
+    ) {
+        guard let entity = anObject as? TrackerRecordCoreData else { return }
+        
+        do {
+            let record = try EntityMapper.convertToTrackerRecord(entity)
+            
+            switch type {
+            case .insert:
+                delegate?.trackerRecordStoreDidChange(record: record, changeType: .insert)
+            case .delete:
+                delegate?.trackerRecordStoreDidChange(record: record, changeType: .delete)
+            case .update:
+                delegate?.trackerRecordStoreDidChange(record: record, changeType: .update)
+            case .move:
+                delegate?.trackerRecordStoreDidChange(record: record, changeType: .move(from: indexPath, to: newIndexPath))
+            @unknown default:
+                break
+            }
+        } catch {
+            Logger.error("Не удалось конвертировать TrackerRecordCoreData в TrackerRecord: \(error)")
+        }
     }
 }

@@ -286,10 +286,10 @@ final class NewTrackerController: ModalController {
     
     private func updateCreateButtonState() {
         let isValid = validateName(from: nameTextField) != nil &&
-                      selectedCategory != nil &&
-                      selectedEmoji != nil &&
-                      selectedColor != nil &&
-                      !(trackerType == .habit && selectedDays.isEmpty)
+        selectedCategory != nil &&
+        selectedEmoji != nil &&
+        selectedColor != nil &&
+        !(trackerType == .habit && selectedDays.isEmpty)
         
         createButton.isEnabled = isValid
     }

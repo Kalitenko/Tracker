@@ -9,7 +9,7 @@ final class DaysValueTransformer: ValueTransformer {
         guard let days = value as? [Day] else { return nil }
         return try? JSONEncoder().encode(days)
     }
-
+    
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         guard let data = value as? NSData else { return nil }
         return try? JSONDecoder().decode([Day].self, from: data as Data)

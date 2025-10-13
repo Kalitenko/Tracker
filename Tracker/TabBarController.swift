@@ -29,12 +29,6 @@ final class TabBarController: UITabBarController {
             image: UIImage(resource: .tabBarTrackers),
             selectedImage: nil
         )
-        let ntvc = NewTrackersViewController()
-        ntvc.tabBarItem = UITabBarItem(
-            title: Layout.trackersTitle,
-            image: UIImage(resource: .tabBarTrackers),
-            selectedImage: nil
-        )
         let statisticsViewController = StatisticsViewController()
         statisticsViewController.tabBarItem = UITabBarItem(
             title: Layout.statisticsTitle,
@@ -44,9 +38,8 @@ final class TabBarController: UITabBarController {
         
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
-        let ntvcnc = UINavigationController(rootViewController: ntvc)
         
-        self.viewControllers = [trackersNavigationController, statisticsNavigationController, ntvcnc]
+        self.viewControllers = [trackersNavigationController, statisticsNavigationController]
         
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -74,7 +67,7 @@ extension TabBarController {
     func loadPreviewData() {
         viewControllers?.forEach {
             if let nav = $0 as? UINavigationController,
-               let trackersVC = nav.viewControllers.first(where: { $0 is TrackersViewController }) as? TrackersViewController {
+               let trackersVC = nav.viewControllers.first(where: { $0 is OldTrackersViewController }) as? OldTrackersViewController {
                 trackersVC.loadPreviewData()
             }
         }

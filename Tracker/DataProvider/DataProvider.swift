@@ -13,12 +13,15 @@ final class DataProvider {
     // MARK: - Shared Instance
     static let shared = DataProvider()
     
+    // MARK: - Public Properties
     var observer: DataObserver
     
+    // MARK: - Private Properties
     private let categoryStore: TrackerCategoryStore
     private let trackerStore: TrackerStore
     private let recordStore: TrackerRecordStore
     
+    // MARK: - Initializers
     private init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         categoryStore = TrackerCategoryStore(context: context)
@@ -32,6 +35,7 @@ final class DataProvider {
         )
     }
     
+    // MARK: - Public Methods
     func addTracker(_ tracker: Tracker, to categoryTitle: String) {
         do {
             guard let category = try categoryStore.fetch(byTitle: categoryTitle) else {
@@ -51,9 +55,10 @@ final class DataProvider {
     func categories(for date: Date) -> [TrackerCategory] {
         trackerStore.fetchTrackersGroupedByCategory(for: date)
     }
-   
+    
 }
 
+// MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
     var categories: [TrackerCategory] {
         (try? categoryStore.fetchCategories()) ?? []

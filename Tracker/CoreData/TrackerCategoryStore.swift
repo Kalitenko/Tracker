@@ -7,8 +7,10 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
 
 final class TrackerCategoryStore: NSObject {
     
-    // MARK: Properties
+    // MARK: - Public Properties
     weak var delegate: TrackerCategoryStoreDelegate?
+    
+    // MARK: - Private Properties
     private let context: NSManagedObjectContext
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData> = {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
@@ -23,39 +25,20 @@ final class TrackerCategoryStore: NSObject {
         return controller
     }()
     
-    // MARK: - Init
+    // MARK: - Initializers
     init(context: NSManagedObjectContext) {
         self.context = context
         super.init()
         performFetch()
     }
     
-    private func performFetch() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            Logger.error("Ошибка выполнения performFetch: \(error)")
-        }
-    }
-    
+    // MARK: - Public Methods
     func add(_ category: TrackerCategory) throws {
         let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
         updateExisting(trackerCategoryCoreData, with: category)
         try context.save()
     }
-    
-    func updateExisting(_ trackerCategoryCoreData: TrackerCategoryCoreData, with category: TrackerCategory) {
-        trackerCategoryCoreData.title = category.title
 
-        if !category.trackers.isEmpty {
-            let trackersSet = NSSet(array: category.trackers.compactMap { tracker in
-                let trackerCoreData = TrackerCoreData(context: context)
-                return EntityMapper.convertToTrackerCoreData(tracker: tracker, trackerCoreData: trackerCoreData)
-            })
-            trackerCategoryCoreData.trackers = trackersSet
-        }
-    }
-    
     func fetchAll() throws -> [TrackerCategoryCoreData] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.relationshipKeyPathsForPrefetching = ["trackers"]
@@ -87,9 +70,31 @@ final class TrackerCategoryStore: NSObject {
         
         return coreDataCategory
     }
+    
+    // MARK: - Private Methods
+    private func performFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            Logger.error("Ошибка выполнения performFetch: \(error)")
+        }
+    }
+    
+    private func updateExisting(_ trackerCategoryCoreData: TrackerCategoryCoreData, with category: TrackerCategory) {
+        trackerCategoryCoreData.title = category.title
+
+        if !category.trackers.isEmpty {
+            let trackersSet = NSSet(array: category.trackers.compactMap { tracker in
+                let trackerCoreData = TrackerCoreData(context: context)
+                return EntityMapper.convertToTrackerCoreData(tracker: tracker, trackerCoreData: trackerCoreData)
+            })
+            trackerCategoryCoreData.trackers = trackersSet
+        }
+    }
 
 }
 
+// MARK: - NSFetchedResultsControllerDelegate
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.trackerCategoryStoreDidChange()
