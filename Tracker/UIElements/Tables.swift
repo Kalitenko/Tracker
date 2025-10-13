@@ -33,7 +33,8 @@ final class Table: UITableView {
         self.register(style.cellType, forCellReuseIdentifier: style.reuseIdentifier)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 }

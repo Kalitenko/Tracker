@@ -8,12 +8,12 @@ extension Date {
         return formatter
     }()
     
-    func dayName() -> String {
-        Self.dayFormatter.string(from: self).capitalized
+    var dayName: String {
+       Self.dayFormatter.string(from: self).capitalized
     }
     
-    var dayEnum: Day? {
+    var dayEnum: WeekDay? {
         let name = Self.dayFormatter.string(from: self).capitalized
-        return Day(rawValue: name)
+        return WeekDay(rawValue: name)
     }
 }

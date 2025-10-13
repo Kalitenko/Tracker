@@ -38,7 +38,7 @@ final class TrackerStore: NSObject {
     
     // MARK: - Public Methods
     func fetchTrackers(for date: Date) -> [Tracker] {
-        guard let dayName = date.dayName() as String? else {
+        guard let dayName = date.dayName as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }
@@ -58,7 +58,7 @@ final class TrackerStore: NSObject {
     }
     
     func fetchTrackersGroupedByCategory(for date: Date) -> [TrackerCategory] {
-        guard let dayName = date.dayName() as String? else {
+        guard let dayName = date.dayName as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }
@@ -91,6 +91,7 @@ final class TrackerStore: NSObject {
         return try? EntityMapper.convertToTracker(trackerCoreData)
     }
     
+    @discardableResult
     func add(_ tracker: Tracker, to category: TrackerCategoryCoreData) throws -> Tracker {
         let trackerCoreData = TrackerCoreData(context: context)
         updateExisting(trackerCoreData, with: tracker)
@@ -108,6 +109,7 @@ final class TrackerStore: NSObject {
         trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
     }
     
+    @discardableResult
     func add(_ tracker: Tracker, toCategoryNamed categoryName: String) throws -> Tracker {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.title), categoryName)

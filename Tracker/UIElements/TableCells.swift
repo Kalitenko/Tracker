@@ -48,8 +48,9 @@ class TableCell: UITableViewCell {
         setupConstraints()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Setup Methods
@@ -99,8 +100,9 @@ final class CheckmarkCell: TableCell {
         setupCheckmark()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     private func setupCheckmark() {
@@ -132,8 +134,9 @@ final class ArrowCell: TableCell {
         setupArrow()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     private func setupArrow() {
@@ -159,8 +162,9 @@ final class ToggleCell: TableCell {
         setupToggle()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     private func setupToggle() {

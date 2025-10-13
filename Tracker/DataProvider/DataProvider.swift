@@ -23,7 +23,7 @@ final class DataProvider {
     
     // MARK: - Initializers
     private init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let context = DataBaseStore.shared.persistentContainer.viewContext
         categoryStore = TrackerCategoryStore(context: context)
         trackerStore = TrackerStore(context: context)
         recordStore = TrackerRecordStore(context: context)

@@ -41,7 +41,7 @@ final class NewTrackerController: ModalController {
     private var selectedColor: UIColor? {
         didSet { updateCreateButtonState() }
     }
-    private var selectedDays: [Day] = [] {
+    private var selectedDays: [WeekDay] = [] {
         didSet { updateCreateButtonState() }
     }
     private let dataProvider: DataProviderProtocol = DataProvider.shared
@@ -54,7 +54,7 @@ final class NewTrackerController: ModalController {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Constants
@@ -274,7 +274,7 @@ final class NewTrackerController: ModalController {
         return text
     }
     
-    private func createNewTracker(name: String, category: String, schedule: [Day]) {
+    private func createNewTracker(name: String, category: String, schedule: [WeekDay]) {
         guard let emoji = selectedEmoji, let color = selectedColor else {
             Logger.error("Emoji или цвет не выбраны")
             return
@@ -305,7 +305,7 @@ final class NewTrackerController: ModalController {
         
         if trackerType == .habit && selectedDays.isEmpty { return }
         
-        let schedule = trackerType == .habit ? selectedDays : Day.allCases
+        let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         createNewTracker(name: name, category: category, schedule: schedule)
         dismiss(animated: true)
     }

@@ -28,10 +28,12 @@ class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UIColle
     
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: String(describing: Cell.self),
             for: indexPath
-        ) as! Cell
+        ) as? Cell else {
+            return UICollectionViewCell()
+        }
         
         configure(cell, items[indexPath.row], false)
         return cell

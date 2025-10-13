@@ -12,13 +12,13 @@ final class EntityMapper {
         
         let trackersSet = entity.trackers as? Set<TrackerCoreData> ?? []
         let trackers = trackersSet.compactMap { trackerEntity in
-                do {
-                    return try convertToTracker(trackerEntity)
-                } catch {
-                    Logger.warning("Ошибка при конвертации сущности трекеса с id=\(trackerEntity.id). Error: \(error)")
-                    return nil
-                }
+            do {
+                return try convertToTracker(trackerEntity)
+            } catch {
+                Logger.warning("Ошибка при конвертации сущности трекеса с id=\(trackerEntity.id). Error: \(error)")
+                return nil
             }
+        }
         
         return TrackerCategory(title: title, trackers: trackers)
     }
@@ -27,7 +27,7 @@ final class EntityMapper {
         guard let name = entity.name,
               let color = entity.color as? UIColor,
               let emoji = entity.emoji,
-              let schedule = entity.schedule as? [Day] else {
+              let schedule = entity.schedule as? [WeekDay] else {
             throw EntityMapperError.conversionFailed
         }
         let id = entity.id

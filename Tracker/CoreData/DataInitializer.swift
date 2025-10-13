@@ -1,5 +1,4 @@
 import CoreData
-import UIKit
 
 final class DataInitializer {
     
@@ -18,7 +17,7 @@ final class DataInitializer {
         do {
             let existing = try categoryStore.fetchAll()
             guard existing.isEmpty else {
-                Logger.info("✅ Начальные данные уже существуют, пропускаем")
+                Logger.success("Начальные данные уже существуют, пропускаем")
                 return
             }
             
@@ -33,7 +32,7 @@ final class DataInitializer {
                 try categoryStore.add(category)
             }
             
-            Logger.info("✅ Категории добавлены")
+            Logger.success("Категории добавлены")
             
             let workTrackers = [
                 Tracker(

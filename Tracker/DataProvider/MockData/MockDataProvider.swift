@@ -3,7 +3,7 @@ import Foundation
 final class MockDataProvider: DataProviderProtocol {
     
     // MARK: - Shared Instance
-    static let shared = MockDataProvider()
+    private static let shared = MockDataProvider()
     
     // MARK: - Public Properties
     let categories: [TrackerCategory]
@@ -15,17 +15,9 @@ final class MockDataProvider: DataProviderProtocol {
         self.completedTrackers = MockDataProvider.makeCompletedTrackers()
     }
     
-    func createTracker(_ tracker: Tracker, to categoryTitle: String) {
-    
-    }
-    
-    func addRecord(_ record: TrackerRecord) {
-        
-    }
-    
-    func deleteRecord(_ record: TrackerRecord) {
-        
-    }
+    func createTracker(_ tracker: Tracker, to categoryTitle: String) {}
+    func addRecord(_ record: TrackerRecord) {}
+    func deleteRecord(_ record: TrackerRecord) {}
 }
 
 
