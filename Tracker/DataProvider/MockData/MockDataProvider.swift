@@ -3,14 +3,14 @@ import Foundation
 final class MockDataProvider: DataProviderProtocol {
     
     // MARK: - Shared Instance
-    private static let shared = MockDataProvider()
+    static let shared = MockDataProvider()
     
     // MARK: - Public Properties
     let categories: [TrackerCategory]
     let completedTrackers: [TrackerRecord]
     
     // MARK: - Initializer
-    init() {
+    private init() {
         self.categories = MockDataProvider.makeCategories()
         self.completedTrackers = MockDataProvider.makeCompletedTrackers()
     }

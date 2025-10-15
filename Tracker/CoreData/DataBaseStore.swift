@@ -20,7 +20,7 @@ final class DataBaseStore {
     }()
     
     // MARK: - Initializers
-    init() {
+    private init() {
         preloadInitialData()
     }
     
