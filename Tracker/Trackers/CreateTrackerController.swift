@@ -77,12 +77,12 @@ final class CreateTrackerController: ModalController {
     
     
     // MARK: - Public Properties
-    var onDaysSelected: (([Day]) -> Void)?
-    var selectedDays: [Day] = []
+    var onDaysSelected: (([WeekDay]) -> Void)?
+    var selectedDays: [WeekDay] = []
     weak var delegate: NewTrackerDelegate?
     
     // MARK: - Private Properties
-    private let options: [Day] = Day.allCases
+    private let options: [WeekDay] = WeekDay.allCases
     private let tableStyle: TableStyle = .toggle
     
     // MARK: - Private Methods

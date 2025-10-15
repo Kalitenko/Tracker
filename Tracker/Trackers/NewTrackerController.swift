@@ -31,11 +31,20 @@ final class NewTrackerController: ModalController {
     // MARK: - Private Properties
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
-    private var selectedDays: [Day] = []
-    private var selectedCategory: String?
     private var defaultCategory = "Важное"
-    private var currentId: UInt = UInt.random(in: 1...100_000)
-    private var trackerColor: UIColor = UIColor.random()
+    private var selectedCategory: String? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedEmoji: String? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedColor: UIColor? {
+        didSet { updateCreateButtonState() }
+    }
+    private var selectedDays: [WeekDay] = [] {
+        didSet { updateCreateButtonState() }
+    }
+    private let dataProvider: DataProviderProtocol = DataProvider.shared
     
     // MARK: - Init
     init(trackerType: TrackerType) {
@@ -45,7 +54,7 @@ final class NewTrackerController: ModalController {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Constants
@@ -66,7 +75,7 @@ final class NewTrackerController: ModalController {
         
         // Insets / Spacing
         static let titleTopInset: CGFloat = 27
-        static let textFieldTopInset: CGFloat = 38
+        static let textFieldTopInset: CGFloat = 24
         static let limitLabelTopInset: CGFloat = 8
         static let optionsTableTopInset: CGFloat = 24
         static let sideInset: CGFloat = 16
@@ -75,6 +84,18 @@ final class NewTrackerController: ModalController {
     }
     
     // MARK: - UI Elements
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        
+        return scrollView
+    }()
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        
+        return view
+    }()
+    
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = Layout.textFieldPlaceholderText
@@ -107,7 +128,7 @@ final class NewTrackerController: ModalController {
     }()
     
     private lazy var createButton: UIButton = {
-        let button = BlackButton(title: Layout.createButtonText)
+        let button = BlackButton(title: Layout.createButtonText, isInitiallyEnabled: false)
         button.addTarget(self, action: #selector(Self.didTapCreateButton), for: .touchUpInside)
         return button
     }()
@@ -129,6 +150,52 @@ final class NewTrackerController: ModalController {
         return table
     }()
     
+    private lazy var emojiHandler = EmojiCollectionHandler { emoji in
+        Logger.debug("Выбран эмоджи: \(emoji)")
+        self.selectedEmoji = emoji
+    }
+    
+    private lazy var colorHandler = ColorCollectionHandler { color in
+        Logger.debug("Выбран цвет: \(color)")
+        self.selectedColor = color
+    }
+    
+    private lazy var emojiCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: EmojiCollectionHandler.makeLayout()
+        )
+        collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: String(describing: EmojiCell.self))
+        collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
+        
+        collectionView.dataSource = emojiHandler
+        collectionView.delegate = emojiHandler
+        
+        return collectionView
+    }()
+    
+    private lazy var colorCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: ColorCollectionHandler.makeLayout()
+        )
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: String(describing: ColorCell.self))
+        collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
+        
+        collectionView.dataSource = colorHandler
+        collectionView.delegate = colorHandler
+        
+        return collectionView
+    }()
+    
+    private lazy var collectionsStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [emojiCollectionView, colorCollectionView])
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,9 +210,17 @@ final class NewTrackerController: ModalController {
     }
     
     private func setupSubViews() {
-        [titleLabel, nameTextField, limitLabel, buttonsStackView, optionsTableView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
+        [nameTextField, limitLabel, optionsTableView, collectionsStackView].forEach {
+            contentView.addSubview($0)
+        }
+        scrollView.addSubview(contentView)
+        
+        [scrollView, buttonsStackView].forEach {
             view.addSubview($0)
+        }
+        
+        [scrollView, contentView, titleLabel, nameTextField, limitLabel, buttonsStackView, optionsTableView, collectionsStackView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
         }
     }
     
@@ -153,27 +228,44 @@ final class NewTrackerController: ModalController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 14),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -16),
             
-            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Layout.textFieldTopInset),
-            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
-            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
-            
-            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
-            limitLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
             buttonsStackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.buttonsStackSideInset),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.buttonsStackSideInset),
             
+            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
+            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.textFieldTopInset),
+            nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            
+            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
+            limitLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
             optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: Layout.optionsTableTopInset),
-            optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.sideInset),
-            optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.sideInset),
-            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight)
+            optionsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            optionsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight),
+            
+            collectionsStackView.topAnchor.constraint(equalTo: optionsTableView.bottomAnchor, constant: 32),
+            collectionsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 18),
+            collectionsStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -18),
+            collectionsStackView.heightAnchor.constraint(equalToConstant: 224 * 2),
+            
+            collectionsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ])
     }
+    
+    
     
     // MARK: - Private Methods
     private func validateName(from textField: UITextField) -> String? {
@@ -182,12 +274,24 @@ final class NewTrackerController: ModalController {
         return text
     }
     
-    private func createNewTracker(name: String, category: String, schedule: [Day]) {
-        let id = currentId
-        let emoji = "🩼"
-        let color = trackerColor
-        let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+    private func createNewTracker(name: String, category: String, schedule: [WeekDay]) {
+        guard let emoji = selectedEmoji, let color = selectedColor else {
+            Logger.error("Emoji или цвет не выбраны")
+            return
+        }
+        let tracker = Tracker(name: name, color: color, emoji: emoji, schedule: schedule)
+        dataProvider.createTracker(tracker, to: category)
         delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
+    }
+    
+    private func updateCreateButtonState() {
+        let isValid = validateName(from: nameTextField) != nil &&
+        selectedCategory != nil &&
+        selectedEmoji != nil &&
+        selectedColor != nil &&
+        !(trackerType == .habit && selectedDays.isEmpty)
+        
+        createButton.isEnabled = isValid
     }
     
     // MARK: - Actions
@@ -201,13 +305,14 @@ final class NewTrackerController: ModalController {
         
         if trackerType == .habit && selectedDays.isEmpty { return }
         
-        let schedule = trackerType == .habit ? selectedDays : Day.allCases
+        let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         createNewTracker(name: name, category: category, schedule: schedule)
         dismiss(animated: true)
     }
     
     @objc private func textDidChange(_ textField: UITextField) {
         limitLabel.isHidden = (textField.text?.count ?? 0) <= Layout.limitSymbolsNumber
+        updateCreateButtonState()
     }
 }
 
@@ -222,8 +327,11 @@ extension NewTrackerController: UITableViewDataSource {
             withIdentifier: tableStyle.reuseIdentifier,
             for: indexPath
         )
+        
+        let isLastElement = indexPath.isLastRow(in: tableView)
+        
         if let arrowCell = cell as? ArrowCell {
-            arrowCell.configure(title: trackerType.options[indexPath.row], subtitle: nil)
+            arrowCell.configure(title: trackerType.options[indexPath.row], subtitle: nil, isLastElement: isLastElement)
         }
         return cell
     }
@@ -236,13 +344,14 @@ extension NewTrackerController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: true)
         let option = trackerType.options[indexPath.row]
-        
+        let isLastElement = indexPath.isLastRow(in: tableView)
         if option == "Категория" {
             selectedCategory = defaultCategory
             if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                cell.configure(title: option, subtitle: selectedCategory)
+                cell.configure(title: option, subtitle: selectedCategory, isLastElement: isLastElement)
             }
         } else if option == "Расписание" {
             let vc = ScheduleController()
@@ -250,7 +359,7 @@ extension NewTrackerController: UITableViewDelegate {
             vc.onDaysSelected = { [weak self] days in
                 self?.selectedDays = days
                 if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                    cell.configure(title: option, subtitle: days.displayText)
+                    cell.configure(title: option, subtitle: days.displayText, isLastElement: isLastElement)
                 }
             }
             present(vc, animated: true)

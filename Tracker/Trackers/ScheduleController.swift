@@ -80,11 +80,11 @@ final class ScheduleController: ModalController {
     }
     
     // MARK: - Public Properties
-    var onDaysSelected: (([Day]) -> Void)?
-    var selectedDays: [Day] = []
+    var onDaysSelected: (([WeekDay]) -> Void)?
+    var selectedDays: [WeekDay] = []
     
     // MARK: - Private Properties
-    private let options: [Day] = Day.allCases
+    private let options: [WeekDay] = WeekDay.allCases
     private let tableStyle: TableStyle = .toggle
     
     // MARK: - Actions
@@ -105,9 +105,11 @@ extension ScheduleController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = optionsTableView.dequeueReusableCell(withIdentifier: tableStyle.reuseIdentifier, for: indexPath)
+        let isLastElement = indexPath.row == options.count - 1
+        
         if let toggleCell = cell as? ToggleCell {
             let day = options[indexPath.row]
-            toggleCell.configure(title: day.rawValue, isOn: selectedDays.contains(day))
+            toggleCell.configure(title: day.rawValue, isLastElement: isLastElement, isOn: selectedDays.contains(day))
             toggleCell.onToggle = { [weak self] isOn in
                 guard let self else { return }
                 if isOn {

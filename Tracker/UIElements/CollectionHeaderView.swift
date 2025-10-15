@@ -1,24 +1,20 @@
 import UIKit
 
-final class TrackerCollectionHeaderView: UICollectionReusableView {
+final class CollectionHeaderView: UICollectionReusableView {
     
     // MARK: - Constants
     private enum Layout {
-        static let trackersTitle = "Трекеры"
-        static let statisticsTitle = "Статистика"
         static let leadingTrailingInset: CGFloat = 28
     }
     
     // MARK: - Public Static Properties
-    static let identifier = "TrackerCollectionViewCell"
+    static let identifier = "CollectionHeaderView"
     
     // MARK: - Layout
     
     // MARK: - UI Elements
     lazy var headerLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.bold19
-        label.textColor = UIColor(resource: .black)
+        let label = Label(style: .collectionHeader)
         
         return label
     }()
@@ -32,8 +28,9 @@ final class TrackerCollectionHeaderView: UICollectionReusableView {
         setupConstraints()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Setup Methods
@@ -52,5 +49,4 @@ final class TrackerCollectionHeaderView: UICollectionReusableView {
             headerLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Layout.leadingTrailingInset)
         ])
     }
-    
 }

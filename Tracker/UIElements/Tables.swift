@@ -28,15 +28,13 @@ final class Table: UITableView {
         super.init(frame: .zero, style: .plain)
         
         self.layer.cornerRadius = 16
-        self.separatorStyle = .singleLine
+        self.separatorStyle = .none
         
         self.register(style.cellType, forCellReuseIdentifier: style.reuseIdentifier)
-        
-        self.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        self.tableFooterView = UIView()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 }

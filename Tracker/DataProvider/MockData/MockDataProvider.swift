@@ -1,23 +1,28 @@
 import Foundation
 
-final class MockDataManager: DataManager {
+final class MockDataProvider: DataProviderProtocol {
     
     // MARK: - Shared Instance
-    static let shared = MockDataManager()
+    static let shared = MockDataProvider()
     
     // MARK: - Public Properties
     let categories: [TrackerCategory]
     let completedTrackers: [TrackerRecord]
     
     // MARK: - Initializer
-    init() {
-        self.categories = MockDataManager.makeCategories()
-        self.completedTrackers = MockDataManager.makeCompletedTrackers()
+    private init() {
+        self.categories = MockDataProvider.makeCategories()
+        self.completedTrackers = MockDataProvider.makeCompletedTrackers()
     }
+    
+    func createTracker(_ tracker: Tracker, to categoryTitle: String) {}
+    func addRecord(_ record: TrackerRecord) {}
+    func deleteRecord(_ record: TrackerRecord) {}
 }
 
+
 // MARK: - Mock data
-private extension MockDataManager {
+private extension MockDataProvider {
     
     private static func makeCategories() -> [TrackerCategory] {
         let workTrackers = TrackerCategory(

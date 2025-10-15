@@ -18,8 +18,9 @@ class Button: UIButton {
         setupTitleAndStyle(title: title, color: outlineColor)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     private func setupTitleAndStyle(title: String, color: UIColor) {
@@ -38,14 +39,30 @@ class Button: UIButton {
 }
 
 final class BlackButton: Button {
-    init(title: String) {
-        super.init(title: title,
-                   backgroundColor: UIColor(resource: .black),
-                   textColor: UIColor(resource: .white))
+    
+    override var isEnabled: Bool {
+        didSet {
+            updateState()
+        }
     }
     
+    private let enabledColor = UIColor(resource: .black)
+    private let disabledColor = UIColor(resource: .gray)
+    
+    init(title: String, isInitiallyEnabled: Bool = true) {
+        super.init(title: title,
+                   backgroundColor: enabledColor,
+                   textColor: UIColor(resource: .white))
+        isEnabled = isInitiallyEnabled
+    }
+    
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
+    }
+    
+    private func updateState() {
+        backgroundColor = isEnabled ? enabledColor : disabledColor
     }
 }
 
@@ -55,8 +72,9 @@ final class OutlineRedButton: Button {
                    outlineColor: UIColor(resource: .red))
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 }
 
@@ -67,7 +85,8 @@ final class BlueButton: Button {
                    textColor: UIColor(resource: .ypWhite))
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 }

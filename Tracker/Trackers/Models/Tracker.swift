@@ -1,53 +1,21 @@
-import Foundation
 import UIKit
 
 struct Tracker {
-    let id: UInt
+    let id: Int32
     let name: String
     let color: UIColor
     let emoji: String
-    let schedule: [Day]
-}
-
-enum Day: String, CaseIterable {
-    case monday = "Понедельник"
-    case tuesday = "Вторник"
-    case wednesday = "Среда"
-    case thursday = "Четверг"
-    case friday = "Пятница"
-    case saturday = "Суббота"
-    case sunday = "Воскресенье"
+    let schedule: [WeekDay]
     
-    var calendarWeekday: Int {
-        switch self {
-        case .sunday: return 1
-        case .monday: return 2
-        case .tuesday: return 3
-        case .wednesday: return 4
-        case .thursday: return 5
-        case .friday: return 6
-        case .saturday: return 7
-        }
+    init(id: Int32, name: String, color: UIColor, emoji: String, schedule: [WeekDay]) {
+        self.id = id
+        self.name = name
+        self.color = color
+        self.emoji = emoji
+        self.schedule = schedule
     }
-    var shortName: String {
-        switch self {
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        case .sunday: return "Вс"
-        }
-    }
-}
-
-extension Array where Element == Day {
-    var displayText: String {
-        if self.count == Day.allCases.count {
-            return "Каждый день"
-        } else {
-            return self.sorted { $0.calendarWeekday < $1.calendarWeekday }.map { $0.shortName }.joined(separator: ", ")
-        }
+    
+    init(name: String, color: UIColor, emoji: String, schedule: [WeekDay]) {
+        self.init(id: Int32.random(in: 1...Int32.max), name: name, color: color, emoji: emoji, schedule: schedule)
     }
 }

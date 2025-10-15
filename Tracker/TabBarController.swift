@@ -62,15 +62,3 @@ final class TabBarController: UITabBarController {
         tabBar.isTranslucent = false
     }
 }
-#if DEBUG
-extension TabBarController {
-    func loadPreviewData() {
-        viewControllers?.forEach {
-            if let nav = $0 as? UINavigationController,
-               let trackersVC = nav.viewControllers.first(where: { $0 is TrackersViewController }) as? TrackersViewController {
-                trackersVC.loadPreviewData()
-            }
-        }
-    }
-}
-#endif
