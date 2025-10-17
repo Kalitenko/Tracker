@@ -8,9 +8,9 @@ final class TrackersViewController: UIViewController {
         static let searchBarText = "Поиск"
         static let emptyStateLabelText = "Что будем отслеживать?"
         
-        static let emptyStateImageTopInset: CGFloat = 220
-        static let emptyStateLabelTopSpacing: CGFloat = 8
-        static let emptyStateLabelHorizontalInset: CGFloat = 16
+        static let collectionViewTopInset: CGFloat = 24
+        static let emptyStateViewTopInset: CGFloat = 220
+        static let emptyStateViewHorizontalInset: CGFloat = 16
     }
     
     // MARK: - Layout
@@ -66,22 +66,7 @@ final class TrackersViewController: UIViewController {
         return appearance
     }()
     
-    private lazy var emptyStateImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(resource: .emptyState))
-        imageView.contentMode = .center
-        
-        return imageView
-    }()
-    
-    private lazy var emptyStateLabel: UILabel = {
-        let label = UILabel()
-        label.text = Layout.emptyStateLabelText
-        label.textAlignment = .center
-        label.textColor = UIColor(resource: .black)
-        label.font = UIFont.medium12
-        
-        return label
-    }()
+    private lazy var emptyStateView = EmptyStateView(text: Layout.emptyStateLabelText)
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(
@@ -117,12 +102,11 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        [emptyStateImageView, emptyStateLabel, collectionView].forEach {
+        [emptyStateView, collectionView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
-        view.bringSubviewToFront(emptyStateLabel)
-        view.bringSubviewToFront(emptyStateImageView)
+        view.bringSubviewToFront(emptyStateView)
     }
     
     private func setupNavigationBar() {
@@ -133,14 +117,12 @@ final class TrackersViewController: UIViewController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            emptyStateImageView.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.emptyStateImageTopInset),
-            emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.emptyStateViewTopInset),
+            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.emptyStateViewHorizontalInset),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.emptyStateViewHorizontalInset),
             
-            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: Layout.emptyStateLabelTopSpacing),
-            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.emptyStateLabelHorizontalInset),
-            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.emptyStateLabelHorizontalInset),
-            
-            collectionView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 24),
+            collectionView.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.collectionViewTopInset),
             collectionView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -223,9 +205,11 @@ final class TrackersViewController: UIViewController {
     }
     
     private func checkEmptyState() {
-        let isEmpty = visibleCategories.isEmpty
-        emptyStateImageView.isHidden = !isEmpty
-        emptyStateLabel.isHidden = !isEmpty
+        if visibleCategories.isEmpty {
+            emptyStateView.show()
+        } else {
+            emptyStateView.hide()
+        }
     }
     
     // MARK: - Actions
