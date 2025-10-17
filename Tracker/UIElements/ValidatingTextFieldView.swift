@@ -47,6 +47,9 @@ final class ValidatingTextFieldView: UIView {
     var isValid: Bool {
         validateText() != nil
     }
+    
+    // MARK: - Callback
+    var onTextChange: ((String?) -> Void)?
         
     // MARK: - Initializers
     init(placeholder: String) {
@@ -87,6 +90,7 @@ final class ValidatingTextFieldView: UIView {
         let tooLong = textCount > Layout.limitSymbolsNumber
 
         limitLabel.isHidden = !tooLong
+        onTextChange?(textField.text)
     }
 
     // MARK: - Validation

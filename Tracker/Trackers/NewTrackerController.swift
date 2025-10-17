@@ -163,6 +163,14 @@ final class NewTrackerController: ModalController {
         [scrollView, contentView, titleLabel, nameFieldView, buttonsStackView, optionsTableView, collectionsStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
+        
+        setupNameFieldViewBindings()
+    }
+    
+    private func setupNameFieldViewBindings() {
+        nameFieldView.onTextChange = { [weak self] _ in
+            self?.updateCreateButtonState()
+        }
     }
     
     private func setupConstraints() {

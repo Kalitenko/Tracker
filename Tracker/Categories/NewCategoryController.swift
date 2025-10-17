@@ -54,6 +54,13 @@ final class NewCategoryController: ModalController {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+        setupNameFieldViewBindings()
+    }
+    
+    private func setupNameFieldViewBindings() {
+        nameFieldView.onTextChange = { [weak self] _ in
+            self?.updateButtonState()
+        }
     }
     
     private func setupConstraints() {
