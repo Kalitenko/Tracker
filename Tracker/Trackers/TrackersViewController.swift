@@ -148,7 +148,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = DataProvider.shared
-    private let dataObserver: DataObserver = DataProvider.shared.observer
+    private let dataObserver: TrackersObserver = DataProvider.shared.trackersObserver
     
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
@@ -299,7 +299,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
 }
 
-extension TrackersViewController: DataObserverDelegate {
+extension TrackersViewController: TrackersObserverDelegate {
     func didUpdateTrackers(_ changes: [DataChange]) {
         self.updateVisibleCategories()
         
@@ -346,9 +346,6 @@ extension TrackersViewController: DataObserverDelegate {
         }
     }
     
-    func didUpdateCategories() {
-        
-    }
     func didUpdateRecords(record: TrackerRecord, changeType: DataChangeType) {
         switch changeType {
         case .insert:

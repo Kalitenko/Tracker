@@ -52,12 +52,9 @@ final class CategoryListViewController: ModalController {
         super.viewDidLoad()
         setupTitleLabel()
         setupSubViews()
-        //        options = shortOptions
         setupConstraints()
-        options = longOptions
-        //                options = shortOptions
-        checkEmptyState()
-        
+        bindViewModel()
+        viewModel.loadCategories()
     }
     
     override func viewDidLayoutSubviews() {
@@ -111,54 +108,42 @@ final class CategoryListViewController: ModalController {
     }
     
     // MARK: - Public Properties
-    var onCategorySelected: ((String) -> Void)?
-    var selectedCategory: String?
+    var onCategorySelected: ((TrackerCategory) -> Void)?
+    var selectedCategory: TrackerCategory?
     
     // MARK: - Private Properties
-    private var options: [String] = []
+    private var options: [TrackerCategory] = []
     private let tableStyle: TableStyle = .checkmark
     private var tableHeightConstraint: NSLayoutConstraint?
     private var selectedIndexPath: IndexPath?
+    private let viewModel = CategoryListViewModel()
     
-    private let shortOptions: [String] = [
-        "Здоровье",
-        "Учёба",
-        "Хобби"
-    ]
-    
-    private let longOptions: [String] = [
-        "Спорт",
-        "Чтение",
-        "Саморазвитие",
-        "Работа",
-        "Отдых",
-        "Путешествия",
-        "Финансы",
-        "Здоровое питание",
-        "Медитация",
-        "Музыка",
-        "Языки",
-        "Домашние дела",
-        "Социальные связи",
-        "Сон",
-        "Планирование",
-        "Творчество",
-        "Образование",
-        "Продуктивность",
-        "Психология",
-        "Развлечения"
-    ]
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
-        Logger.debug("Категория выбрана")
-        dismiss(animated: true) { [weak self] in
-            guard let self, let category = selectedCategory else { return }
-            self.onCategorySelected?(category)
+            guard let category = selectedCategory else { return }
+            dismiss(animated: true) { [weak self] in
+                self?.onCategorySelected?(category)
+            }
         }
-    }
     
     // MARK: - Private Methods
+    private func bindViewModel() {
+            viewModel.onCategoriesChanged = { [weak self] categories in
+                self?.options = categories
+                self?.optionsTableView.reloadData()
+                self?.updateTableHeight()
+            }
+            
+            viewModel.onEmptyStateChanged = { [weak self] isEmpty in
+                isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+            }
+            
+            viewModel.onSelectionChanged = { [weak self] category in
+                self?.selectedCategory = category
+            }
+        }
+    
     private func updateTableHeight() {
         optionsTableView.layoutIfNeeded()
         
@@ -171,16 +156,6 @@ final class CategoryListViewController: ModalController {
         
         tableHeightConstraint.constant = min(contentHeight, availableHeight)
         optionsTableView.isScrollEnabled = contentHeight > availableHeight
-        
-        Logger.debug("contentHeight: \(contentHeight), availableHeight: \(availableHeight)")
-    }
-    
-    private func checkEmptyState() {
-        if options.isEmpty {
-            emptyStateView.show()
-        } else {
-            emptyStateView.hide()
-        }
     }
 }
 
@@ -196,7 +171,7 @@ extension CategoryListViewController: UITableViewDataSource {
         let isLastElement = indexPath.row == options.count - 1
         
         if let checkmarkCell = cell as? CheckmarkCell {
-            let categoryName = options[indexPath.row]
+            let categoryName = options[indexPath.row].title
             checkmarkCell.configure(title: categoryName, isLastElement: isLastElement)
             let isSelected = indexPath == selectedIndexPath
             checkmarkCell.setChecked(isSelected)
@@ -212,17 +187,10 @@ extension CategoryListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let previous = selectedIndexPath,
-           let previousCell = tableView.cellForRow(at: previous) as? CheckmarkCell {
-            previousCell.setChecked(false)
-        }
-        if let currentCell = tableView.cellForRow(at: indexPath) as? CheckmarkCell {
-            currentCell.setChecked(true)
-        }
-        
         selectedIndexPath = indexPath
         selectedCategory = options[indexPath.row]
         
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }

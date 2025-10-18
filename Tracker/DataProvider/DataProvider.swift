@@ -14,7 +14,8 @@ final class DataProvider {
     static let shared = DataProvider()
     
     // MARK: - Public Properties
-    var observer: DataObserver
+    var trackersObserver: TrackersObserver
+    var categoriesObserver: CategoriesObserver
     
     // MARK: - Private Properties
     private let categoryStore: TrackerCategoryStore
@@ -28,10 +29,13 @@ final class DataProvider {
         trackerStore = TrackerStore(context: context)
         recordStore = TrackerRecordStore(context: context)
         
-        observer = DataObserver(
-            categoryStore: categoryStore,
+        trackersObserver = TrackersObserver(
             trackerStore: trackerStore,
             recordStore: recordStore
+        )
+        
+        categoriesObserver = CategoriesObserver(
+            categoryStore: categoryStore
         )
     }
     
@@ -70,8 +74,7 @@ extension DataProvider: DataProviderProtocol {
     
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {
         Logger.debug("Создание трекера: \(tracker)")
-        let newTracker = addTracker(tracker, to: categoryTitle)
-        Logger.debug("Создан трекер: \(newTracker)")
+        addTracker(tracker, to: categoryTitle)
     }
     
     func addRecord(_ record: TrackerRecord) {
@@ -89,5 +92,4 @@ extension DataProvider: DataProviderProtocol {
             Logger.error("Ошибка удаления записи: \(error)")
         }
     }
-    
 }
