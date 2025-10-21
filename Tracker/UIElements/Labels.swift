@@ -71,7 +71,7 @@ final class Label: UILabel {
         textAlignment = style.alignment
     }
     
-    init(text: String,
+    init(text: String = "",
          style: LabelStyle,
          color: UIColor? = nil,
          alignment: NSTextAlignment? = nil) {

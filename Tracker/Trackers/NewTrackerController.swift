@@ -43,6 +43,10 @@ final class NewTrackerController: ModalController {
         static let sideInset: CGFloat = 16
         static let buttonsStackSideInset: CGFloat = 20
         static let buttonsStackSpacing: CGFloat = 8
+        
+        // ValidatingTextFieldView
+        static let limitSymbolsNumber = 38
+        static let limitLabelText = "Ограничение \(limitSymbolsNumber) символов"
     }
     
     // MARK: - UI Elements
@@ -168,8 +172,10 @@ final class NewTrackerController: ModalController {
     }
     
     private func setupNameFieldViewBindings() {
-        nameFieldView.onTextChange = { [weak self] _ in
-            self?.updateCreateButtonState()
+        nameFieldView.onTextChange = { [weak self] text in
+            guard let self = self else { return }
+            self.trackerName = text?.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.validateText()
         }
     }
     
@@ -228,6 +234,10 @@ final class NewTrackerController: ModalController {
     private var selectedDays: [WeekDay] = [] {
         didSet { updateCreateButtonState() }
     }
+    private var isNameValid: Bool = false {
+        didSet { updateCreateButtonState() }
+    }
+    private var trackerName: String?
     private let dataProvider: DataProviderProtocol = DataProvider.shared
     
     // MARK: - Initializers
@@ -247,7 +257,7 @@ final class NewTrackerController: ModalController {
     }
     
     @objc private func didTapCreateButton(_ sender: Any) {
-        guard let name = nameFieldView.validatedText(),
+        guard let name = trackerName,
               let title = selectedCategory?.title else { return }
         
         if trackerType == .habit && selectedDays.isEmpty { return }
@@ -275,7 +285,7 @@ final class NewTrackerController: ModalController {
     }
     
     private func updateCreateButtonState() {
-        let isValid = nameFieldView.validatedText() != nil &&
+        let isValid = isNameValid &&
         selectedCategory != nil &&
         selectedEmoji != nil &&
         selectedColor != nil &&
@@ -284,6 +294,21 @@ final class NewTrackerController: ModalController {
         createButton.isEnabled = isValid
     }
     
+    private func validateText() {
+        guard let trimmed = trackerName?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
+            nameFieldView.hideError()
+            isNameValid = false
+            return
+        }
+        
+        if trimmed.count > Layout.limitSymbolsNumber {
+            nameFieldView.showError(message: Layout.limitLabelText)
+            isNameValid = false
+        } else {
+            nameFieldView.hideError()
+            isNameValid = true
+        }
+    }
 }
 
 // MARK: - UITableViewDataSource

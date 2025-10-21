@@ -80,6 +80,15 @@ final class NewCategoryController: ModalController {
         viewModel.onValidationChanged = { [weak self] isEnabled in
             self?.button.isEnabled = isEnabled
         }
+        
+        viewModel.onValidationError = { [weak self] error in
+            guard let self else { return }
+            if let error = error {
+                self.nameFieldView.showError(message: error)
+            } else {
+                self.nameFieldView.hideError()
+            }
+        }
     }
     
     // MARK: - Public Properties
@@ -98,12 +107,6 @@ final class NewCategoryController: ModalController {
         guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else { return nil }
         return text
-    }
-    
-    private func updateButtonState() {
-        let isValid = nameFieldView.validatedText() != nil
-        
-        button.isEnabled = isValid
     }
     
 }

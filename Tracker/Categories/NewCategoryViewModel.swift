@@ -1,11 +1,19 @@
 final class NewCategoryViewModel {
     
+    // MARK: - Constants
+    private enum Constants {
+        static let limitSymbolsNumber = 38
+        static let limitText = "Ограничение \(limitSymbolsNumber) символов"
+        static let alreadyExistsText = "Категория с таким названием уже существует"
+    }
+    
     // MARK: - Public Properties
     var onValidationChanged: ((Bool) -> Void)?
+    var onValidationError: ((String?) -> Void)?
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = .shared
-
+    
     private var title: String = "" {
         didSet {
             trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -20,17 +28,26 @@ final class NewCategoryViewModel {
     }
     
     func didTapCreateButton() {
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmedTitle.isEmpty else { return }
         createNewCategory()
     }
     
     // MARK: - Private Methods
     private func validateTitle() {
-        let notEmpty = !trimmedTitle.isEmpty
-        let doesNotExist = !isExistCategory()
-        let isValid = notEmpty && doesNotExist
-        onValidationChanged?(isValid)
+        if trimmedTitle.count > Constants.limitSymbolsNumber {
+            onValidationError?(Constants.limitText)
+            onValidationChanged?(false)
+            return
+        }
+        
+        if isExistCategory() {
+            onValidationError?(Constants.alreadyExistsText)
+            onValidationChanged?(false)
+            return
+        }
+        
+        onValidationError?(nil)
+        onValidationChanged?(!trimmedTitle.isEmpty)
     }
     
     private func isExistCategory() -> Bool {

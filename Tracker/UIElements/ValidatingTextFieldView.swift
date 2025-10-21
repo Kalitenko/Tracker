@@ -4,8 +4,6 @@ final class ValidatingTextFieldView: UIView {
     
     // MARK: - Constants
     private enum Layout {
-        static let limitSymbolsNumber = 38
-        static let limitLabelText = "Ограничение \(limitSymbolsNumber) символов"
         static let textFieldHeight: CGFloat = 75
         static let sideInset: CGFloat = 16
         static let cornerRadius: CGFloat = 16
@@ -27,9 +25,8 @@ final class ValidatingTextFieldView: UIView {
         return textField
     }()
     
-    private lazy var limitLabel: UILabel = {
+    private lazy var errorLabel: UILabel = {
         let label = Label(
-            text: Layout.limitLabelText,
             style: .standard,
             color: UIColor(resource: .red),
             alignment: .center
@@ -42,10 +39,6 @@ final class ValidatingTextFieldView: UIView {
     // MARK: - Public Properties
     var text: String? {
         textField.text
-    }
-    
-    var isValid: Bool {
-        validateText() != nil
     }
     
     // MARK: - Callback
@@ -65,7 +58,7 @@ final class ValidatingTextFieldView: UIView {
     
     // MARK: - Setup Methods
     private func setupSubViews() {
-        [textField, limitLabel].forEach {
+        [textField, errorLabel].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -78,32 +71,24 @@ final class ValidatingTextFieldView: UIView {
             textField.trailingAnchor.constraint(equalTo: trailingAnchor),
             textField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
             
-            limitLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: Layout.labelTopInset),
-            limitLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            limitLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
+            errorLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: Layout.labelTopInset),
+            errorLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            errorLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
     
     // MARK: - Actions
     @objc private func textDidChange(_ textField: UITextField) {
-        let textCount = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).count ?? 0
-        let tooLong = textCount > Layout.limitSymbolsNumber
-
-        limitLabel.isHidden = !tooLong
         onTextChange?(textField.text)
     }
 
-    // MARK: - Validation
-    private func validateText() -> String? {
-        guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !text.isEmpty,
-              text.count <= Layout.limitSymbolsNumber else {
-            return nil
-        }
-        return text
+    // MARK: - Public Methods
+    func showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isHidden = false
     }
-
-    func validatedText() -> String? {
-        return validateText()
+    
+    func hideError() {
+        errorLabel.isHidden = true
     }
 }

@@ -41,6 +41,7 @@ final class DataBaseStore {
     private func preloadInitialData() {
         let context = persistentContainer.viewContext
         let initializer = DataInitializer(context: context)
-        initializer.preloadDataIfNeeded()
+        // MARK: - Отключены для проверки пустого экрана списка категорий
+//        initializer.preloadDataIfNeeded()
     }
 }
