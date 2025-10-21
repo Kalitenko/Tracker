@@ -143,11 +143,11 @@ final class CategoryListViewController: ModalController {
         }
         
         viewModel.onCategoriesChangedWithChanges = { [weak self] data in
-                guard let self = self else { return }
-                let (categories, changes) = data
-                self.options = categories
-                self.applyTableChanges(changes)
-            }
+            guard let self = self else { return }
+            let (categories, changes) = data
+            self.options = categories
+            self.applyTableChanges(changes)
+        }
     }
     
     private func applyTableChanges(_ changes: [DataChange]) {
@@ -200,6 +200,9 @@ extension CategoryListViewController: UITableViewDataSource {
         if let checkmarkCell = cell as? CheckmarkCell {
             let categoryName = options[indexPath.row].title
             checkmarkCell.configure(title: categoryName, isLastElement: isLastElement)
+            if categoryName == selectedCategory?.title {
+                selectedIndexPath = indexPath
+            }
             let isSelected = indexPath == selectedIndexPath
             checkmarkCell.setChecked(isSelected)
         }
@@ -219,6 +222,10 @@ extension CategoryListViewController: UITableViewDelegate {
         
         tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        guard let category = selectedCategory else { return }
+        onCategorySelected?(category)
+        dismiss(animated: true)
     }
 }
 

@@ -15,7 +15,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             rootController = OnboardingPageViewController()
         }
         window?.rootViewController = rootController
-        window?.rootViewController = CategoryListViewController()
         window?.makeKeyAndVisible()
     }
 }

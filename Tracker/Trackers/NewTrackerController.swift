@@ -216,8 +216,7 @@ final class NewTrackerController: ModalController {
     // MARK: - Private Properties
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
-    private var defaultCategory = "Важное"
-    private var selectedCategory: String? {
+    private var selectedCategory: TrackerCategory? {
         didSet { updateCreateButtonState() }
     }
     private var selectedEmoji: String? {
@@ -249,12 +248,12 @@ final class NewTrackerController: ModalController {
     
     @objc private func didTapCreateButton(_ sender: Any) {
         guard let name = nameFieldView.validatedText(),
-              let category = selectedCategory else { return }
+              let title = selectedCategory?.title else { return }
         
         if trackerType == .habit && selectedDays.isEmpty { return }
         
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
-        createNewTracker(name: name, category: category, schedule: schedule)
+        createNewTracker(name: name, title: title, schedule: schedule)
         dismiss(animated: true)
     }
     
@@ -265,14 +264,14 @@ final class NewTrackerController: ModalController {
         return text
     }
     
-    private func createNewTracker(name: String, category: String, schedule: [WeekDay]) {
+    private func createNewTracker(name: String, title: String, schedule: [WeekDay]) {
         guard let emoji = selectedEmoji, let color = selectedColor else {
             Logger.error("Emoji или цвет не выбраны")
             return
         }
         let tracker = Tracker(name: name, color: color, emoji: emoji, schedule: schedule)
-        dataProvider.createTracker(tracker, to: category)
-        delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
+        dataProvider.createTracker(tracker, to: title)
+        delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: title)
     }
     
     private func updateCreateButtonState() {
@@ -284,7 +283,7 @@ final class NewTrackerController: ModalController {
         
         createButton.isEnabled = isValid
     }
-
+    
 }
 
 // MARK: - UITableViewDataSource
@@ -320,10 +319,15 @@ extension NewTrackerController: UITableViewDelegate {
         let option = trackerType.options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
         if option == "Категория" {
-            selectedCategory = defaultCategory
-            if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                cell.configure(title: option, subtitle: selectedCategory, isLastElement: isLastElement)
+            let vc = CategoryListViewController()
+            vc.selectedCategory = selectedCategory
+            vc.onCategorySelected = { [weak self] category in
+                self?.selectedCategory = category
+                if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
+                    cell.configure(title: option, subtitle: category.title, isLastElement: isLastElement)
+                }
             }
+            present(vc, animated: true)
         } else if option == "Расписание" {
             let vc = ScheduleController()
             vc.selectedDays = selectedDays
