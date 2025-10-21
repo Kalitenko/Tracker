@@ -93,7 +93,7 @@ final class TrackersViewController: UIViewController {
         dataObserver.delegate = self
         loadData()
         
-        checkEmptyState()
+        updateEmptyState()
     }
     
     // MARK: - Setup Methods
@@ -201,10 +201,10 @@ final class TrackersViewController: UIViewController {
         }
         
         collectionView.reloadData()
-        checkEmptyState()
+        updateEmptyState()
     }
     
-    private func checkEmptyState() {
+    private func updateEmptyState() {
         if visibleCategories.isEmpty {
             emptyStateView.show()
         } else {
@@ -319,6 +319,7 @@ extension TrackersViewController: TrackersObserverDelegate {
                 case .deleteSection(let section):
                     collectionView.deleteSections(IndexSet(integer: section))
                 }
+                updateEmptyState()
             }
         } completion: { finished in
             guard finished else {

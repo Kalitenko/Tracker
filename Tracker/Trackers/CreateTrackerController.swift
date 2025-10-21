@@ -77,15 +77,10 @@ final class CreateTrackerController: ModalController {
     
     
     // MARK: - Public Properties
-    var onDaysSelected: (([WeekDay]) -> Void)?
-    var selectedDays: [WeekDay] = []
     weak var delegate: NewTrackerDelegate?
     
     // MARK: - Private Properties
-    private let options: [WeekDay] = WeekDay.allCases
     private let tableStyle: TableStyle = .toggle
-    
-    // MARK: - Private Methods
     
     // MARK: - Actions
     @objc private func didTapHabitButton(_ sender: Any) {
