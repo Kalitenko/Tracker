@@ -121,28 +121,55 @@ final class CategoryListViewController: ModalController {
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
-            guard let category = selectedCategory else { return }
-            dismiss(animated: true) { [weak self] in
-                self?.onCategorySelected?(category)
-            }
-        }
+        let vc = NewCategoryController()
+        
+        present(vc, animated: true)
+    }
     
     // MARK: - Private Methods
     private func bindViewModel() {
-            viewModel.onCategoriesChanged = { [weak self] categories in
-                self?.options = categories
-                self?.optionsTableView.reloadData()
-                self?.updateTableHeight()
-            }
-            
-            viewModel.onEmptyStateChanged = { [weak self] isEmpty in
-                isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
-            }
-            
-            viewModel.onSelectionChanged = { [weak self] category in
-                self?.selectedCategory = category
-            }
+        viewModel.onCategoriesChanged = { [weak self] categories in
+            self?.options = categories
+            self?.optionsTableView.reloadData()
+            self?.updateTableHeight()
         }
+        
+        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
+            isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+        }
+        
+        viewModel.onSelectionChanged = { [weak self] category in
+            self?.selectedCategory = category
+        }
+        
+        viewModel.onCategoriesChangedWithChanges = { [weak self] data in
+                guard let self = self else { return }
+                let (categories, changes) = data
+                self.options = categories
+                self.applyTableChanges(changes)
+            }
+    }
+    
+    private func applyTableChanges(_ changes: [DataChange]) {
+        optionsTableView.performBatchUpdates({
+            for change in changes {
+                switch change {
+                case .insert(let indexPath):
+                    optionsTableView.insertRows(at: [indexPath], with: .automatic)
+                case .delete(let indexPath):
+                    optionsTableView.deleteRows(at: [indexPath], with: .automatic)
+                case .update(let indexPath):
+                    optionsTableView.reloadRows(at: [indexPath], with: .automatic)
+                case .move(let from, let to):
+                    optionsTableView.moveRow(at: from, to: to)
+                default:
+                    break
+                }
+            }
+        }, completion: { [weak self] _ in
+            self?.updateTableHeight()
+        })
+    }
     
     private func updateTableHeight() {
         optionsTableView.layoutIfNeeded()

@@ -60,6 +60,24 @@ final class DataProvider {
         trackerStore.fetchTrackersGroupedByCategory(for: date)
     }
     
+    func isExistCategory(withTitle title: String) -> Bool {
+        do {
+            return try categoryStore.isExist(byTitle: title)
+        } catch {
+            Logger.error("Ошибка проверки категории: \(error)")
+        }
+        return false
+    }
+    
+    func createCategory(withTitle title: String) {
+        do {
+            try categoryStore.add(TrackerCategory(title: title, trackers: []))
+            Logger.debug("Создание категории \(title)")
+        } catch {
+            Logger.error("Ошибка создания категории: \(error)")
+        }
+    }
+    
 }
 
 // MARK: - DataProviderProtocol

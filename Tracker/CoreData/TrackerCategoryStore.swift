@@ -71,6 +71,16 @@ final class TrackerCategoryStore: NSObject {
         return coreDataCategory
     }
     
+    func isExist(byTitle title: String) throws -> Bool {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "%K ==[c] %@", #keyPath(TrackerCategoryCoreData.title), title)
+        fetchRequest.fetchLimit = 1
+        fetchRequest.includesSubentities = false
+
+        let count = try context.count(for: fetchRequest)
+        return count > 0
+    }
+    
     // MARK: - Private Methods
     private func performFetch() {
         do {

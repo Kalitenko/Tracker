@@ -4,6 +4,7 @@ final class CategoryListViewModel {
     var onCategoriesChanged: Binding<[TrackerCategory]>?
     var onEmptyStateChanged: Binding<Bool>?
     var onSelectionChanged: Binding<TrackerCategory?>?
+    var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     
     // MARK: - Private Properties
     private(set) var categories: [TrackerCategory] = []
@@ -13,7 +14,7 @@ final class CategoryListViewModel {
     
     // MARK: - Initializers
     init() {
-        
+        dataObserver.delegate = self
     }
     
     // MARK: - Public Methods
@@ -33,5 +34,12 @@ final class CategoryListViewModel {
         onCategoriesChanged?(categories)
         onEmptyStateChanged?(categories.isEmpty)
     }
-    
+}
+
+extension CategoryListViewModel: CategoriesObserverDelegate {
+    func didUpdateCategories(_ changes: [DataChange]) {
+        categories = dataProvider.categories
+        onCategoriesChangedWithChanges?((categories, changes))
+        onEmptyStateChanged?(categories.isEmpty)
+    }
 }

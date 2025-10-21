@@ -42,6 +42,7 @@ final class NewCategoryController: ModalController {
         setupTitleLabel()
         setupSubViews()
         setupConstraints()
+        bindViewModel()
     }
     
     // MARK: - Setup Methods
@@ -58,8 +59,8 @@ final class NewCategoryController: ModalController {
     }
     
     private func setupNameFieldViewBindings() {
-        nameFieldView.onTextChange = { [weak self] _ in
-            self?.updateButtonState()
+        nameFieldView.onTextChange = { [weak self] text in
+            self?.viewModel.didChangeName(text ?? "")
         }
     }
     
@@ -75,14 +76,21 @@ final class NewCategoryController: ModalController {
         ])
     }
     
+    private func bindViewModel() {
+        viewModel.onValidationChanged = { [weak self] isEnabled in
+            self?.button.isEnabled = isEnabled
+        }
+    }
+    
     // MARK: - Public Properties
     
-    
     // MARK: - Private Properties
+    private let viewModel = NewCategoryViewModel()
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
-        
+        viewModel.didTapCreateButton()
+        dismiss(animated: true)
     }
     
     // MARK: - Private Methods
@@ -90,10 +98,6 @@ final class NewCategoryController: ModalController {
         guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else { return nil }
         return text
-    }
-    
-    private func createNewCategory(name: String) {
-        
     }
     
     private func updateButtonState() {
