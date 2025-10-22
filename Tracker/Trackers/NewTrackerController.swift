@@ -1,9 +1,5 @@
 import UIKit
 
-protocol NewTrackerDelegate: AnyObject {
-    func didCreateNewTracker(tracker: Tracker, categoryTitle: String)
-}
-
 enum TrackerType {
     case habit
     case irregular
@@ -217,7 +213,6 @@ final class NewTrackerController: ModalController {
     }
     
     // MARK: - Public Properties
-    weak var delegate: NewTrackerDelegate?
     
     // MARK: - Private Properties
     private let trackerType: TrackerType
@@ -264,7 +259,11 @@ final class NewTrackerController: ModalController {
         
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         createNewTracker(name: name, title: title, schedule: schedule)
-        dismiss(animated: true)
+        var root = presentingViewController
+        while let parent = root?.presentingViewController {
+            root = parent
+        }
+        root?.dismiss(animated: true)
     }
     
     // MARK: - Private Methods
@@ -281,7 +280,6 @@ final class NewTrackerController: ModalController {
         }
         let tracker = Tracker(name: name, color: color, emoji: emoji, schedule: schedule)
         dataProvider.createTracker(tracker, to: title)
-        delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: title)
     }
     
     private func updateCreateButtonState() {

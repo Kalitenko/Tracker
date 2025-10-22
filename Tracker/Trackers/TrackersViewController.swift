@@ -215,7 +215,6 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func didTapAddTrackerButton() {
         let vc = CreateTrackerController()
-        vc.delegate = self
         
         present(vc, animated: true)
     }
@@ -376,13 +375,6 @@ extension TrackersViewController: TrackersObserverDelegate {
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         filterCategories()
-    }
-}
-
-// MARK: - NewTrackerDelegate
-extension TrackersViewController: NewTrackerDelegate {
-    func didCreateNewTracker(tracker: Tracker, categoryTitle: String) {
-        dismiss(animated: true, completion: nil)
     }
 }
 

@@ -77,7 +77,6 @@ final class CreateTrackerController: ModalController {
     
     
     // MARK: - Public Properties
-    weak var delegate: NewTrackerDelegate?
     
     // MARK: - Private Properties
     private let tableStyle: TableStyle = .toggle
@@ -85,13 +84,11 @@ final class CreateTrackerController: ModalController {
     // MARK: - Actions
     @objc private func didTapHabitButton(_ sender: Any) {
         let vc = NewTrackerController(trackerType: .habit)
-        vc.delegate = self.delegate
         present(vc, animated: true)
     }
     
     @objc private func didTapIrregularEventButton(_ sender: Any) {
         let vc = NewTrackerController(trackerType: .irregular)
-        vc.delegate = self.delegate
         present(vc, animated: true)
     }
     
