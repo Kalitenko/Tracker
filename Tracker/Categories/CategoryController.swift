@@ -1,10 +1,9 @@
 import UIKit
 
-final class NewCategoryController: ModalController {
+final class CategoryController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Новая категория"
         static let buttonText = "Готово"
         static let textFieldPlaceholderText = "Введите название категории"
         
@@ -47,7 +46,7 @@ final class NewCategoryController: ModalController {
     
     // MARK: - Setup Methods
     private func setupTitleLabel() {
-        self.titleLabel.text = Layout.titleText
+        self.titleLabel.text = mode.title
     }
     
     private func setupSubViews() {
@@ -89,16 +88,37 @@ final class NewCategoryController: ModalController {
                 self.nameFieldView.hideError()
             }
         }
+        
     }
     
     // MARK: - Public Properties
     
     // MARK: - Private Properties
-    private let viewModel = NewCategoryViewModel()
+    private let mode: Mode
+    private let viewModel: CategoryViewModel
+    
+    // MARK: - Initializers
+    init(mode: Mode) {
+        self.mode = mode
+        self.viewModel = .init(mode: mode)
+        super.init(nibName: nil, bundle: nil)
+        switch mode {
+        case .edit(let category):
+            title = category.title
+            nameFieldView.setText(category.title)
+        default:
+            break
+        }
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
-        viewModel.didTapCreateButton()
+        viewModel.didTapButton()
         dismiss(animated: true)
     }
     
@@ -112,6 +132,9 @@ final class NewCategoryController: ModalController {
 }
 // MARK: - Preview
 #Preview("NewCategoryController") {
-    NewCategoryController()
+    CategoryController(mode: .create)
+}
+#Preview("NewCategoryController") {
+    CategoryController(mode: .edit(TrackerCategory(title: "Test", trackers: [])))
 }
 

@@ -7,6 +7,9 @@ final class CategoryListViewController: ModalController {
         static let titleText = "Категория"
         static let buttonText = "Добавить категорию"
         static let emptyStateLabelText = "Привычки и события можно\nобъединить по смыслу"
+        static let editButtonText = "Редактировать"
+        static let deleteButtonText = "Удалить"
+        static let alertQuestion = "Эта категория точно не нужна?"
         
         static let cellHeight: CGFloat = 75
         static let titleTopInset: CGFloat = 27
@@ -121,7 +124,7 @@ final class CategoryListViewController: ModalController {
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
-        let vc = NewCategoryController()
+        let vc = CategoryController(mode: .create)
         
         present(vc, animated: true)
     }
@@ -158,6 +161,9 @@ final class CategoryListViewController: ModalController {
                     optionsTableView.insertRows(at: [indexPath], with: .automatic)
                 case .delete(let indexPath):
                     optionsTableView.deleteRows(at: [indexPath], with: .automatic)
+                    if indexPath == selectedIndexPath {
+                        self.selectedIndexPath = nil
+                    }
                 case .update(let indexPath):
                     optionsTableView.reloadRows(at: [indexPath], with: .automatic)
                 case .move(let from, let to):
@@ -168,6 +174,8 @@ final class CategoryListViewController: ModalController {
             }
         }, completion: { [weak self] _ in
             self?.updateTableHeight()
+            self?.updateSelectionState()
+            self?.updateLastItem()
         })
     }
     
@@ -184,6 +192,24 @@ final class CategoryListViewController: ModalController {
         tableHeightConstraint.constant = min(contentHeight, availableHeight)
         optionsTableView.isScrollEnabled = contentHeight > availableHeight
     }
+    
+    private func updateSelectionState() {
+        guard let selectedIndexPath = selectedIndexPath else { return }
+        
+        for visibleCell in optionsTableView.visibleCells {
+            guard let indexPath = optionsTableView.indexPath(for: visibleCell),
+                  let checkmarkCell = visibleCell as? CheckmarkCell else { continue }
+            let isSelected = indexPath == selectedIndexPath
+            checkmarkCell.setChecked(isSelected)
+        }
+    }
+    
+    private func updateLastItem() {
+        if let lastVisible = optionsTableView.indexPathsForVisibleRows?.last {
+            optionsTableView.reloadRows(at: [lastVisible], with: .none)
+        }
+    }
+    
 }
 
 // MARK: - UITableViewDataSource
@@ -217,17 +243,57 @@ extension CategoryListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let previousIndexPath = selectedIndexPath,
+           let previousCell = tableView.cellForRow(at: previousIndexPath) as? CheckmarkCell {
+            previousCell.setChecked(false)
+        }
+        
+        if let currentCell = tableView.cellForRow(at: indexPath) as? CheckmarkCell {
+            currentCell.setChecked(true)
+        }
+        
         selectedIndexPath = indexPath
         selectedCategory = options[indexPath.row]
         
-        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
         
-        guard let category = selectedCategory else { return }
-        onCategorySelected?(category)
+        if let category = selectedCategory {
+            onCategorySelected?(category)
+        }
         dismiss(animated: true)
     }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let category = options[indexPath.row]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
+                self?.editCategory(category)
+            }
+            
+            let deleteAction = UIAction(title: Layout.deleteButtonText, attributes: .destructive) { [weak self] _ in
+                self?.showDeleteAlert(for: category)
+            }
+            
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
+    }
+    
+    private func editCategory(_ category: TrackerCategory) {
+        let vc = CategoryController(mode: .edit(category))
+        present(vc, animated: true)
+    }
+    
+    private func showDeleteAlert(for category: TrackerCategory) {
+        AlertHelper.showDeleteConfirmation(
+            from: self,
+            message: Layout.alertQuestion
+        ) { [weak self] in
+            self?.viewModel.deleteCategory(category)
+        }
+    }
 }
+
 
 // MARK: - Preview
 #Preview("CategoryController") {

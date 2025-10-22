@@ -91,4 +91,8 @@ final class ValidatingTextFieldView: UIView {
     func hideError() {
         errorLabel.isHidden = true
     }
+    
+    func setText(_ text: String) {
+        textField.text = text
+    }
 }

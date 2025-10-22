@@ -29,6 +29,10 @@ final class CategoryListViewModel {
         onSelectionChanged?(selectedCategory)
     }
     
+    func deleteCategory(_ category: TrackerCategory) {
+        dataProvider.deleteCategory(category)
+    }
+    
     // MARK: - Private Methods
     private func notifyState() {
         onCategoriesChanged?(categories)

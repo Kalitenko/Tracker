@@ -78,6 +78,24 @@ final class DataProvider {
         }
     }
     
+    func updateCategory(category: TrackerCategory, withNewTitle title: String) {
+        do {
+            try categoryStore.update(category: category, withNewTitle: title)
+            Logger.debug("Обновление названия категории с \(category.title) на \(title)")
+        } catch {
+            Logger.error("Ошибка обновления названия категории: \(error)")
+        }
+    }
+    
+    func deleteCategory(_ category: TrackerCategory) {
+        do {
+            try categoryStore.delete(category: category)
+            Logger.debug("Удаление категории \(category.title)")
+        } catch {
+            Logger.error("Ошибка удаления категории: \(error)")
+        }
+    }
+    
 }
 
 // MARK: - DataProviderProtocol

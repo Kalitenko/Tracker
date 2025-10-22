@@ -1,4 +1,4 @@
-final class NewCategoryViewModel {
+final class CategoryViewModel {
     
     // MARK: - Constants
     private enum Constants {
@@ -13,6 +13,8 @@ final class NewCategoryViewModel {
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = .shared
+    private let mode: Mode
+    private let currentCategory: TrackerCategory?
     
     private var title: String = "" {
         didSet {
@@ -22,14 +24,33 @@ final class NewCategoryViewModel {
     }
     private var trimmedTitle: String = ""
     
+    // MARK: - Initializers
+    init(mode: Mode) {
+        self.mode = mode
+        switch mode {
+        case .create:
+            currentCategory = nil
+        case .edit(let category):
+            currentCategory = category
+            title = category.title
+            trimmedTitle = category.title
+        }
+    }
+    
     // MARK: - Public Methods
     func didChangeName(_ text: String) {
         title = text
     }
     
-    func didTapCreateButton() {
+    func didTapButton() {
         guard !trimmedTitle.isEmpty else { return }
-        createNewCategory()
+        switch mode {
+        case .create:
+            createNewCategory()
+        case .edit(let category):
+            guard trimmedTitle != category.title else { return }
+            updateTitle(for: category, newTitle: trimmedTitle)
+        }
     }
     
     // MARK: - Private Methods
@@ -40,7 +61,7 @@ final class NewCategoryViewModel {
             return
         }
         
-        if isExistCategory() {
+        if isExistCategory() && trimmedTitle != currentCategory?.title {
             onValidationError?(Constants.alreadyExistsText)
             onValidationChanged?(false)
             return
@@ -56,5 +77,9 @@ final class NewCategoryViewModel {
     
     private func createNewCategory() {
         dataProvider.createCategory(withTitle: trimmedTitle)
+    }
+    
+    private func updateTitle(for category: TrackerCategory, newTitle: String) {
+        dataProvider.updateCategory(category: category, withNewTitle: newTitle)
     }
 }

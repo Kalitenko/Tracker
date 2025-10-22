@@ -81,6 +81,31 @@ final class TrackerCategoryStore: NSObject {
         return count > 0
     }
     
+    func update(category: TrackerCategory, withNewTitle title: String) throws {
+        guard let entity = try fetch(byTitle: category.title) else {
+            throw NSError(
+                domain: "TrackerCategoryStore",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Category not found"]
+            )
+        }
+        
+        try updateExisting(entity, withNewTitle: title)
+    }
+    
+    func delete(category: TrackerCategory) throws {
+        guard let entity = try fetch(byTitle: category.title) else {
+            throw NSError(
+                domain: "TrackerCategoryStore",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Category not found"]
+            )
+        }
+        
+        context.delete(entity)
+        try context.save()
+    }
+    
     // MARK: - Private Methods
     private func performFetch() {
         do {
@@ -100,6 +125,11 @@ final class TrackerCategoryStore: NSObject {
             })
             trackerCategoryCoreData.trackers = trackersSet
         }
+    }
+    
+    private func updateExisting(_ trackerCategoryCoreData: TrackerCategoryCoreData, withNewTitle title: String) throws {
+        trackerCategoryCoreData.title = title
+        try context.save()
     }
 
 }
