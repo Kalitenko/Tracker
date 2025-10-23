@@ -96,6 +96,10 @@ final class DataProvider {
         }
     }
     
+    func completedTrackers(ids: [Int32]) -> [TrackerRecord] {
+        (try? recordStore.fetchRecords(ids: ids)) ?? []
+    }
+    
 }
 
 // MARK: - DataProviderProtocol

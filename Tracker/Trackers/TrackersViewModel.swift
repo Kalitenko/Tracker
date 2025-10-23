@@ -78,7 +78,8 @@ final class TrackersViewModel {
     }
     
     private func loadCompletedTrackers() {
-        completedTrackers = dataProvider.completedTrackers
+        let ids = categories.flatMap { $0.trackers.map { $0.id }}
+        completedTrackers = dataProvider.completedTrackers(ids: ids)
     }
     
     private func addTrackerRecord(id: Int32, at indexPath: IndexPath) {
