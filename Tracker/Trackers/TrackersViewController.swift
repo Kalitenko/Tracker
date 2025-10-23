@@ -169,6 +169,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
     private let viewModel: TrackersViewModel = .init()
+    private var isFiltering = false
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton() {
@@ -188,6 +189,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func applyCollectionChanges(_ changes: [DataChange]) {
+        if isFiltering { return }
         collectionView.performBatchUpdates {
             for change in changes {
                 switch change {
@@ -310,6 +312,7 @@ extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         let text = searchController.searchBar.text ?? ""
         viewModel.updateSearchQuery(text)
+        isFiltering = !text.isEmpty
     }
 }
 

@@ -8,10 +8,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Constants
     private enum Layout {
-        // Texts
-        static let trackersTitle = "Трекеры"
-        static let statisticsTitle = "Статистика"
-        
         // Sizes
         static let cardHeight: CGFloat = 90
         static let quantityViewHeight: CGFloat = 58
@@ -86,6 +82,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         return button
     }()
+    
+    // MARK: - Lifecycle
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        trackerLabel.text = nil
+        emojiLabel.text = nil
+        counterLabel.text = nil
+        quantityManagementButton.isSelected = false
+        quantityManagementButton.isEnabled = true
+    }
     
     // MARK: - Init
     override init(frame: CGRect) {

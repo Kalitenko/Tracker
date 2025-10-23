@@ -42,7 +42,7 @@ final class ValidatingTextFieldView: UIView {
     }
     
     // MARK: - Callback
-    var onTextChange: ((String?) -> Void)?
+    var onTextChange: Binding<String?>?
         
     // MARK: - Initializers
     init(placeholder: String) {

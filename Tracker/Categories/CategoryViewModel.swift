@@ -8,8 +8,8 @@ final class CategoryViewModel {
     }
     
     // MARK: - Public Properties
-    var onValidationChanged: ((Bool) -> Void)?
-    var onValidationError: ((String?) -> Void)?
+    var onValidationChanged: Binding<Bool>?
+    var onValidationError: Binding<String?>?
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = .shared

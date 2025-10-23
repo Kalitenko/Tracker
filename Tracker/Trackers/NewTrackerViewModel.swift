@@ -9,11 +9,11 @@ final class NewTrackerViewModel {
     }
     
     // MARK: - Public Properties
-    var onValidationChanged: ((Bool) -> Void)?
-    var onValidationError: ((String?) -> Void)?
+    var onValidationChanged: Binding<Bool>?
+    var onValidationError: Binding<String?>?
     var options: [String]
-    var onScheduleChanged: (([WeekDay]) -> Void)?
-    var onCategoryChanged: ((TrackerCategory?) -> Void)?
+    var onScheduleChanged: Binding<[WeekDay]>?
+    var onCategoryChanged: Binding<TrackerCategory?>?
     
     // MARK: - Private Properties
     private let trackerType: TrackerType

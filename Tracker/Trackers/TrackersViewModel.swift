@@ -137,6 +137,7 @@ final class TrackersViewModel {
     
 }
 
+// MARK: - TrackersObserverDelegate
 extension TrackersViewModel: TrackersObserverDelegate {
     func didUpdateTrackers(_ changes: [DataChange]) {
         categories = dataProvider.categories(for: selectedDate)
