@@ -215,7 +215,6 @@ final class CategoryListViewController: ModalController {
 // MARK: - UITableViewDataSource
 extension CategoryListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        Logger.debug("\(options.count)")
         return options.count
     }
     

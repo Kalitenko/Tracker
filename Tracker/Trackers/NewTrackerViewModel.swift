@@ -94,8 +94,6 @@ final class NewTrackerViewModel {
         !(trackerType == .habit && selectedDays.isEmpty)
         
         onValidationChanged?(isValid)
-        Logger.debug("isValid: \(isValid)")
-        Logger.debug("isNameValid: \(isNameValid), selectedCategory: \(selectedCategory != nil), selectedEmoji: \(selectedEmoji != nil), selectedColor: \(selectedColor != nil), selectedDays: \(selectedDays.isEmpty)")
     }
     
     private func createTracker(_ tracker: Tracker, to categoryTitle: String) {

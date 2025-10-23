@@ -109,7 +109,6 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {
-        Logger.debug("Создание трекера: \(tracker)")
         addTracker(tracker, to: categoryTitle)
     }
     

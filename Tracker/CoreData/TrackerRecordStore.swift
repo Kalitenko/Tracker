@@ -51,7 +51,6 @@ final class TrackerRecordStore: NSObject {
     
     func delete(_ record: TrackerRecord) throws {
         let trackerRecordCoreData = try fetch(byTrackerId: record.trackerId, date: record.date)
-        Logger.debug("trackerRecordCoreData: \(trackerRecordCoreData)")
         try deleteEntity(trackerRecordCoreData)
     }
     

@@ -244,7 +244,6 @@ extension TrackersViewController: UICollectionViewDataSource {
         cell.delegate = self
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         let trackerId = tracker.id
-        Logger.debug("id: \(trackerId)")
         let isCompletedToday = isTrackerCompletedToday(id: trackerId)
         Logger.debug("isCompletedToday: \(isCompletedToday)")
         let count = countCompletedTrackers(id: trackerId)
