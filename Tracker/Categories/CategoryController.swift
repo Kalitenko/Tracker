@@ -90,9 +90,7 @@ final class CategoryController: ModalController {
         }
         
     }
-    
-    // MARK: - Public Properties
-    
+        
     // MARK: - Private Properties
     private let mode: Mode
     private let viewModel: CategoryViewModel

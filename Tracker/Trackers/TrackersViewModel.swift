@@ -141,6 +141,7 @@ final class TrackersViewModel {
 extension TrackersViewModel: TrackersObserverDelegate {
     func didUpdateTrackers(_ changes: [DataChange]) {
         categories = dataProvider.categories(for: selectedDate)
+        visibleCategories = categories
         onCategoriesChangedWithChanges?((categories, changes))
         onEmptyStateChanged?(visibleCategories.isEmpty)
     }
