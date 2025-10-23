@@ -149,11 +149,6 @@ final class TrackersViewController: UIViewController {
             self?.collectionView.reloadData()
         }
         
-        viewModel.onCompletedTrackersChanged = { [weak self] completedTrackers in
-            self?.completedTrackers = completedTrackers
-            Logger.debug("completedTrackers: \(completedTrackers)")
-        }
-        
         viewModel.onEmptyStateChanged = { [weak self] isEmpty in
             isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
         }
@@ -173,7 +168,6 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
     private let viewModel: TrackersViewModel = .init()
     
     // MARK: - Actions
@@ -254,12 +248,14 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
         
         cell.delegate = self
-        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
-        let trackerId = tracker.id
-        // TODO: - Что-то придумать с этим!
-        let isCompletedToday = viewModel.isTrackerCompletedToday(id: trackerId)
-        let count = viewModel.countCompletedTrackers(id: trackerId)
-        cell.configure(with: tracker, isCompletedToday: isCompletedToday, indexPath: indexPath, completedDays: count, datePickerDate: datePicker.date)
+        let cellData = viewModel.cellData(for: indexPath)
+        cell.configure(
+            with: cellData.tracker,
+            isCompletedToday: cellData.isCompletedToday,
+            indexPath: indexPath,
+            completedDays: cellData.completedCount,
+            datePickerDate: datePicker.date
+        )
         
         return cell
     }
@@ -320,19 +316,6 @@ extension TrackersViewController: UISearchResultsUpdating {
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
     func didTapQuantityManagementButton(id: Int32, at indexPath: IndexPath) {
-        let isCompletedToday = isTrackerCompletedToday(id: id)
-        if isCompletedToday {
-            viewModel.removeTrackerRecord(id: id, at: indexPath)
-        } else {
-            viewModel.addTrackerRecord(id: id, at: indexPath)
-        }
-    }
-    func isTrackerCompletedToday(id: Int32) -> Bool {
-        completedTrackers.contains { isTrackerCompletedTodayPredicate(record: $0, for: id) }
-    }
-    
-    private func isTrackerCompletedTodayPredicate(record: TrackerRecord, for id: Int32) -> Bool {
-        let isSameDay = Calendar.current.isDate(record.date, inSameDayAs: datePicker.date)
-        return record.trackerId == id && isSameDay
+        viewModel.toggleTrackerRecord(at: indexPath)
     }
 }

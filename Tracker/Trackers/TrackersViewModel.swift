@@ -1,11 +1,16 @@
 import Foundation
 
+struct TrackerCellData {
+    let tracker: Tracker
+    let isCompletedToday: Bool
+    let completedCount: Int
+}
+
 final class TrackersViewModel {
     
     // MARK: - Public Properties
-    var onDateChanged: ((Date) -> Void)?
-    var onVisibleCategoriesChanged: (([TrackerCategory]) -> Void)?
-    var onCompletedTrackersChanged: (([TrackerRecord]) -> Void)?
+    var onDateChanged: Binding<Date>?
+    var onVisibleCategoriesChanged: Binding<[TrackerCategory]>?
     var onEmptyStateChanged: Binding<Bool>?
     var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     var onRecordUpdated: Binding<IndexPath>?
@@ -21,11 +26,7 @@ final class TrackersViewModel {
     
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = [] {
-        didSet {
-            onCompletedTrackersChanged?(completedTrackers)
-        }
-    }
+    private var completedTrackers: [TrackerRecord] = []
     private var currentQuery: String = ""{
         didSet {
             filterCategories()
@@ -49,28 +50,23 @@ final class TrackersViewModel {
         currentQuery = text
     }
     
-    func addTrackerRecord(id: Int32, at indexPath: IndexPath) {
-        let trackerRecord = TrackerRecord(trackerId: id, date: selectedDate)
-        dataProvider.addRecord(trackerRecord)
-        Logger.info("Выполнен трекер \(trackerRecord.trackerId) на \(trackerRecord.date)")
+    func cellData(for indexPath: IndexPath) -> TrackerCellData {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        return TrackerCellData(
+            tracker: tracker,
+            isCompletedToday: isTrackerCompletedToday(id: tracker.id),
+            completedCount: countCompletedTrackers(id: tracker.id)
+        )
     }
     
-    func removeTrackerRecord(id: Int32, at indexPath: IndexPath) {
-        completedTrackers
-            .filter { isTrackerCompletedTodayPredicate(record: $0, for: id) }
-            .forEach { record in
-                Logger.debug("Удаляем отметку о трекере с ID: \(record.trackerId)")
-                dataProvider.deleteRecord(record)
-            }
-        Logger.info("Удалена отметка о выполнении трекера \(id)")
-    }
-    
-    func isTrackerCompletedToday(id: Int32) -> Bool {
-        completedTrackers.contains { isTrackerCompletedTodayPredicate(record: $0, for: id) }
-    }
-    
-    func countCompletedTrackers(id: Int32) -> Int {
-        completedTrackers.filter { $0.trackerId == id }.count
+    func toggleTrackerRecord(at indexPath: IndexPath) {
+        let id = visibleCategories[indexPath.section].trackers[indexPath.item].id
+        let isCompletedToday = isTrackerCompletedToday(id: id)
+        if isCompletedToday {
+            removeTrackerRecord(id: id, at: indexPath)
+        } else {
+            addTrackerRecord(id: id, at: indexPath)
+        }
     }
     
     // MARK: - Private Methods
@@ -85,9 +81,33 @@ final class TrackersViewModel {
         completedTrackers = dataProvider.completedTrackers
     }
     
+    private func addTrackerRecord(id: Int32, at indexPath: IndexPath) {
+        let trackerRecord = TrackerRecord(trackerId: id, date: selectedDate)
+        dataProvider.addRecord(trackerRecord)
+        Logger.info("Выполнен трекер \(trackerRecord.trackerId) на \(trackerRecord.date)")
+    }
+    
+    private func removeTrackerRecord(id: Int32, at indexPath: IndexPath) {
+        completedTrackers
+            .filter { isTrackerCompletedTodayPredicate(record: $0, for: id) }
+            .forEach { record in
+                Logger.debug("Удаляем отметку о трекере с ID: \(record.trackerId)")
+                dataProvider.deleteRecord(record)
+            }
+        Logger.info("Удалена отметка о выполнении трекера \(id)")
+    }
+    
     private func isTrackerCompletedTodayPredicate(record: TrackerRecord, for id: Int32) -> Bool {
         let isSameDay = Calendar.current.isDate(record.date, inSameDayAs: selectedDate)
         return record.trackerId == id && isSameDay
+    }
+    
+    private func isTrackerCompletedToday(id: Int32) -> Bool {
+        completedTrackers.contains { isTrackerCompletedTodayPredicate(record: $0, for: id) }
+    }
+    
+    private func countCompletedTrackers(id: Int32) -> Int {
+        completedTrackers.filter { $0.trackerId == id }.count
     }
     
     private func filterCategories() {
