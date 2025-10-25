@@ -4,15 +4,15 @@ enum TrackerType {
     
     var titleText: String {
         switch self {
-        case .habit: return "Новая привычка"
-        case .irregular: return "Новое нерегулярное событие"
+        case .habit: "Новая привычка"
+        case .irregular: "Новое нерегулярное событие"
         }
     }
     
     var options: [String] {
         switch self {
-        case .habit: return ["Категория", "Расписание"]
-        case .irregular: return ["Категория"]
+        case .habit: ["Категория", "Расписание"]
+        case .irregular: ["Категория"]
         }
     }
 }

@@ -18,7 +18,7 @@ final class OnboardingPageViewController: UIPageViewController {
         return button
     }()
     
-    lazy var pageControl: UIPageControl = {
+    private lazy var pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0

@@ -165,11 +165,21 @@ final class TrackersViewController: UIViewController {
         }
     }
     
-    
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
-    private let viewModel: TrackersViewModel = .init()
+    private let viewModel: TrackersViewModel
     private var isFiltering = false
+    
+    // MARK: - Initializers
+    init(viewModel: TrackersViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton() {
@@ -189,7 +199,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func applyCollectionChanges(_ changes: [DataChange]) {
-        if isFiltering { return }
+        guard !isFiltering else { return }
         collectionView.performBatchUpdates {
             for change in changes {
                 switch change {

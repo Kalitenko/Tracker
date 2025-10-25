@@ -279,7 +279,8 @@ extension NewTrackerController: UITableViewDelegate {
         let option = options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
         if option == "Категория" {
-            let vc = CategoryListViewController()
+            let viewModel = CategoryListViewModel()
+            let vc = CategoryListViewController(viewModel: viewModel)
             vc.selectedCategory = selectedCategory
             vc.onCategorySelected = { [weak self] category in
                 self?.viewModel.selectCategory(category)

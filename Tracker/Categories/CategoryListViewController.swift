@@ -119,8 +119,18 @@ final class CategoryListViewController: ModalController {
     private let tableStyle: TableStyle = .checkmark
     private var tableHeightConstraint: NSLayoutConstraint?
     private var selectedIndexPath: IndexPath?
-    private let viewModel = CategoryListViewModel()
+    private let viewModel: CategoryListViewModel
     
+    // MARK: - Initializers
+    init(viewModel: CategoryListViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
     
     // MARK: - Actions
     @objc private func didTapButton(_ sender: Any) {
@@ -296,7 +306,8 @@ extension CategoryListViewController: UITableViewDelegate {
 
 // MARK: - Preview
 #Preview("CategoryController") {
-    let vc = CategoryListViewController()
+    let viewModel = CategoryListViewModel()
+    let vc = CategoryListViewController(viewModel: viewModel)
     
     return vc
 }

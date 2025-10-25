@@ -23,7 +23,8 @@ final class TabBarController: UITabBarController {
     }
     
     private func configureTabBar() {
-        let trackersViewController = TrackersViewController()
+        let viewModel = TrackersViewModel()
+        let trackersViewController = TrackersViewController(viewModel: viewModel)
         trackersViewController.tabBarItem = UITabBarItem(
             title: Layout.trackersTitle,
             image: UIImage(resource: .tabBarTrackers),
