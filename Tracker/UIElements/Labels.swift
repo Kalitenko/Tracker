@@ -6,6 +6,7 @@ enum LabelStyle {
     case standard
     case subtitle
     case collectionHeader
+    case bold32
     
     var font: UIFont {
         switch self {
@@ -14,6 +15,7 @@ enum LabelStyle {
         case .standard: .regular17
         case .subtitle: .regular17
         case .collectionHeader: .bold19
+        case .bold32: .bold32
         }
     }
     
@@ -24,6 +26,7 @@ enum LabelStyle {
         case .standard: UIColor(resource: .black)
         case .subtitle: UIColor(resource: .gray)
         case .collectionHeader: UIColor(resource: .black)
+        case .bold32: UIColor(resource: .black)
         }
     }
     
@@ -34,6 +37,7 @@ enum LabelStyle {
         case .standard: .left
         case .subtitle: .left
         case .collectionHeader: .left
+        case .bold32: .center
         }
     }
 }
@@ -67,13 +71,13 @@ final class Label: UILabel {
         textAlignment = style.alignment
     }
     
-    init(text: String,
+    init(text: String = "",
          style: LabelStyle,
          color: UIColor? = nil,
          alignment: NSTextAlignment? = nil) {
         super.init(frame: .zero)
         self.text = text
-        self.font = font
+        self.font = style.font
         textColor = color ?? style.color
         textAlignment = alignment ?? style.alignment
     }

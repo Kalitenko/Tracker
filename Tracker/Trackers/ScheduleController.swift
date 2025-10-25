@@ -12,6 +12,7 @@ final class ScheduleController: ModalController {
         static let tableTopInset: CGFloat = 38
         static let tableSideInset: CGFloat = 16
         static let stackSideInset: CGFloat = 20
+        static let stackBottomInset: CGFloat = 16
         static let stackSpacing: CGFloat = 8
     }
     
@@ -73,7 +74,7 @@ final class ScheduleController: ModalController {
             optionsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.tableSideInset),
             optionsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.tableSideInset),
             
-            stackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
+            stackView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -Layout.stackBottomInset),
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.stackSideInset),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.stackSideInset)
         ])

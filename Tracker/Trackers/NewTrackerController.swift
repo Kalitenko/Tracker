@@ -1,72 +1,13 @@
 import UIKit
 
-protocol NewTrackerDelegate: AnyObject {
-    func didCreateNewTracker(tracker: Tracker, categoryTitle: String)
-}
-
-enum TrackerType {
-    case habit
-    case irregular
-    
-    var titleText: String {
-        switch self {
-        case .habit: return "Новая привычка"
-        case .irregular: return "Новое нерегулярное событие"
-        }
-    }
-    
-    var options: [String] {
-        switch self {
-        case .habit: return ["Категория", "Расписание"]
-        case .irregular: return ["Категория"]
-        }
-    }
-}
-
 final class NewTrackerController: ModalController {
-    
-    // MARK: - Public Properties
-    weak var delegate: NewTrackerDelegate?
-    
-    // MARK: - Private Properties
-    private let trackerType: TrackerType
-    private let tableStyle: TableStyle = .arrow
-    private var defaultCategory = "Важное"
-    private var selectedCategory: String? {
-        didSet { updateCreateButtonState() }
-    }
-    private var selectedEmoji: String? {
-        didSet { updateCreateButtonState() }
-    }
-    private var selectedColor: UIColor? {
-        didSet { updateCreateButtonState() }
-    }
-    private var selectedDays: [WeekDay] = [] {
-        didSet { updateCreateButtonState() }
-    }
-    private let dataProvider: DataProviderProtocol = DataProvider.shared
-    
-    // MARK: - Init
-    init(trackerType: TrackerType) {
-        self.trackerType = trackerType
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        nil
-    }
     
     // MARK: - Constants
     private enum Layout {
         // Texts
         static let textFieldPlaceholderText = "Введите название трекера"
-        static let limitLabelText = "Ограничение \(limitSymbolsNumber) символов"
         static let cancelButtonText = "Отменить"
         static let createButtonText = "Создать"
-        
-        // Limits
-        static let limitSymbolsNumber = 38
         
         // Sizes
         static let cellHeight: CGFloat = 75
@@ -74,9 +15,7 @@ final class NewTrackerController: ModalController {
         static let cornerRadius: CGFloat = 16
         
         // Insets / Spacing
-        static let titleTopInset: CGFloat = 27
-        static let textFieldTopInset: CGFloat = 24
-        static let limitLabelTopInset: CGFloat = 8
+        static let nameFieldViewTopInset: CGFloat = 24
         static let optionsTableTopInset: CGFloat = 24
         static let sideInset: CGFloat = 16
         static let buttonsStackSideInset: CGFloat = 20
@@ -96,30 +35,9 @@ final class NewTrackerController: ModalController {
         return view
     }()
     
-    private lazy var nameTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = Layout.textFieldPlaceholderText
-        textField.font = UIFont.regular17
-        textField.textColor = UIColor(resource: .black)
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: Layout.sideInset, height: 0))
-        textField.leftViewMode = .always
-        textField.backgroundColor = UIColor(resource: .background)
-        textField.layer.cornerRadius = Layout.cornerRadius
-        textField.clearButtonMode = .whileEditing
-        textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
-        return textField
-    }()
-    
-    private lazy var limitLabel: UILabel = {
-        let label = Label(
-            text: Layout.limitLabelText,
-            style: .standard,
-            color: UIColor(resource: .red),
-            alignment: .center
-        )
-        label.isHidden = true
-        return label
-    }()
+    private lazy var nameFieldView = ValidatingTextFieldView(
+        placeholder: Layout.textFieldPlaceholderText
+    )
     
     private lazy var cancelButton: UIButton = {
         let button = OutlineRedButton(title: Layout.cancelButtonText)
@@ -150,14 +68,12 @@ final class NewTrackerController: ModalController {
         return table
     }()
     
-    private lazy var emojiHandler = EmojiCollectionHandler { emoji in
-        Logger.debug("Выбран эмоджи: \(emoji)")
-        self.selectedEmoji = emoji
+    private lazy var emojiHandler = EmojiCollectionHandler { [weak viewModel] emoji in
+        viewModel?.selectEmoji(emoji)
     }
     
-    private lazy var colorHandler = ColorCollectionHandler { color in
-        Logger.debug("Выбран цвет: \(color)")
-        self.selectedColor = color
+    private lazy var colorHandler = ColorCollectionHandler { [weak viewModel] color in
+        viewModel?.selectColor(color)
     }
     
     private lazy var emojiCollectionView: UICollectionView = {
@@ -202,6 +118,7 @@ final class NewTrackerController: ModalController {
         setupTitleLabel()
         setupSubViews()
         setupConstraints()
+        bindViewModel()
     }
     
     // MARK: - Setup Methods
@@ -210,7 +127,7 @@ final class NewTrackerController: ModalController {
     }
     
     private func setupSubViews() {
-        [nameTextField, limitLabel, optionsTableView, collectionsStackView].forEach {
+        [nameFieldView, optionsTableView, collectionsStackView].forEach {
             contentView.addSubview($0)
         }
         scrollView.addSubview(contentView)
@@ -219,8 +136,16 @@ final class NewTrackerController: ModalController {
             view.addSubview($0)
         }
         
-        [scrollView, contentView, titleLabel, nameTextField, limitLabel, buttonsStackView, optionsTableView, collectionsStackView].forEach {
+        [scrollView, contentView, titleLabel, nameFieldView, buttonsStackView, optionsTableView, collectionsStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        
+        setupNameFieldViewBindings()
+    }
+    
+    private func setupNameFieldViewBindings() {
+        nameFieldView.onTextChange = { [weak self] text in
+            self?.viewModel.didChangeName(text ?? "")
         }
     }
     
@@ -243,18 +168,14 @@ final class NewTrackerController: ModalController {
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.buttonsStackSideInset),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.buttonsStackSideInset),
             
-            nameTextField.heightAnchor.constraint(equalToConstant: Layout.textFieldHeight),
-            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.textFieldTopInset),
-            nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
-            nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            nameFieldView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.nameFieldViewTopInset),
+            nameFieldView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            nameFieldView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
             
-            limitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Layout.limitLabelTopInset),
-            limitLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            
-            optionsTableView.topAnchor.constraint(equalTo: limitLabel.bottomAnchor, constant: Layout.optionsTableTopInset),
+            optionsTableView.topAnchor.constraint(equalTo: nameFieldView.bottomAnchor, constant: Layout.optionsTableTopInset),
             optionsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
             optionsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
-            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(trackerType.options.count) * Layout.cellHeight),
+            optionsTableView.heightAnchor.constraint(equalToConstant: CGFloat(options.count) * Layout.cellHeight),
             
             collectionsStackView.topAnchor.constraint(equalTo: optionsTableView.bottomAnchor, constant: 32),
             collectionsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 18),
@@ -265,33 +186,49 @@ final class NewTrackerController: ModalController {
         ])
     }
     
-    
-    
-    // MARK: - Private Methods
-    private func validateName(from textField: UITextField) -> String? {
-        guard let text = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !text.isEmpty else { return nil }
-        return text
-    }
-    
-    private func createNewTracker(name: String, category: String, schedule: [WeekDay]) {
-        guard let emoji = selectedEmoji, let color = selectedColor else {
-            Logger.error("Emoji или цвет не выбраны")
-            return
+    private func bindViewModel() {
+        viewModel.onValidationError = { [weak self] error in
+            guard let self else { return }
+            if let error = error {
+                self.nameFieldView.showError(message: error)
+            } else {
+                self.nameFieldView.hideError()
+            }
         }
-        let tracker = Tracker(name: name, color: color, emoji: emoji, schedule: schedule)
-        dataProvider.createTracker(tracker, to: category)
-        delegate?.didCreateNewTracker(tracker: tracker, categoryTitle: category)
+        
+        viewModel.onValidationChanged = { [weak self] isEnabled in
+            self?.createButton.isEnabled = isEnabled
+        }
+        
+        viewModel.onCategoryChanged = { [weak self] category in
+            self?.selectedCategory = category
+        }
+        
+        viewModel.onScheduleChanged = { [weak self] schedule in
+            self?.selectedDays = schedule
+        }
     }
     
-    private func updateCreateButtonState() {
-        let isValid = validateName(from: nameTextField) != nil &&
-        selectedCategory != nil &&
-        selectedEmoji != nil &&
-        selectedColor != nil &&
-        !(trackerType == .habit && selectedDays.isEmpty)
-        
-        createButton.isEnabled = isValid
+    // MARK: - Private Properties
+    private let trackerType: TrackerType
+    private let tableStyle: TableStyle = .arrow
+    private var selectedCategory: TrackerCategory?
+    private var selectedDays: [WeekDay] = []
+    private let viewModel: NewTrackerViewModel
+    private var options: [String] {
+        viewModel.options
+    }
+    
+    // MARK: - Initializers
+    init(trackerType: TrackerType) {
+        self.trackerType = trackerType
+        self.viewModel = .init(trackerType: trackerType, category: selectedCategory, schedule: selectedDays)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
     }
     
     // MARK: - Actions
@@ -300,26 +237,19 @@ final class NewTrackerController: ModalController {
     }
     
     @objc private func didTapCreateButton(_ sender: Any) {
-        guard let name = validateName(from: nameTextField),
-              let category = selectedCategory else { return }
-        
-        if trackerType == .habit && selectedDays.isEmpty { return }
-        
-        let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
-        createNewTracker(name: name, category: category, schedule: schedule)
-        dismiss(animated: true)
-    }
-    
-    @objc private func textDidChange(_ textField: UITextField) {
-        limitLabel.isHidden = (textField.text?.count ?? 0) <= Layout.limitSymbolsNumber
-        updateCreateButtonState()
+        viewModel.createTracker()
+        var root = presentingViewController
+        while let parent = root?.presentingViewController {
+            root = parent
+        }
+        root?.dismiss(animated: true)
     }
 }
 
 // MARK: - UITableViewDataSource
 extension NewTrackerController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        trackerType.options.count
+        options.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -331,7 +261,7 @@ extension NewTrackerController: UITableViewDataSource {
         let isLastElement = indexPath.isLastRow(in: tableView)
         
         if let arrowCell = cell as? ArrowCell {
-            arrowCell.configure(title: trackerType.options[indexPath.row], subtitle: nil, isLastElement: isLastElement)
+            arrowCell.configure(title: options[indexPath.row], subtitle: nil, isLastElement: isLastElement)
         }
         return cell
     }
@@ -346,18 +276,24 @@ extension NewTrackerController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         tableView.deselectRow(at: indexPath, animated: true)
-        let option = trackerType.options[indexPath.row]
+        let option = options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
         if option == "Категория" {
-            selectedCategory = defaultCategory
-            if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
-                cell.configure(title: option, subtitle: selectedCategory, isLastElement: isLastElement)
+            let viewModel = CategoryListViewModel()
+            let vc = CategoryListViewController(viewModel: viewModel)
+            vc.selectedCategory = selectedCategory
+            vc.onCategorySelected = { [weak self] category in
+                self?.viewModel.selectCategory(category)
+                if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
+                    cell.configure(title: option, subtitle: category.title, isLastElement: isLastElement)
+                }
             }
+            present(vc, animated: true)
         } else if option == "Расписание" {
             let vc = ScheduleController()
             vc.selectedDays = selectedDays
             vc.onDaysSelected = { [weak self] days in
-                self?.selectedDays = days
+                self?.viewModel.selectDays(days)
                 if let cell = tableView.cellForRow(at: indexPath) as? TableCell {
                     cell.configure(title: option, subtitle: days.displayText, isLastElement: isLastElement)
                 }

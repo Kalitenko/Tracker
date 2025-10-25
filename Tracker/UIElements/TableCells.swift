@@ -122,6 +122,10 @@ final class CheckmarkCell: TableCell {
         subtitleLabel.isHidden = (subtitle == nil)
         checkmark.isHidden = !selected
     }
+    
+    func setChecked(_ checked: Bool) {
+        checkmark.isHidden = !checked
+    }
 }
 
 // MARK: - Arrow Cell

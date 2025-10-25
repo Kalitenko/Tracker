@@ -14,7 +14,8 @@ final class DataProvider {
     static let shared = DataProvider()
     
     // MARK: - Public Properties
-    var observer: DataObserver
+    var trackersObserver: TrackersObserver
+    var categoriesObserver: CategoriesObserver
     
     // MARK: - Private Properties
     private let categoryStore: TrackerCategoryStore
@@ -28,10 +29,13 @@ final class DataProvider {
         trackerStore = TrackerStore(context: context)
         recordStore = TrackerRecordStore(context: context)
         
-        observer = DataObserver(
-            categoryStore: categoryStore,
+        trackersObserver = TrackersObserver(
             trackerStore: trackerStore,
             recordStore: recordStore
+        )
+        
+        categoriesObserver = CategoriesObserver(
+            categoryStore: categoryStore
         )
     }
     
@@ -56,6 +60,46 @@ final class DataProvider {
         trackerStore.fetchTrackersGroupedByCategory(for: date)
     }
     
+    func isExistCategory(withTitle title: String) -> Bool {
+        do {
+            return try categoryStore.isExist(byTitle: title)
+        } catch {
+            Logger.error("Ошибка проверки категории: \(error)")
+        }
+        return false
+    }
+    
+    func createCategory(withTitle title: String) {
+        do {
+            try categoryStore.add(TrackerCategory(title: title, trackers: []))
+            Logger.debug("Создание категории \(title)")
+        } catch {
+            Logger.error("Ошибка создания категории: \(error)")
+        }
+    }
+    
+    func updateCategory(category: TrackerCategory, withNewTitle title: String) {
+        do {
+            try categoryStore.update(category: category, withNewTitle: title)
+            Logger.debug("Обновление названия категории с \(category.title) на \(title)")
+        } catch {
+            Logger.error("Ошибка обновления названия категории: \(error)")
+        }
+    }
+    
+    func deleteCategory(_ category: TrackerCategory) {
+        do {
+            try categoryStore.delete(category: category)
+            Logger.debug("Удаление категории \(category.title)")
+        } catch {
+            Logger.error("Ошибка удаления категории: \(error)")
+        }
+    }
+    
+    func completedTrackers(ids: [Int32]) -> [TrackerRecord] {
+        (try? recordStore.fetchRecords(ids: ids)) ?? []
+    }
+    
 }
 
 // MARK: - DataProviderProtocol
@@ -69,9 +113,7 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {
-        Logger.debug("Создание трекера: \(tracker)")
-        let newTracker = addTracker(tracker, to: categoryTitle)
-        Logger.debug("Создан трекер: \(newTracker)")
+        addTracker(tracker, to: categoryTitle)
     }
     
     func addRecord(_ record: TrackerRecord) {
@@ -89,5 +131,4 @@ extension DataProvider: DataProviderProtocol {
             Logger.error("Ошибка удаления записи: \(error)")
         }
     }
-    
 }

@@ -51,7 +51,6 @@ final class TrackerRecordStore: NSObject {
     
     func delete(_ record: TrackerRecord) throws {
         let trackerRecordCoreData = try fetch(byTrackerId: record.trackerId, date: record.date)
-        Logger.debug("trackerRecordCoreData: \(trackerRecordCoreData)")
         try deleteEntity(trackerRecordCoreData)
     }
     
@@ -79,6 +78,22 @@ final class TrackerRecordStore: NSObject {
     }
     
     func fetchRecords() throws -> [TrackerRecord] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: #keyPath(TrackerRecordCoreData.trackerID), ascending: true)]
+        
+        let objects = try context.fetch(fetchRequest)
+        let records = try objects.map(EntityMapper.convertToTrackerRecord)
+        
+        return records
+    }
+    
+    func fetchRecords(ids: [Int32]) throws -> [TrackerRecord] {
+        guard !ids.isEmpty else { return [] }
+        
+        fetchedResultsController.fetchRequest.predicate = NSPredicate(
+            format: "%K IN %@", #keyPath(TrackerRecordCoreData.trackerID), ids
+        )
+        
         try fetchedResultsController.performFetch()
         
         let objects = fetchedResultsController.fetchedObjects ?? []
