@@ -37,13 +37,13 @@ final class TrackersViewModel {
     init() {
         self.selectedDate = Date()
         dataObserver.delegate = self
-        loadCompletedTrackers()
     }
     
     // MARK: - Public Methods
     func selectDate(_ date: Date) {
         selectedDate = date
         loadCategories(for: date)
+        loadCompletedTrackers()
     }
     
     func updateSearchQuery(_ text: String) {
