@@ -38,7 +38,7 @@ final class TrackerStore: NSObject {
     
     // MARK: - Public Methods
     func fetchTrackers(for date: Date) -> [Tracker] {
-        guard let dayName = date.dayName as String? else {
+        guard let dayName = date.weekDayRawValue as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }
@@ -58,7 +58,7 @@ final class TrackerStore: NSObject {
     }
     
     func fetchTrackersGroupedByCategory(for date: Date) -> [TrackerCategory] {
-        guard let dayName = date.dayName as String? else {
+        guard let dayName = date.weekDayRawValue as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }

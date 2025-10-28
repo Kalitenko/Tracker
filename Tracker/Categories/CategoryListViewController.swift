@@ -4,12 +4,12 @@ final class CategoryListViewController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Категория"
-        static let buttonText = "Добавить категорию"
-        static let emptyStateLabelText = "Привычки и события можно\nобъединить по смыслу"
-        static let editButtonText = "Редактировать"
-        static let deleteButtonText = "Удалить"
-        static let alertQuestion = "Эта категория точно не нужна?"
+        static let titleText = L10n.category
+        static let buttonText = L10n.addCategory
+        static let emptyStateLabelText = L10n.categoryHint
+        static let editButtonText = L10n.edit
+        static let deleteButtonText = L10n.delete
+        static let alertQuestion = L10n.deleteConfirmation
         
         static let cellHeight: CGFloat = 75
         static let titleTopInset: CGFloat = 27

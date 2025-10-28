@@ -3,8 +3,8 @@ final class CategoryViewModel {
     // MARK: - Constants
     private enum Constants {
         static let limitSymbolsNumber = 38
-        static let limitText = "Ограничение \(limitSymbolsNumber) символов"
-        static let alreadyExistsText = "Категория с таким названием уже существует"
+        static let limitText = Utils.symbolCountString(for: limitSymbolsNumber)
+        static let alreadyExistsText = L10n.categoryExists
     }
     
     // MARK: - Public Properties

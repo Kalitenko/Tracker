@@ -13,15 +13,17 @@
             <key>NSStringFormatValueTypeKey</key>
             <string>d</string>
             <key>one</key>
-            <string>%d day</string>
+            <string>יום אחד</string>
+            <key>two</key>
+            <string>שני ימים</string>
             <key>other</key>
-            <string>%d days</string>
+            <string>%d ימים</string>
         </dict>
     </dict>
     <key>numberOfSymbols</key>
     <dict>
         <key>NSStringLocalizedFormatKey</key>
-        <string>Limit of %#@symbols@</string>
+        <string>מגבלה של %#@symbols@</string>
         <key>symbols</key>
         <dict>
             <key>NSStringFormatSpecTypeKey</key>
@@ -29,9 +31,11 @@
             <key>NSStringFormatValueTypeKey</key>
             <string>d</string>
             <key>one</key>
-            <string>%d character</string>
+            <string>תו אחד</string>
+            <key>two</key>
+            <string>שני תווים</string>
             <key>other</key>
-            <string>%d characters</string>
+            <string>%d תווים</string>
         </dict>
     </dict>
 </dict>

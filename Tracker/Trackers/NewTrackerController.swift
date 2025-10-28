@@ -5,9 +5,9 @@ final class NewTrackerController: ModalController {
     // MARK: - Constants
     private enum Layout {
         // Texts
-        static let textFieldPlaceholderText = "Введите название трекера"
-        static let cancelButtonText = "Отменить"
-        static let createButtonText = "Создать"
+        static let textFieldPlaceholderText = L10n.enterTrackerName
+        static let cancelButtonText = L10n.cancel
+        static let createButtonText = L10n.create
         
         // Sizes
         static let cellHeight: CGFloat = 75
@@ -278,7 +278,7 @@ extension NewTrackerController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let option = options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
-        if option == "Категория" {
+        if option == L10n.category {
             let viewModel = CategoryListViewModel()
             let vc = CategoryListViewController(viewModel: viewModel)
             vc.selectedCategory = selectedCategory
@@ -289,7 +289,7 @@ extension NewTrackerController: UITableViewDelegate {
                 }
             }
             present(vc, animated: true)
-        } else if option == "Расписание" {
+        } else if option == L10n.schedule {
             let vc = ScheduleController()
             vc.selectedDays = selectedDays
             vc.onDaysSelected = { [weak self] days in

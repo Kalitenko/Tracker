@@ -144,6 +144,15 @@ extension TrackersViewModel: TrackersObserverDelegate {
         categories = dataProvider.categories(for: selectedDate)
         visibleCategories = categories
         onCategoriesChangedWithChanges?((categories, changes))
+        let isInsert = changes.contains {
+            switch $0 {
+            case .insert, .insertSection: return true
+            default: return false
+            }
+        }
+        if isInsert {
+            loadCompletedTrackers()
+        }
         onEmptyStateChanged?(visibleCategories.isEmpty)
     }
     

@@ -4,8 +4,8 @@ final class ScheduleController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Расписание"
-        static let doneButtonText = "Готово"
+        static let titleText = L10n.scheduleLabel
+        static let doneButtonText = L10n.doneButton
         
         static let cellHeight: CGFloat = 75
         static let titleTopInset: CGFloat = 27
@@ -110,7 +110,7 @@ extension ScheduleController: UITableViewDataSource {
         
         if let toggleCell = cell as? ToggleCell {
             let day = options[indexPath.row]
-            toggleCell.configure(title: day.rawValue, isLastElement: isLastElement, isOn: selectedDays.contains(day))
+            toggleCell.configure(title: day.localized, isLastElement: isLastElement, isOn: selectedDays.contains(day))
             toggleCell.onToggle = { [weak self] isOn in
                 guard let self else { return }
                 if isOn {

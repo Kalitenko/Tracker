@@ -109,7 +109,7 @@ final class EmojiCollectionHandler: BaseCollectionHandler<String, EmojiCell> {
             },
             configureHeader: { header in
                 guard let header = header as? CollectionHeaderView else { return }
-                header.headerLabel.text = "Emoji"
+                header.headerLabel.text = L10n.emoji
             }
         )
     }
@@ -136,7 +136,7 @@ final class ColorCollectionHandler: BaseCollectionHandler<UIColor, ColorCell> {
             },
             configureHeader: { header in
                 guard let header = header as? CollectionHeaderView else { return }
-                header.headerLabel.text = "Цвет"
+                header.headerLabel.text = L10n.color
             }
         )
     }

@@ -5,7 +5,7 @@ final class NewTrackerViewModel {
     // MARK: - Constants
     private enum Constants {
         static let limitSymbolsNumber = 38
-        static let limitText = "Ограничение \(limitSymbolsNumber) символов"
+        static let limitText = Utils.symbolCountString(for: limitSymbolsNumber)
     }
     
     // MARK: - Public Properties

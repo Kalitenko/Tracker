@@ -12,26 +12,42 @@
             <string>NSStringPluralRuleType</string>
             <key>NSStringFormatValueTypeKey</key>
             <string>d</string>
+            <key>zero</key>
+            <string>٠ أيام</string>
             <key>one</key>
-            <string>%d day</string>
+            <string>يوم واحد</string>
+            <key>two</key>
+            <string>يومان</string>
+            <key>few</key>
+            <string>%d أيام</string>
+            <key>many</key>
+            <string>%d يومًا</string>
             <key>other</key>
-            <string>%d days</string>
+            <string>%d يوم</string>
         </dict>
     </dict>
     <key>numberOfSymbols</key>
     <dict>
         <key>NSStringLocalizedFormatKey</key>
-        <string>Limit of %#@symbols@</string>
+        <string>حد %#@symbols@</string>
         <key>symbols</key>
         <dict>
             <key>NSStringFormatSpecTypeKey</key>
             <string>NSStringPluralRuleType</string>
             <key>NSStringFormatValueTypeKey</key>
             <string>d</string>
+            <key>zero</key>
+            <string>٠ رموز</string>
             <key>one</key>
-            <string>%d character</string>
+            <string>رمز واحد</string>
+            <key>two</key>
+            <string>رمزان</string>
+            <key>few</key>
+            <string>%d رموز</string>
+            <key>many</key>
+            <string>%d رمزًا</string>
             <key>other</key>
-            <string>%d characters</string>
+            <string>%d رمز</string>
         </dict>
     </dict>
 </dict>

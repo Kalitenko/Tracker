@@ -1,0 +1,111 @@
+/* ================================
+   CategoryController
+   ================================ */
+"done_button" = "Fertig";
+"enter_category_name" = "Gib den Kategorienamen ein";
+
+/* ================================
+   CategoryListViewController
+   ================================ */
+"category_title" = "Kategorie";
+"add_category" = "Kategorie hinzufügen";
+"category_hint" = "Gewohnheiten und Ereignisse können\nnach Bedeutung gruppiert werden";
+"edit" = "Bearbeiten";
+"delete" = "Löschen";
+"delete_confirmation" = "Diese Kategorie wirklich löschen?";
+
+/* ================================
+   CategoryViewModel
+   ================================ */
+"symbol_limit" = "Begrenzung auf %d Zeichen";
+"category_exists" = "Eine Kategorie mit diesem Namen existiert bereits";
+
+/* ================================
+   Mode
+   ================================ */
+"new_category" = "Neue Kategorie";
+"edit_category" = "Kategorie bearbeiten";
+
+/* ================================
+   AlertHelper
+   ================================ */
+"delete_action" = "Löschen";
+"cancel_action" = "Abbrechen";
+
+/* ================================
+   OnboardingPageViewController
+   ================================ */
+"tech_exclamation" = "Was für eine Technik!";
+"track_only_what_you_want" = "Verfolge nur, was du möchtest";
+"not_water_yoga" = "Auch wenn es\nkein Wasser und Yoga ist";
+
+/* ================================
+   WeekDay
+   ================================ */
+"monday" = "Montag";
+"tuesday" = "Dienstag";
+"wednesday" = "Mittwoch";
+"thursday" = "Donnerstag";
+"friday" = "Freitag";
+"saturday" = "Samstag";
+"sunday" = "Sonntag";
+"mon_short" = "Mo";
+"tue_short" = "Di";
+"wed_short" = "Mi";
+"thu_short" = "Do";
+"fri_short" = "Fr";
+"sat_short" = "Sa";
+"sun_short" = "So";
+"every_day" = "Jeden Tag";
+
+/* ================================
+   CollectionHandlers
+   ================================ */
+"emoji" = "Emoji";
+"color" = "Farbe";
+
+/* ================================
+   CreateTrackerController
+   ================================ */
+"create_tracker" = "Tracker erstellen";
+"habit" = "Gewohnheit";
+"irregular_event" = "Unregelmäßiges Ereignis";
+
+/* ================================
+   NewTrackerController
+   ================================ */
+"enter_tracker_name" = "Gib den Namen des Trackers ein";
+"cancel" = "Abbrechen";
+"create" = "Erstellen";
+
+/* ================================
+   NewTrackerViewModel
+   ================================ */
+"symbol_limit_tracker" = "Begrenzung auf %d Zeichen";
+
+/* ================================
+   ScheduleController
+   ================================ */
+"schedule" = "Zeitplan";
+"done" = "Fertig";
+
+/* ================================
+   TrackersViewController
+   ================================ */
+"trackers" = "Tracker";
+"search" = "Suche";
+"what_to_track" = "Was möchtest du verfolgen?";
+
+/* ================================
+   TrackerType
+   ================================ */
+"new_habit" = "Neue Gewohnheit";
+"new_irregular_event" = "Neues unregelmäßiges Ereignis";
+"category" = "Kategorie";
+"schedule_label" = "Zeitplan";
+
+/* ================================
+   TabBarController
+   ================================ */
+"tab_trackers" = "Tracker";
+"tab_statistics" = "Statistik";

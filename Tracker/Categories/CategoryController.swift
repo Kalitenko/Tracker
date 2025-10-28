@@ -4,8 +4,8 @@ final class CategoryController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let buttonText = "Готово"
-        static let textFieldPlaceholderText = "Введите название категории"
+        static let buttonText = L10n.doneButton
+        static let textFieldPlaceholderText = L10n.enterCategoryName
         
         static let nameFieldViewTopInset: CGFloat = 38
         static let sideInset: CGFloat = 16
@@ -90,7 +90,7 @@ final class CategoryController: ModalController {
         }
         
     }
-        
+    
     // MARK: - Private Properties
     private let mode: Mode
     private let viewModel: CategoryViewModel

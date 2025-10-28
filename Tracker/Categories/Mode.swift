@@ -4,8 +4,8 @@ enum Mode {
     
     var title: String {
         switch self {
-        case .create: "Новая категория"
-        case .edit: "Редактирование категории"
+        case .create: L10n.newCategory
+        case .edit: L10n.editCategory
         }
     }
 }

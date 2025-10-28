@@ -4,9 +4,9 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Constants
     private enum Layout {
-        static let trackersLabelText = "Трекеры"
-        static let searchBarText = "Поиск"
-        static let emptyStateLabelText = "Что будем отслеживать?"
+        static let trackersLabelText = L10n.trackers
+        static let searchBarText = L10n.search
+        static let emptyStateLabelText = L10n.whatToTrack
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220
@@ -108,7 +108,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Трекеры"
+        navigationItem.title = Layout.trackersLabelText
     }
     
     private func setupConstraints() {

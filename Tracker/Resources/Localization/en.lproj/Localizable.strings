@@ -1,0 +1,110 @@
+/* ================================
+   CategoryController
+   ================================ */
+"done_button" = "Done";
+"enter_category_name" = "Enter category name";
+
+/* ================================
+   CategoryListViewController
+   ================================ */
+"category_title" = "Category";
+"add_category" = "Add category";
+"category_hint" = "You can group habits and events by meaning";
+"edit" = "Edit";
+"delete" = "Delete";
+"delete_confirmation" = "Are you sure you want to delete this category?";
+
+/* ================================
+   CategoryViewModel
+   ================================ */
+"symbol_limit" = "Limit of %d characters";
+"category_exists" = "A category with this name already exists";
+
+/* ================================
+   Mode
+   ================================ */
+"new_category" = "New category";
+"edit_category" = "Edit category";
+
+/* ================================
+   AlertHelper
+   ================================ */
+"delete_action" = "Delete";
+"cancel_action" = "Cancel";
+
+/* ================================
+   OnboardingPageViewController
+   ================================ */
+"tech_exclamation" = "That's technology!";
+"not_water_yoga" = "Even if it's not litres of water and yoga";
+
+/* ================================
+   WeekDay
+   ================================ */
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+"mon_short" = "Mon";
+"tue_short" = "Tue";
+"wed_short" = "Wed";
+"thu_short" = "Thu";
+"fri_short" = "Fri";
+"sat_short" = "Sat";
+"sun_short" = "Sun";
+"every_day" = "Every day";
+
+/* ================================
+   CollectionHandlers
+   ================================ */
+"emoji" = "Emoji";
+"color" = "Color";
+
+/* ================================
+   CreateTrackerController
+   ================================ */
+"create_tracker" = "Create tracker";
+"habit" = "Habit";
+"irregular_event" = "Irregular event";
+
+/* ================================
+   NewTrackerController
+   ================================ */
+"enter_tracker_name" = "Enter tracker name";
+"cancel" = "Cancel";
+"create" = "Create";
+
+/* ================================
+   NewTrackerViewModel
+   ================================ */
+"symbol_limit_tracker" = "Limit of %d characters";
+
+/* ================================
+   ScheduleController
+   ================================ */
+"schedule" = "Schedule";
+"done" = "Done";
+
+/* ================================
+   TrackersViewController
+   ================================ */
+"trackers" = "Trackers";
+"search" = "Search";
+"what_to_track" = "What do you want to track?";
+
+/* ================================
+   TrackerType
+   ================================ */
+"new_habit" = "New habit";
+"new_irregular_event" = "New irregular event";
+"category" = "Category";
+"schedule_label" = "Schedule";
+
+/* ================================
+   TabBarController
+   ================================ */
+"tab_trackers" = "Trackers";
+"tab_statistics" = "Statistics";

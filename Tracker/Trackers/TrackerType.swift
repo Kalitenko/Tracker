@@ -4,15 +4,15 @@ enum TrackerType {
     
     var titleText: String {
         switch self {
-        case .habit: "Новая привычка"
-        case .irregular: "Новое нерегулярное событие"
+        case .habit: L10n.newHabit
+        case .irregular: L10n.newIrregularEvent
         }
     }
     
     var options: [String] {
         switch self {
-        case .habit: ["Категория", "Расписание"]
-        case .irregular: ["Категория"]
+        case .habit: [L10n.category, L10n.schedule]
+        case .irregular: [L10n.category]
         }
     }
 }

@@ -4,8 +4,8 @@ final class TabBarController: UITabBarController {
     
     // MARK: - Constants
     private enum Layout {
-        static let trackersTitle = "Трекеры"
-        static let statisticsTitle = "Статистика"
+        static let trackersTitle = L10n.tabTrackers
+        static let statisticsTitle = L10n.tabStatistics
     }
     
     // MARK: - Layout
