@@ -13,7 +13,7 @@ final class CategoryViewModel {
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = .shared
-    private let mode: Mode
+    private let mode: CategoryMode
     private let currentCategory: TrackerCategory?
     
     private var title: String = "" {
@@ -25,7 +25,7 @@ final class CategoryViewModel {
     private var trimmedTitle: String = ""
     
     // MARK: - Initializers
-    init(mode: Mode) {
+    init(mode: CategoryMode) {
         self.mode = mode
         switch mode {
         case .create:

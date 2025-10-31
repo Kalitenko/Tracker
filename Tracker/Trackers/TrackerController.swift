@@ -1,6 +1,6 @@
 import UIKit
 
-final class NewTrackerController: ModalController {
+final class TrackerController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
@@ -8,6 +8,7 @@ final class NewTrackerController: ModalController {
         static let textFieldPlaceholderText = L10n.enterTrackerName
         static let cancelButtonText = L10n.cancel
         static let createButtonText = L10n.create
+        static let saveButtonText = "Сохранить"
         
         // Sizes
         static let cellHeight: CGFloat = 75
@@ -15,7 +16,8 @@ final class NewTrackerController: ModalController {
         static let cornerRadius: CGFloat = 16
         
         // Insets / Spacing
-        static let nameFieldViewTopInset: CGFloat = 24
+        static let topStackViewTopInset: CGFloat = 24
+        static let topStackViewSpacing: CGFloat = 40
         static let optionsTableTopInset: CGFloat = 24
         static let sideInset: CGFloat = 16
         static let buttonsStackSideInset: CGFloat = 20
@@ -35,9 +37,20 @@ final class NewTrackerController: ModalController {
         return view
     }()
     
+    private lazy var countLabel: UILabel = Label(style: .bold32)
+    
     private lazy var nameFieldView = ValidatingTextFieldView(
         placeholder: Layout.textFieldPlaceholderText
     )
+    
+    private lazy var topStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [countLabel, nameFieldView])
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.spacing = Layout.topStackViewSpacing
+        
+        return stackView
+    }()
     
     private lazy var cancelButton: UIButton = {
         let button = OutlineRedButton(title: Layout.cancelButtonText)
@@ -45,14 +58,24 @@ final class NewTrackerController: ModalController {
         return button
     }()
     
-    private lazy var createButton: UIButton = {
-        let button = BlackButton(title: Layout.createButtonText, isInitiallyEnabled: false)
-        button.addTarget(self, action: #selector(Self.didTapCreateButton), for: .touchUpInside)
+    private lazy var actionButton: UIButton = {
+        let title: String
+        let action: Selector
+        switch mode {
+        case .create:
+            title = Layout.createButtonText
+            action = #selector(Self.didTapCreateButton)
+        case .edit:
+            title = Layout.saveButtonText
+            action = #selector(Self.didTapUpdateButton)
+        }
+        let button = BlackButton(title: title, isInitiallyEnabled: false)
+        button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }()
     
     private lazy var buttonsStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [cancelButton, createButton])
+        let stackView = UIStackView(arrangedSubviews: [cancelButton, actionButton])
         stackView.axis = .horizontal
         stackView.spacing = Layout.buttonsStackSpacing
         stackView.distribution = .fillEqually
@@ -84,8 +107,7 @@ final class NewTrackerController: ModalController {
         collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: String(describing: EmojiCell.self))
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         
-        collectionView.dataSource = emojiHandler
-        collectionView.delegate = emojiHandler
+        emojiHandler.attach(to: collectionView)
         
         return collectionView
     }()
@@ -98,8 +120,7 @@ final class NewTrackerController: ModalController {
         collectionView.register(ColorCell.self, forCellWithReuseIdentifier: String(describing: ColorCell.self))
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         
-        collectionView.dataSource = colorHandler
-        collectionView.delegate = colorHandler
+        colorHandler.attach(to: collectionView)
         
         return collectionView
     }()
@@ -119,15 +140,19 @@ final class NewTrackerController: ModalController {
         setupSubViews()
         setupConstraints()
         bindViewModel()
+        
+        // TODO: - Попробовать провести рефакторинг
+        viewModel.initData()
+        updateUI()
     }
     
     // MARK: - Setup Methods
     private func setupTitleLabel() {
-        self.titleLabel.text = trackerType.titleText
+        self.titleLabel.text = mode.titleText
     }
     
     private func setupSubViews() {
-        [nameFieldView, optionsTableView, collectionsStackView].forEach {
+        [topStackView, optionsTableView, collectionsStackView].forEach {
             contentView.addSubview($0)
         }
         scrollView.addSubview(contentView)
@@ -136,7 +161,7 @@ final class NewTrackerController: ModalController {
             view.addSubview($0)
         }
         
-        [scrollView, contentView, titleLabel, nameFieldView, buttonsStackView, optionsTableView, collectionsStackView].forEach {
+        [scrollView, contentView, titleLabel, topStackView, buttonsStackView, optionsTableView, collectionsStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -168,9 +193,9 @@ final class NewTrackerController: ModalController {
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.buttonsStackSideInset),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.buttonsStackSideInset),
             
-            nameFieldView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.nameFieldViewTopInset),
-            nameFieldView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
-            nameFieldView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
+            topStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.topStackViewTopInset),
+            topStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
+            topStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.sideInset),
             
             optionsTableView.topAnchor.constraint(equalTo: nameFieldView.bottomAnchor, constant: Layout.optionsTableTopInset),
             optionsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.sideInset),
@@ -197,7 +222,7 @@ final class NewTrackerController: ModalController {
         }
         
         viewModel.onValidationChanged = { [weak self] isEnabled in
-            self?.createButton.isEnabled = isEnabled
+            self?.actionButton.isEnabled = isEnabled
         }
         
         viewModel.onCategoryChanged = { [weak self] category in
@@ -210,20 +235,41 @@ final class NewTrackerController: ModalController {
     }
     
     // MARK: - Private Properties
+    private let mode: TrackerMode
     private let trackerType: TrackerType
     private let tableStyle: TableStyle = .arrow
     private var selectedCategory: TrackerCategory?
     private var selectedDays: [WeekDay] = []
-    private let viewModel: NewTrackerViewModel
+    private let viewModel: TrackerViewModel
     private var options: [String] {
         viewModel.options
     }
     
     // MARK: - Initializers
-    init(trackerType: TrackerType) {
-        self.trackerType = trackerType
-        self.viewModel = .init(trackerType: trackerType, category: selectedCategory, schedule: selectedDays)
+    init(mode: TrackerMode) {
+        self.mode = mode
+        self.trackerType = mode.trackerType
+        self.viewModel = .init(mode: mode, category: selectedCategory, schedule: selectedDays)
         super.init(nibName: nil, bundle: nil)
+        switch mode {
+        case .create:
+            countLabel.isHidden = true
+        case .edit(let type, let tracker, let category, let count):
+            break
+        }
+    }
+    
+    // TODO: - Попробовать провести рефакторинг
+    private func updateUI() {
+        switch mode {
+        case .create:
+            countLabel.isHidden = true
+        case .edit(let type, let tracker, let category, let count):
+            nameFieldView.setText(tracker.name)
+            countLabel.text = Utils.dayCountString(for: count)
+            colorHandler.selectItem(tracker.color)
+            emojiHandler.selectItem(tracker.emoji)
+        }
     }
     
     @available(*, unavailable)
@@ -244,10 +290,19 @@ final class NewTrackerController: ModalController {
         }
         root?.dismiss(animated: true)
     }
+    
+    @objc private func didTapUpdateButton(_ sender: Any) {
+        viewModel.updateTracker()
+        var root = presentingViewController
+        while let parent = root?.presentingViewController {
+            root = parent
+        }
+        root?.dismiss(animated: true)
+    }
 }
 
 // MARK: - UITableViewDataSource
-extension NewTrackerController: UITableViewDataSource {
+extension TrackerController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         options.count
     }
@@ -258,17 +313,26 @@ extension NewTrackerController: UITableViewDataSource {
             for: indexPath
         )
         
+        let option = options[indexPath.row]
         let isLastElement = indexPath.isLastRow(in: tableView)
+        var subtitle: String?
         
         if let arrowCell = cell as? ArrowCell {
-            arrowCell.configure(title: options[indexPath.row], subtitle: nil, isLastElement: isLastElement)
+            
+            if option == L10n.category && selectedCategory != nil{
+                subtitle = selectedCategory?.title
+            }
+            if option == L10n.schedule && selectedDays.count > 0 {
+                subtitle = selectedDays.displayText
+            }
+            arrowCell.configure(title: options[indexPath.row], subtitle: subtitle, isLastElement: isLastElement)
         }
         return cell
     }
 }
 
 // MARK: - UITableViewDelegate
-extension NewTrackerController: UITableViewDelegate {
+extension TrackerController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         Layout.cellHeight
     }
@@ -306,10 +370,10 @@ extension NewTrackerController: UITableViewDelegate {
 // MARK: - Preview
 #if DEBUG
 #Preview("New Habit Controller") {
-    NewTrackerController(trackerType: .habit)
+    TrackerController(mode: .create(.habit))
 }
 
 #Preview("New Irregular Event Controller") {
-    NewTrackerController(trackerType: .irregular)
+    TrackerController(mode: .create(.irregular))
 }
 #endif

@@ -92,17 +92,16 @@ final class CategoryController: ModalController {
     }
     
     // MARK: - Private Properties
-    private let mode: Mode
+    private let mode: CategoryMode
     private let viewModel: CategoryViewModel
     
     // MARK: - Initializers
-    init(mode: Mode) {
+    init(mode: CategoryMode) {
         self.mode = mode
         self.viewModel = .init(mode: mode)
         super.init(nibName: nil, bundle: nil)
         switch mode {
         case .edit(let category):
-            title = category.title
             nameFieldView.setText(category.title)
         default:
             break

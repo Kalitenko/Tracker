@@ -60,7 +60,7 @@ internal enum L10n {
   /// Введите название категории
   internal static let enterCategoryName = L10n.tr("Localizable", "enter_category_name", fallback: "Введите название категории")
   /// ================================
-  ///    NewTrackerController
+  ///    TrackerController
   ///    ================================
   internal static let enterTrackerName = L10n.tr("Localizable", "enter_tracker_name", fallback: "Введите название трекера")
   /// Каждый день
@@ -80,7 +80,7 @@ internal enum L10n {
   ///    ================================
   internal static let monday = L10n.tr("Localizable", "monday", fallback: "Понедельник")
   /// ================================
-  ///    Mode
+  ///    CategoryMode
   ///    ================================
   internal static let newCategory = L10n.tr("Localizable", "new_category", fallback: "Новая категория")
   /// ================================
@@ -115,7 +115,7 @@ internal enum L10n {
     return L10n.tr("Localizable", "symbol_limit", p1, fallback: "Ограничение %d символов")
   }
   /// ================================
-  ///    NewTrackerViewModel
+  ///    TrackerViewModel
   ///    ================================
   internal static func symbolLimitTracker(_ p1: Int) -> String {
     return L10n.tr("Localizable", "symbol_limit_tracker", p1, fallback: "Ограничение %d символов")

@@ -1,7 +1,7 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func didTapQuantityManagementButton(id: Int32, at: IndexPath)
+    func didTapQuantityManagementButton(from cell: UICollectionViewCell)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -179,13 +179,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - IB Actions
     @objc private func quantityManagementButtonTapped() {
-        guard let trackerId, let indexPath else {
-            assertionFailure("Missing trackerId or indexPath")
-            Logger.error("Нет trackerId или indexPath")
-            return
-        }
-        Logger.info("Кнопка трекера нажата")
-        delegate?.didTapQuantityManagementButton(id: trackerId, at: indexPath)
+        delegate?.didTapQuantityManagementButton(from: self)
     }
 }
 

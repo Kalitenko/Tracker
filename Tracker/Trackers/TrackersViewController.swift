@@ -7,6 +7,9 @@ final class TrackersViewController: UIViewController {
         static let trackersLabelText = L10n.trackers
         static let searchBarText = L10n.search
         static let emptyStateLabelText = L10n.whatToTrack
+        static let editButtonText = L10n.edit
+        static let deleteButtonText = L10n.delete
+        static let alertTrackerQuestion = "Уверены что хотите удалить трекер?"
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220
@@ -328,7 +331,47 @@ extension TrackersViewController: UISearchResultsUpdating {
 
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
-    func didTapQuantityManagementButton(id: Int32, at indexPath: IndexPath) {
+    func didTapQuantityManagementButton(from cell: UICollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else {
+            Logger.error("Не удалось получить indexPath ячейки")
+            return
+        }
         viewModel.toggleTrackerRecord(at: indexPath)
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+extension TrackersViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let category = visibleCategories[indexPath.section]
+        let tracker = category.trackers[indexPath.item]
+        let count = viewModel.count(for: indexPath)
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
+                self?.editTracker(tracker: tracker, category: category, count: count)
+            }
+            
+            let deleteAction = UIAction(title: Layout.deleteButtonText, attributes: .destructive) { [weak self] _ in
+                self?.showDeleteAlert(for: tracker)
+            }
+            
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
+    }
+    
+    private func editTracker(tracker: Tracker, category: TrackerCategory, count: Int) {
+        let vc = TrackerController(mode: .edit(type: .habit, tracker: tracker, category: category, count: count))
+        present(vc, animated: true)
+    }
+    
+    private func showDeleteAlert(for tracker: Tracker) {
+        AlertHelper.showDeleteConfirmation(
+            from: self,
+            message: Layout.alertTrackerQuestion
+        ) { [weak self] in
+            self?.viewModel.deleteTracker(tracker)
+        }
     }
 }

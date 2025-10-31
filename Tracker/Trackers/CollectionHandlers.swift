@@ -2,12 +2,14 @@ import ObjectiveC
 import UIKit
 
 // MARK: - Base Handler
-class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
+class BaseCollectionHandler<Item: Equatable, Cell: UICollectionViewCell>: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
     
+    private weak var collectionView: UICollectionView?
     private let items: [Item]
     private let configure: (Cell, Item, Bool) -> Void
     private let onSelect: (Item) -> Void
     private let configureHeader: ((UICollectionReusableView) -> Void)?
+    private var selectedItemIndexPath: IndexPath?
     
     init(
         items: [Item],
@@ -35,20 +37,20 @@ class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UIColle
             return UICollectionViewCell()
         }
         
-        configure(cell, items[indexPath.row], false)
+        configure(cell, items[indexPath.row], indexPath == selectedItemIndexPath)
         return cell
     }
     
     // MARK: - Delegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? Cell else { return }
-        configure(cell, items[indexPath.row], true)
+        var indexPathsToReload: [IndexPath] = [indexPath]
+        
+        if let oldIndexPath = selectedItemIndexPath, oldIndexPath != indexPath {
+            indexPathsToReload.append(oldIndexPath)
+        }
+        selectedItemIndexPath = indexPath
+        collectionView.reloadItems(at: indexPathsToReload)
         onSelect(items[indexPath.row])
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? Cell else { return }
-        configure(cell, items[indexPath.row], false)
     }
     
     func collectionView(
@@ -68,6 +70,23 @@ class BaseCollectionHandler<Item, Cell: UICollectionViewCell>: NSObject, UIColle
         )
         configureHeader(header)
         return header
+    }
+    
+    // MARK: - Public Methods
+    func attach(to collectionView: UICollectionView) {
+        self.collectionView = collectionView
+        collectionView.dataSource = self
+        collectionView.delegate = self
+    }
+    
+    func selectItem(_ item: Item) {
+        guard let collectionView,
+              let newIndex = items.firstIndex(of: item) else { return }
+        
+        let indexPath = IndexPath(item: newIndex, section: 0)
+        
+        selectedItemIndexPath = indexPath
+        collectionView.reloadItems(at: [indexPath])
     }
     
     class func makeLayout() -> UICollectionViewFlowLayout {

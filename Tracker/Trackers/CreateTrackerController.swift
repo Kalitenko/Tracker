@@ -83,12 +83,12 @@ final class CreateTrackerController: ModalController {
     
     // MARK: - Actions
     @objc private func didTapHabitButton(_ sender: Any) {
-        let vc = NewTrackerController(trackerType: .habit)
+        let vc = TrackerController(mode: .create(.habit))
         present(vc, animated: true)
     }
     
     @objc private func didTapIrregularEventButton(_ sender: Any) {
-        let vc = NewTrackerController(trackerType: .irregular)
+        let vc = TrackerController(mode: .create(.irregular))
         present(vc, animated: true)
     }
     

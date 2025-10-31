@@ -18,6 +18,8 @@ final class MockDataProvider: DataProviderProtocol {
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {}
     func addRecord(_ record: TrackerRecord) {}
     func deleteRecord(_ record: TrackerRecord) {}
+    func updateTracker(_ tracker: Tracker, to categoryTitle: String) {}
+    func deleteTracker(_ tracker: Tracker) {}
 }
 
 

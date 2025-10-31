@@ -101,6 +101,34 @@ final class TrackerStore: NSObject {
         return try EntityMapper.convertToTracker(trackerCoreData)
     }
     
+    func update(_ tracker: Tracker, to category: TrackerCategoryCoreData) {
+        guard let existingTracker = fetchById(tracker.id) else {
+            Logger.error("Не найден трекер для обновления с id: \(tracker.id)")
+            return
+        }
+        updateExisting(existingTracker, with: tracker)
+        
+        if existingTracker.category != category {
+            existingTracker.category = category
+        }
+        
+        do {
+            try context.save()
+            Logger.success("Трекер '\(tracker.name)' успешно обновлён")
+        } catch {
+            Logger.error("Ошибка при сохранении обновлённого трекера: \(error)")
+        }
+    }
+    
+    func delete(_ tracker: Tracker) throws {
+        guard let entity = fetchById(tracker.id) else {
+            Logger.error("Невозможно удалить несуществующий трекер")
+            return
+        }
+        context.delete(entity)
+        try context.save()
+    }
+    
     func updateExisting(_ trackerCoreData: TrackerCoreData, with tracker: Tracker) {
         trackerCoreData.color = tracker.color
         trackerCoreData.emoji = tracker.emoji
@@ -127,6 +155,19 @@ final class TrackerStore: NSObject {
         
         Logger.success("Добавлен трекер '\(tracker.name)' в категорию '\(categoryName)'")
         return try EntityMapper.convertToTracker(trackerCoreData)
+    }
+    
+    func fetchById(_ id: Int32) -> TrackerCoreData? {
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", NSNumber(value: id))
+        request.fetchLimit = 1
+        
+        do {
+            return try context.fetch(request).first
+        } catch {
+            Logger.error("Ошибка при поиске трекера по id: \(error)")
+            return nil
+        }
     }
 }
 

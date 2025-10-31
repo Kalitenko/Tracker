@@ -60,13 +60,24 @@ final class TrackersViewModel {
     }
     
     func toggleTrackerRecord(at indexPath: IndexPath) {
+        Logger.debug("indexPath.section \(indexPath.section), indexPath.item \(indexPath.item)")
         let id = visibleCategories[indexPath.section].trackers[indexPath.item].id
+        Logger.debug("id \(id), нажали на трекер c name \(visibleCategories[indexPath.section].trackers[indexPath.item].name)")
         let isCompletedToday = isTrackerCompletedToday(id: id)
         if isCompletedToday {
             removeTrackerRecord(id: id, at: indexPath)
         } else {
             addTrackerRecord(id: id, at: indexPath)
         }
+    }
+    
+    func count(for indexPath: IndexPath) -> Int {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        return countCompletedTrackers(id: tracker.id)
+    }
+    
+    func deleteTracker(_ tracker: Tracker) {
+        dataProvider.deleteTracker(tracker)
     }
     
     // MARK: - Private Methods

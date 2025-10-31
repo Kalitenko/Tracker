@@ -1,4 +1,4 @@
-enum Mode {
+enum CategoryMode {
     case create
     case edit(TrackerCategory)
     
