@@ -91,6 +91,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         counterLabel.text = nil
         quantityManagementButton.isSelected = false
         quantityManagementButton.isEnabled = true
+        configureContextMenuDelegate(nil)
     }
     
     // MARK: - Init
@@ -153,6 +154,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Public Properties
     weak var delegate: TrackerCellDelegate?
+    weak var menuDelegate: (any UIContextMenuInteractionDelegate)?
     
     // MARK: - Private Properties
     private var isCompletedToday: Bool = false
@@ -175,6 +177,21 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let today = Calendar.current.startOfDay(for: Date())
         let datePickerDay = Calendar.current.startOfDay(for: date)
         quantityManagementButton.isEnabled = datePickerDay <= today
+    }
+    
+    func configureContextMenuDelegate(_ delegate: (any UIContextMenuInteractionDelegate)?) {
+        self.menuDelegate = delegate
+        
+        cardView.interactions.forEach { interaction in
+            if interaction is UIContextMenuInteraction {
+                cardView.removeInteraction(interaction)
+            }
+        }
+        
+        if let delegate = delegate {
+            let interaction = UIContextMenuInteraction(delegate: delegate)
+            cardView.addInteraction(interaction)
+        }
     }
     
     // MARK: - IB Actions

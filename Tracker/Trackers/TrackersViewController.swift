@@ -271,6 +271,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             completedDays: cellData.completedCount,
             datePickerDate: datePicker.date
         )
+        cell.configureContextMenuDelegate(self)
         
         return cell
     }
@@ -340,9 +341,15 @@ extension TrackersViewController: TrackerCellDelegate {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-extension TrackersViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+// MARK: - UIContextMenuInteractionDelegate
+extension TrackersViewController: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction,
+                                configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let cardView = interaction.view,
+              let cell = cardView.superview(of: UICollectionViewCell.self),
+              let indexPath = collectionView.indexPath(for: cell) else {
+            return nil
+        }
         
         let category = visibleCategories[indexPath.section]
         let tracker = category.trackers[indexPath.item]
@@ -352,11 +359,9 @@ extension TrackersViewController: UICollectionViewDelegate {
             let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
                 self?.editTracker(tracker: tracker, category: category, count: count)
             }
-            
             let deleteAction = UIAction(title: Layout.deleteButtonText, attributes: .destructive) { [weak self] _ in
                 self?.showDeleteAlert(for: tracker)
             }
-            
             return UIMenu(title: "", children: [editAction, deleteAction])
         }
     }
