@@ -14,6 +14,7 @@ final class TrackersViewModel {
     var onEmptyStateChanged: Binding<Bool>?
     var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     var onRecordUpdated: Binding<IndexPath>?
+    var onFilterChanged: Binding<TrackerFilter>?
     
     // MARK: - Private Properties
     private var selectedDate: Date {
@@ -27,9 +28,14 @@ final class TrackersViewModel {
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
-    private var currentQuery: String = ""{
+    private var currentQuery: String = "" {
         didSet {
             filterCategories()
+        }
+    }
+    private var selectedFilter: TrackerFilter = .all {
+        didSet {
+            onFilterChanged?(selectedFilter)
         }
     }
     
@@ -78,6 +84,11 @@ final class TrackersViewModel {
     
     func deleteTracker(_ tracker: Tracker) {
         dataProvider.deleteTracker(tracker)
+    }
+    
+    func selectFilter(_ filter: TrackerFilter) {
+        selectedFilter = filter
+        Logger.debug("Выбран фильтр \(filter)")
     }
     
     // MARK: - Private Methods

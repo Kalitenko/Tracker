@@ -89,4 +89,9 @@ final class BlueButton: Button {
     required init?(coder: NSCoder) {
         nil
     }
+    
+    func showActive(_ isActive: Bool) {
+        let color = isActive ? UIColor(resource: .red) : UIColor(resource: .ypWhite)
+        setTitleColor(color, for: .normal)
+    }
 }

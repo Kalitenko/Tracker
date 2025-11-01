@@ -10,10 +10,13 @@ final class TrackersViewController: UIViewController {
         static let editButtonText = L10n.edit
         static let deleteButtonText = L10n.delete
         static let alertTrackerQuestion = "Уверены что хотите удалить трекер?"
+        static let filtersButtonText = "Фильтры"
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220
         static let emptyStateViewHorizontalInset: CGFloat = 16
+        static let filtersButtonsHorizontalInset: CGFloat = 130
+        static let filtersButtonsBottomInset: CGFloat = 16
     }
     
     // MARK: - Layout
@@ -85,6 +88,12 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
+    private lazy var filtersButton: BlueButton = {
+        let button = BlueButton(title: Layout.filtersButtonText)
+        button.addTarget(self, action: #selector(Self.didTapFiltersButton), for: .touchUpInside)
+        return button
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,17 +106,27 @@ final class TrackersViewController: UIViewController {
         loadData()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        let buttonHeight = filtersButton.frame.height
+        
+        collectionView.contentInset.bottom = view.safeAreaInsets.bottom + buttonHeight + Layout.filtersButtonsBottomInset
+        collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
+    }
+    
     // MARK: - Setup Methods
     private func setupView() {
         view.backgroundColor = UIColor(resource: .white)
     }
     
     private func setupSubViews() {
-        [emptyStateView, collectionView].forEach {
+        [emptyStateView, collectionView, filtersButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         view.bringSubviewToFront(emptyStateView)
+        view.bringSubviewToFront(filtersButton)
     }
     
     private func setupNavigationBar() {
@@ -126,7 +145,11 @@ final class TrackersViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.collectionViewTopInset),
             collectionView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            filtersButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.filtersButtonsHorizontalInset),
+            filtersButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.filtersButtonsHorizontalInset),
+            filtersButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -Layout.filtersButtonsBottomInset)
         ])
     }
     
@@ -166,12 +189,18 @@ final class TrackersViewController: UIViewController {
             self.visibleCategories = categories
             self.applyCollectionChanges(changes)
         }
+        
+        viewModel.onFilterChanged = { [weak self] filter in
+            self?.filtersButton.showActive(filter.isActive)
+            self?.selectedFilter = filter
+        }
     }
     
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
     private let viewModel: TrackersViewModel
     private var isFiltering = false
+    private var selectedFilter: TrackerFilter?
     
     // MARK: - Initializers
     init(viewModel: TrackersViewModel) {
@@ -194,6 +223,15 @@ final class TrackersViewController: UIViewController {
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         Logger.info("Выбранная дата: \(sender.date)")
         viewModel.selectDate(sender.date)
+    }
+    
+    @objc private func didTapFiltersButton() {
+        let vc = FiltersViewController(filter: selectedFilter)
+        vc.onFilterSelected = { [weak self] filter in
+            self?.viewModel.selectFilter(filter)
+        }
+        
+        present(vc, animated: true)
     }
     
     // MARK: - Private Methods
