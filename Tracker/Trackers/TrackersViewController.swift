@@ -78,6 +78,8 @@ final class TrackersViewController: UIViewController {
             frame: .zero,
             collectionViewLayout: UICollectionViewFlowLayout()
         )
+        collectionView.backgroundColor = .clear
+        
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         

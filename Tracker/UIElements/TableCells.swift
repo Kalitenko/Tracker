@@ -34,7 +34,7 @@ class TableCell: UITableViewCell {
     
     private let separatorView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(resource: .gray)
+        view.backgroundColor = UIColor(resource: .background)
         
         return view
     }()

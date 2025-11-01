@@ -104,6 +104,8 @@ final class TrackerController: ModalController {
             frame: .zero,
             collectionViewLayout: EmojiCollectionHandler.makeLayout()
         )
+        collectionView.backgroundColor = .clear
+        
         collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: String(describing: EmojiCell.self))
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         
@@ -117,6 +119,8 @@ final class TrackerController: ModalController {
             frame: .zero,
             collectionViewLayout: ColorCollectionHandler.makeLayout()
         )
+        collectionView.backgroundColor = .clear
+        
         collectionView.register(ColorCell.self, forCellWithReuseIdentifier: String(describing: ColorCell.self))
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         
