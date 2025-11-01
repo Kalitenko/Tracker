@@ -1,17 +1,23 @@
-//
-//  TrackerTests.swift
-//  TrackerTests
-//
-//  Created by Bogdan Kalitenko on 15.08.2025.
-//
-
-import Testing
+import XCTest
+import SnapshotTesting
 @testable import Tracker
 
-struct TrackerTests {
-
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+final class TrackerTests: XCTestCase {
+    
+    func testTrackersViewController_defaultAppearance() {
+        let viewModel = TrackersViewModel()
+        let vc = TrackersViewController(viewModel: viewModel)
+        assertSnapshot(of: vc, as: .image, named: "Default", testName: "TrackersCommon")
     }
+    
+    func testTrackersViewController_withDifferentBackground() {
+        let viewModel = TrackersViewModel()
+        let vc = TrackersViewController(viewModel: viewModel)
+        vc.view.backgroundColor = .red
 
+        XCTExpectFailure("Snapshot expected to fail because background is different") {
+            assertSnapshot(of: vc, as: .image, named: "Default", testName: "TrackersCommon")
+        }
+    }
+    
 }
