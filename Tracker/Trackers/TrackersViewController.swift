@@ -184,15 +184,25 @@ final class TrackersViewController: UIViewController {
         }
         
         viewModel.onCategoriesChangedWithChanges = { [weak self] data in
-            guard let self = self else { return }
+            guard let self else { return }
             let (categories, changes) = data
             self.visibleCategories = categories
             self.applyCollectionChanges(changes)
         }
         
         viewModel.onFilterChanged = { [weak self] filter in
-            self?.filtersButton.showActive(filter.isActive)
-            self?.selectedFilter = filter
+            guard let self else { return }
+            self.filtersButton.showActive(filter.isActive)
+            self.selectedFilter = filter
+            if filter == .today {
+                self.datePicker.date = Date()
+                self.datePicker.sendActions(for: .valueChanged)
+            }
+            isFiltering = filter.isActive
+        }
+        
+        viewModel.onFilteringAvailableChanged = { [weak self] isHidden in
+            self?.filtersButton.isHidden = isHidden
         }
     }
     
