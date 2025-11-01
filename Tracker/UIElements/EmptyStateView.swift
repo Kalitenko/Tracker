@@ -1,5 +1,29 @@
 import UIKit
 
+enum EmptyStateViewType {
+    case trackers
+    case categories
+    case filtering
+    case statistics
+    
+    var image: UIImage {
+        switch self {
+        case .trackers, .categories: UIImage(resource: .trackersAndCategories)
+        case .filtering: UIImage(resource: .filtering)
+        case .statistics: UIImage(resource: .statistics)
+        }
+    }
+    
+    var labelText: String {
+        switch self {
+        case .trackers: L10n.whatToTrack
+        case .categories: L10n.categoryHint
+        case .filtering: "Ничего не найдено"
+        case .statistics: "Анализировать пока нечего"
+        }
+    }
+}
+
 final class EmptyStateView: UIView {
     
     // MARK: - Constants
@@ -11,7 +35,7 @@ final class EmptyStateView: UIView {
     
     // MARK: - UI Elements
     private lazy var imageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(resource: .emptyState))
+        let imageView = UIImageView()
         imageView.contentMode = .center
         
         return imageView
@@ -36,9 +60,8 @@ final class EmptyStateView: UIView {
     }()
     
     // MARK: - Initializers
-    init(text: String) {
+    init() {
         super.init(frame: .zero)
-        label.text = text
         setupViews()
         setupConstraints()
     }
@@ -61,7 +84,9 @@ final class EmptyStateView: UIView {
     }
     
     // MARK: - Public Methods
-    func show() {
+    func show(type: EmptyStateViewType) {
+        imageView.image = type.image
+        label.text = type.labelText
         imageView.isHidden = false
         label.isHidden = false
     }

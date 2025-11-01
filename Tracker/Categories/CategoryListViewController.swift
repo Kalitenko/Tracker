@@ -6,7 +6,6 @@ final class CategoryListViewController: ModalController {
     private enum Layout {
         static let titleText = L10n.category
         static let buttonText = L10n.addCategory
-        static let emptyStateLabelText = L10n.categoryHint
         static let editButtonText = L10n.edit
         static let deleteButtonText = L10n.delete
         static let alertQuestion = L10n.deleteConfirmation
@@ -48,7 +47,7 @@ final class CategoryListViewController: ModalController {
         return stackView
     }()
     
-    private lazy var emptyStateView = EmptyStateView(text: Layout.emptyStateLabelText)
+    private lazy var emptyStateView = EmptyStateView()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -147,8 +146,12 @@ final class CategoryListViewController: ModalController {
             self?.updateTableHeight()
         }
         
-        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
-            isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+        viewModel.onEmptyStateChanged = { [weak self] emptyStateViewType in
+            guard let type = emptyStateViewType else {
+                self?.emptyStateView.hide()
+                return
+            }
+            self?.emptyStateView.show(type: type)
         }
         
         viewModel.onSelectionChanged = { [weak self] category in

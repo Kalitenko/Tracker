@@ -11,7 +11,7 @@ final class TrackersViewModel {
     // MARK: - Public Properties
     var onDateChanged: Binding<Date>?
     var onVisibleCategoriesChanged: Binding<[TrackerCategory]>?
-    var onEmptyStateChanged: Binding<Bool>?
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>?
     var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     var onRecordUpdated: Binding<IndexPath>?
     var onFilterChanged: Binding<TrackerFilter>?
@@ -172,7 +172,15 @@ final class TrackersViewModel {
     }
     
     private func updateEmptyState() {
-        onEmptyStateChanged?(visibleCategories.isEmpty)
+        let type: EmptyStateViewType?
+        if categories.isEmpty {
+            type = .trackers
+        } else if visibleCategories.isEmpty {
+            type = .filtering
+        } else {
+            type = nil
+        }
+        onEmptyStateChanged?(type)
     }
     
     private func updateFilteringAvailability() {

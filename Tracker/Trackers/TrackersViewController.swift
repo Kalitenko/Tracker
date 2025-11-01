@@ -6,7 +6,6 @@ final class TrackersViewController: UIViewController {
     private enum Layout {
         static let trackersLabelText = L10n.trackers
         static let searchBarText = L10n.search
-        static let emptyStateLabelText = L10n.whatToTrack
         static let editButtonText = L10n.edit
         static let deleteButtonText = L10n.delete
         static let alertTrackerQuestion = "Уверены что хотите удалить трекер?"
@@ -72,7 +71,7 @@ final class TrackersViewController: UIViewController {
         return appearance
     }()
     
-    private lazy var emptyStateView = EmptyStateView(text: Layout.emptyStateLabelText)
+    private lazy var emptyStateView = EmptyStateView()
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(
@@ -175,8 +174,12 @@ final class TrackersViewController: UIViewController {
             self?.collectionView.reloadData()
         }
         
-        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
-            isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+        viewModel.onEmptyStateChanged = { [weak self] emptyStateViewType in
+            guard let type = emptyStateViewType else {
+                self?.emptyStateView.hide()
+                return
+            }
+            self?.emptyStateView.show(type: type)
         }
         
         viewModel.onRecordUpdated = { [weak self] indexPath in
