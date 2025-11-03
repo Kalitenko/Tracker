@@ -23,14 +23,15 @@ final class TabBarController: UITabBarController {
     }
     
     private func configureTabBar() {
-        let viewModel = TrackersViewModel()
-        let trackersViewController = TrackersViewController(viewModel: viewModel)
+        let trackersViewModel = TrackersViewModel()
+        let trackersViewController = TrackersViewController(viewModel: trackersViewModel)
         trackersViewController.tabBarItem = UITabBarItem(
             title: Layout.trackersTitle,
             image: UIImage(resource: .tabBarTrackers),
             selectedImage: nil
         )
-        let statisticsViewController = StatisticsViewController()
+        let statisticsViewModel = StatisticsViewModel()
+        let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         statisticsViewController.tabBarItem = UITabBarItem(
             title: Layout.statisticsTitle,
             image: UIImage(resource: .tabBarStatistics),

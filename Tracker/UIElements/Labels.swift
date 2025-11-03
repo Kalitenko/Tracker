@@ -7,6 +7,8 @@ enum LabelStyle {
     case subtitle
     case collectionHeader
     case bold32
+    case statisticsTitle
+    case statisticsSubtitle
     
     var font: UIFont {
         switch self {
@@ -16,6 +18,8 @@ enum LabelStyle {
         case .subtitle: .regular17
         case .collectionHeader: .bold19
         case .bold32: .bold32
+        case .statisticsTitle: .bold34
+        case .statisticsSubtitle: .medium12
         }
     }
     
@@ -27,6 +31,8 @@ enum LabelStyle {
         case .subtitle: UIColor(resource: .gray)
         case .collectionHeader: UIColor(resource: .black)
         case .bold32: UIColor(resource: .black)
+        case .statisticsTitle: UIColor(resource: .black)
+        case .statisticsSubtitle: UIColor(resource: .black)
         }
     }
     
@@ -38,6 +44,8 @@ enum LabelStyle {
         case .subtitle: .left
         case .collectionHeader: .left
         case .bold32: .center
+        case .statisticsTitle: .left
+        case .statisticsSubtitle: .left
         }
     }
 }
