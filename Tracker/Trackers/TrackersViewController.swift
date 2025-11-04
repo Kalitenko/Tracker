@@ -8,8 +8,8 @@ final class TrackersViewController: UIViewController {
         static let searchBarText = L10n.search
         static let editButtonText = L10n.edit
         static let deleteButtonText = L10n.delete
-        static let alertTrackerQuestion = "Уверены что хотите удалить трекер?"
-        static let filtersButtonText = "Фильтры"
+        static let alertTrackerQuestion = L10n.deleteTrackerConfirmation
+        static let filtersButtonText = L10n.filtersTitle
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220

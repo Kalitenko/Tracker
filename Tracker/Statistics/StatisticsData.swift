@@ -7,11 +7,11 @@ enum StatisticsMetric: CaseIterable {
 
     var title: String {
         switch self {
-        case .bestPeriod: "Лучший период по всем трекерам"
-        case .bestPeriodPerTracker: "Лучший период для одного трекера"
-        case .idealDays: "Идеальные дни"
-        case .completedTrackers: "Трекеров завершено"
-        case .averageValue: "Среднее значение"
+        case .bestPeriod: L10n.bestPeriod
+        case .bestPeriodPerTracker: L10n.bestPeriodPerTracker
+        case .idealDays: L10n.idealDays
+        case .completedTrackers: L10n.completedTrackers
+        case .averageValue: L10n.averageValue
         }
     }
 }

@@ -8,7 +8,7 @@ final class TrackerController: ModalController {
         static let textFieldPlaceholderText = L10n.enterTrackerName
         static let cancelButtonText = L10n.cancel
         static let createButtonText = L10n.create
-        static let saveButtonText = "Сохранить"
+        static let saveButtonText = L10n.save
         
         // Sizes
         static let cellHeight: CGFloat = 75

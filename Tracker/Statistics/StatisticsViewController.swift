@@ -4,7 +4,7 @@ final class StatisticsViewController: UIViewController {
     
     // MARK: - Constants
     private enum Layout {
-        static let statisticsLabelText = "Статистика"
+        static let statisticsLabelText = L10n.statisticsLabel
         
         static let cellHeight: CGFloat = 102
         static let tableTopInset: CGFloat = 77

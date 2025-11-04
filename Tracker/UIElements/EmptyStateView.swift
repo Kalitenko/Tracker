@@ -18,8 +18,8 @@ enum EmptyStateViewType {
         switch self {
         case .trackers: L10n.whatToTrack
         case .categories: L10n.categoryHint
-        case .filtering: "Ничего не найдено"
-        case .statistics: "Анализировать пока нечего"
+        case .filtering: L10n.emptyFiltering
+        case .statistics: L10n.emptyStatistics
         }
     }
 }

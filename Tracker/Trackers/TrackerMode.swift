@@ -30,8 +30,8 @@ enum TrackerMode {
             }
         case .edit(let type, _, _, _):
             switch type {
-            case .habit: "Редактирование привычки"
-            case .irregular: "Редактирование нерегулярного события"
+            case .habit: L10n.editHabit
+            case .irregular: L10n.editIrregularEvent
             }
         }
     }

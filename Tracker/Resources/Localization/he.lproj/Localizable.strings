@@ -2,22 +2,24 @@
    CategoryController
    ================================ */
 "done_button" = "סיום";
-"enter_category_name" = "הזן שם קטגוריה";
+"enter_category_name" = "הכנס שם קטגוריה";
 
 /* ================================
    CategoryListViewController
    ================================ */
 "category_title" = "קטגוריה";
 "add_category" = "הוסף קטגוריה";
-"category_hint" = "ניתן לקבץ הרגלים ואירועים לפי משמעות";
+"category_hint" = "הרגלים ואירועים\nניתנים לאיחוד לפי משמעות";
+"empty_filtering" = "לא נמצא כלום";
+"empty_statistics" = "אין עדיין מה לנתח";
 "edit" = "ערוך";
 "delete" = "מחק";
-"delete_confirmation" = "למחוק את הקטגוריה הזו?";
+"delete_confirmation" = "האם למחוק את הקטגוריה הזו?";
 
 /* ================================
    CategoryViewModel
    ================================ */
-"symbol_limit" = "מגבלה של %d תווים";
+"symbol_limit" = "מגבלת %d תווים";
 "category_exists" = "קטגוריה בשם זה כבר קיימת";
 
 /* ================================
@@ -30,14 +32,14 @@
    AlertHelper
    ================================ */
 "delete_action" = "מחק";
-"cancel_action" = "בטל";
+"cancel_action" = "ביטול";
 
 /* ================================
    OnboardingPageViewController
    ================================ */
-"tech_exclamation" = "איזו טכנולוגיה!";
+"tech_exclamation" = "איזה טכנולוגיה!";
 "track_only_what_you_want" = "עקוב רק אחרי מה שאתה רוצה";
-"not_water_yoga" = "גם אם זה\nלא מים ויוגה";
+"not_water_yoga" = "גם אם זה\nלא ליטרים של מים ויוגה";
 
 /* ================================
    WeekDay
@@ -48,40 +50,41 @@
 "thursday" = "יום חמישי";
 "friday" = "יום שישי";
 "saturday" = "שבת";
-"sunday" = "יום ראשון";
-"mon_short" = "ב'";
-"tue_short" = "ג'";
-"wed_short" = "ד'";
-"thu_short" = "ה'";
-"fri_short" = "ו'";
-"sat_short" = "ש'";
-"sun_short" = "א'";
+"sunday" = "ראשון";
+"mon_short" = "ב׳";
+"tue_short" = "ג׳";
+"wed_short" = "ד׳";
+"thu_short" = "ה׳";
+"fri_short" = "ו׳";
+"sat_short" = "ש׳";
+"sun_short" = "א׳";
 "every_day" = "כל יום";
 
 /* ================================
    CollectionHandlers
    ================================ */
-"emoji" = "אימוג'י";
+"emoji" = "אימוג׳י";
 "color" = "צבע";
 
 /* ================================
    CreateTrackerController
    ================================ */
-"create_tracker" = "צור עוקב";
+"create_tracker" = "יצירת טרקר";
 "habit" = "הרגל";
 "irregular_event" = "אירוע לא סדיר";
 
 /* ================================
-   NewTrackerController
+   TrackerController
    ================================ */
-"enter_tracker_name" = "הזן שם עוקב";
-"cancel" = "בטל";
+"enter_tracker_name" = "הכנס שם טרקר";
+"cancel" = "ביטול";
 "create" = "צור";
+"save" = "שמור";
 
 /* ================================
    NewTrackerViewModel
    ================================ */
-"symbol_limit_tracker" = "מגבלה של %d תווים";
+"symbol_limit_tracker" = "מגבלת %d תווים";
 
 /* ================================
    ScheduleController
@@ -92,9 +95,11 @@
 /* ================================
    TrackersViewController
    ================================ */
-"trackers" = "עוקבים";
+"trackers" = "טרקרים";
 "search" = "חיפוש";
-"what_to_track" = "מה אתה רוצה לעקוב?";
+"what_to_track" = "מה ברצונך לעקוב?";
+"delete_tracker_confirmation" = "האם אתה בטוח שברצונך למחוק את הטרקר?";
+"filters_title" = "מסננים";
 
 /* ================================
    TrackerType
@@ -103,9 +108,38 @@
 "new_irregular_event" = "אירוע לא סדיר חדש";
 "category" = "קטגוריה";
 "schedule_label" = "לוח זמנים";
+"edit_irregular_event" = "עריכת אירוע לא סדיר";
+"edit_habit" = "עריכת הרגל";
 
 /* ================================
    TabBarController
    ================================ */
-"tab_trackers" = "עוקבים";
+"tab_trackers" = "טרקרים";
 "tab_statistics" = "סטטיסטיקה";
+
+/* ================================
+   StatisticsMetric
+   ================================ */
+"bestPeriod" = "התקופה הטובה ביותר לכל הטרקרים";
+"bestPeriodPerTracker" = "התקופה הטובה ביותר לטרקר יחיד";
+"idealDays" = "ימים אידאליים";
+"completedTrackers" = "טרקרים שהושלמו";
+"averageValue" = "ערך ממוצע";
+
+/* ================================
+   StatisticsViewController
+   ================================ */
+"statisticsLabel" = "סטטיסטיקה";
+
+/* ================================
+   FiltersViewController
+   ================================ */
+"filters" = "מסננים";
+
+/* ================================
+   TrackerFilter
+   ================================ */
+"all" = "כל הטרקרים";
+"today" = "טרקרים להיום";
+"completed" = "הושלמו";
+"notCompleted" = "לא הושלמו";

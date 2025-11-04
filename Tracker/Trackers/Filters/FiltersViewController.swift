@@ -4,7 +4,7 @@ final class FiltersViewController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Фильтры"
+        static let titleText = L10n.filtersTitle
         
         static let cellHeight: CGFloat = 75
         static let tableTopInset: CGFloat = 38

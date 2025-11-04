@@ -6,10 +6,10 @@ enum TrackerFilter: CaseIterable {
     
     var title: String {
         switch self {
-        case .all: "Все трекеры"
-        case .today: "Трекеры на сегодня"
-        case .completed: "Завершенные"
-        case .notCompleted: "Не завершенные"
+        case .all: L10n.all
+        case .today: L10n.today
+        case .completed: L10n.completed
+        case .notCompleted: L10n.notCompleted
         }
     }
     
