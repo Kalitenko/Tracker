@@ -44,6 +44,26 @@ final class CategoryController: ModalController {
         bindViewModel()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.openScreen(name: Screen.createCategory.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editCategory.rawValue)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.closeScreen(name: Screen.createCategory.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editCategory.rawValue)
+        }
+    }
+    
     // MARK: - Setup Methods
     private func setupTitleLabel() {
         self.titleLabel.text = mode.title

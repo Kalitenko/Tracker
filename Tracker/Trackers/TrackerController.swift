@@ -150,6 +150,26 @@ final class TrackerController: ModalController {
         updateUI()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.openScreen(name: Screen.createTracker.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editTracker.rawValue)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.closeScreen(name: Screen.createTracker.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editTracker.rawValue)
+        }
+    }
+    
     // MARK: - Setup Methods
     private func setupTitleLabel() {
         self.titleLabel.text = mode.titleText

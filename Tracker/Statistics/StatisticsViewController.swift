@@ -61,6 +61,16 @@ final class StatisticsViewController: UIViewController {
         viewModel.loadStatistics()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.openScreen(name: Screen.statistics.rawValue)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AnalyticsService.closeScreen(name: Screen.statistics.rawValue)
+    }
+    
     // MARK: - Setup Methods
     private func setupView() {
         view.backgroundColor = UIColor(resource: .white)

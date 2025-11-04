@@ -107,6 +107,16 @@ final class TrackersViewController: UIViewController {
         loadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.openScreen(name: Screen.main.rawValue)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AnalyticsService.closeScreen(name: Screen.main.rawValue)
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -230,6 +240,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton() {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.addTrack.rawValue)
         let vc = CreateTrackerController()
         
         present(vc, animated: true)
@@ -241,6 +252,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func didTapFiltersButton() {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.filter.rawValue)
         let vc = FiltersViewController(filter: selectedFilter)
         vc.onFilterSelected = { [weak self] filter in
             self?.viewModel.selectFilter(filter)
@@ -386,6 +398,7 @@ extension TrackersViewController: UISearchResultsUpdating {
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
     func didTapQuantityManagementButton(from cell: UICollectionViewCell) {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.track.rawValue)
         guard let indexPath = collectionView.indexPath(for: cell) else {
             Logger.error("Не удалось получить indexPath ячейки")
             return
@@ -410,9 +423,11 @@ extension TrackersViewController: UIContextMenuInteractionDelegate {
         
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
             let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.edit.rawValue)
                 self?.editTracker(tracker: tracker, category: category, count: count)
             }
             let deleteAction = UIAction(title: Layout.deleteButtonText, attributes: .destructive) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.delete.rawValue)
                 self?.showDeleteAlert(for: tracker)
             }
             return UIMenu(title: "", children: [editAction, deleteAction])
