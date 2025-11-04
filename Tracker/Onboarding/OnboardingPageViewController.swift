@@ -12,7 +12,7 @@ final class OnboardingPageViewController: UIPageViewController {
     
     // MARK: - UI Elements
     private lazy var onboardingButton: UIButton = {
-        let button = BlackButton(title: Layout.onboardingButtonText)
+        let button = OnboardingButton(title: Layout.onboardingButtonText)
         button.addTarget(self, action: #selector(Self.didTapOnboardingButton), for: .touchUpInside)
         
         return button

@@ -95,3 +95,18 @@ final class BlueButton: Button {
         setTitleColor(color, for: .normal)
     }
 }
+
+final class OnboardingButton: Button {
+    
+    init(title: String, isInitiallyEnabled: Bool = true) {
+        super.init(title: title,
+                   backgroundColor: .ypBlack,
+                   textColor: .ypWhite)
+        isEnabled = isInitiallyEnabled
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+}
