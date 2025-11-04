@@ -164,6 +164,7 @@ final class TrackerStore: NSObject {
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
+        trackerCoreData.isHabit = tracker.isHabit
     }
     
     @discardableResult

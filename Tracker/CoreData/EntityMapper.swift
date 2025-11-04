@@ -31,8 +31,9 @@ final class EntityMapper {
             throw EntityMapperError.conversionFailed
         }
         let id = entity.id
+        let isHabit = entity.isHabit
         
-        return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+        return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
     }
     
     static func convertToTrackerRecord(_ entity: TrackerRecordCoreData) throws -> TrackerRecord {
@@ -51,6 +52,7 @@ final class EntityMapper {
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
+        trackerCoreData.isHabit = tracker.isHabit
         
         return trackerCoreData
     }

@@ -139,18 +139,20 @@ final class TrackerViewModel {
     
     private func prepareTracker() -> Tracker? {
         if trackerType == .habit && selectedDays.isEmpty { return nil }
+        let isHabit = trackerType == .habit
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         guard let emoji = selectedEmoji, let color = selectedColor else { return nil }
         
-        return Tracker(name: trimmedName, color: color, emoji: emoji, schedule: schedule)
+        return Tracker(name: trimmedName, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
     }
     
     private func prepareTrackerForUpdate() -> Tracker? {
         if trackerType == .habit && selectedDays.isEmpty { return nil }
+        let isHabit = trackerType == .habit
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         guard let emoji = selectedEmoji, let color = selectedColor, let trackerId = trackerForUpdate?.id else { return nil }
         
-        return Tracker(id: trackerId, name: trimmedName, color: color, emoji: emoji, schedule: schedule)
+        return Tracker(id: trackerId, name: trimmedName, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
     }
     
     private func validateName() {

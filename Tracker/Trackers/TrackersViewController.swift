@@ -420,7 +420,8 @@ extension TrackersViewController: UIContextMenuInteractionDelegate {
     }
     
     private func editTracker(tracker: Tracker, category: TrackerCategory, count: Int) {
-        let vc = TrackerController(mode: .edit(type: .habit, tracker: tracker, category: category, count: count))
+        let type: TrackerType = tracker.isHabit ? .habit : .irregular
+        let vc = TrackerController(mode: .edit(type: type, tracker: tracker, category: category, count: count))
         present(vc, animated: true)
     }
     
