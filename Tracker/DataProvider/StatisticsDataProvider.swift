@@ -5,6 +5,7 @@ protocol StatisticsDataProviderProtocol {
     func averagePerDay() -> Double
     func bestPeriod() -> Int
     func bestPeriodPerTracker() -> Int
+    func idealDays() -> Int
 }
 
 final class StatisticsDataProvider {
@@ -14,11 +15,13 @@ final class StatisticsDataProvider {
     
     // MARK: - Private Properties
     private let recordStore: TrackerRecordStore
+    private let trackerStore: TrackerStore
     
     // MARK: - Initializers
     private init() {
         let context = DataBaseStore.shared.persistentContainer.viewContext
         recordStore = TrackerRecordStore(context: context)
+        trackerStore = TrackerStore(context: context)
     }
     
     // MARK: - Private Methods
@@ -51,15 +54,15 @@ final class StatisticsDataProvider {
     private func calculateBestStreak(for dates: [Date], calendar: Calendar = .current) -> Int {
         let uniqueDays = Array(Set(dates.map { calendar.startOfDay(for: $0) })).sorted()
         guard !uniqueDays.isEmpty else { return 0 }
-
+        
         var maxStreak = 1
         var currentStreak = 1
-
+        
         for i in 1..<uniqueDays.count {
             let previous = uniqueDays[i - 1]
             let current = uniqueDays[i]
             let daysBetween = calendar.dateComponents([.day], from: previous, to: current).day ?? 0
-
+            
             if daysBetween == 1 {
                 currentStreak += 1
             } else {
@@ -80,12 +83,12 @@ final class StatisticsDataProvider {
             return 0
         }
     }
-
+    
     private func findBestPeriodPerTracker() -> Int {
         do {
             let records = try recordStore.fetchAllTrackerRecords()
             let groupedByTracker = Dictionary(grouping: records) { $0.trackerId }
-
+            
             return groupedByTracker
                 .values
                 .map { trackerRecords in
@@ -97,7 +100,50 @@ final class StatisticsDataProvider {
             return 0
         }
     }
-
+    
+    private func countIdealDays() -> Int {
+        let calendar = Calendar.current
+        
+        let trackers: [Tracker]
+        do {
+            trackers = try trackerStore.fetchAllTrackers()
+        } catch {
+            Logger.error("Не удалось получить трекеры: \(error)")
+            return 0
+        }
+        
+        let records: [TrackerRecord]
+        do {
+            records = try recordStore.fetchAllTrackerRecords()
+        } catch {
+            Logger.error("Не удалось получить записи: \(error)")
+            return 0
+        }
+        
+        var scheduledByWeekday = [Int: Set<Int32>]()
+        for tracker in trackers {
+            for day in tracker.schedule {
+                scheduledByWeekday[day.calendarWeekday, default: []].insert(tracker.id)
+            }
+        }
+        
+        var completedByDate = [Date: Set<Int32>]()
+        for record in records {
+            let day = calendar.startOfDay(for: record.date)
+            completedByDate[day, default: []].insert(record.trackerId)
+        }
+        
+        var idealDays = 0
+        for (day, completedTrackers) in completedByDate {
+            let weekday = calendar.component(.weekday, from: day)
+            let scheduledTrackers = scheduledByWeekday[weekday] ?? []
+            if !scheduledTrackers.isEmpty && scheduledTrackers.isSubset(of: completedTrackers) {
+                idealDays += 1
+            }
+        }
+        return idealDays
+    }
+    
 }
 
 // MARK: - StatisticsDataProviderProtocol
@@ -116,6 +162,10 @@ extension StatisticsDataProvider: StatisticsDataProviderProtocol {
     
     func completedTrackers() -> Int {
         fetchCompletedTrackers()
+    }
+    
+    func idealDays() -> Int {
+        countIdealDays()
     }
 }
 

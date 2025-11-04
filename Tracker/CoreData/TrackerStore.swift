@@ -5,10 +5,24 @@ protocol TrackerStoreDelegate: AnyObject {
     func trackerStoreDidChange(_ changes: [DataChange])
 }
 
+protocol TrackerStoreStatisticsDelegate: AnyObject {
+    func recalculateIdealDays()
+}
+
 final class TrackerStore: NSObject {
     
     // MARK: - Public Properties
     weak var delegate: TrackerStoreDelegate?
+    weak var statisticsDelegate: TrackerStoreStatisticsDelegate? {
+        didSet {
+            guard statisticsDelegate != nil else { return }
+            do {
+                try allTrackersFRC.performFetch()
+            } catch {
+                Logger.error("Ошибка при fetch allTrackersFRC: \(error)")
+            }
+        }
+    }
     
     // MARK: - Private Properties
     private let context: NSManagedObjectContext
@@ -23,6 +37,21 @@ final class TrackerStore: NSObject {
             fetchRequest: fetchRequest,
             managedObjectContext: context,
             sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+            cacheName: nil
+        )
+        controller.delegate = self
+        return controller
+    }()
+    private lazy var allTrackersFRC: NSFetchedResultsController<TrackerCoreData> = {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "id", ascending: true)
+        ]
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
             cacheName: nil
         )
         controller.delegate = self
@@ -169,6 +198,21 @@ final class TrackerStore: NSObject {
             return nil
         }
     }
+    
+    private func fetchAll() throws -> [TrackerCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        let coreDataTrackers = try context.fetch(fetchRequest)
+        
+        return coreDataTrackers
+    }
+    
+    func fetchAllTrackers() throws -> [Tracker] {
+        let entities = try fetchAll()
+        let records = try entities.map(EntityMapper.convertToTracker)
+        
+        return records
+    }
+    
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
@@ -207,9 +251,15 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        guard !pendingChanges.isEmpty else { return }
-        delegate?.trackerStoreDidChange(pendingChanges)
-        Logger.info("Обновления трекеров: \(pendingChanges.count) изменений")
+        if controller == fetchedResultsController {
+            guard !pendingChanges.isEmpty else { return }
+            delegate?.trackerStoreDidChange(pendingChanges)
+            pendingChanges.removeAll()
+            Logger.info("Обновления трекеров: \(pendingChanges.count) изменений")
+        } else if controller == allTrackersFRC {
+            statisticsDelegate?.recalculateIdealDays()
+            Logger.debug("Пересчет идеальных дней")
+        }
     }
     
     func controller(

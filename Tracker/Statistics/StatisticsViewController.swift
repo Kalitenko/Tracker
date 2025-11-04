@@ -75,11 +75,9 @@ final class StatisticsViewController: UIViewController {
     
     private func setupConstraints() {
         let guide = view.safeAreaLayoutGuide
-                
+        
         let middleGuide = UILayoutGuide()
         view.addLayoutGuide(middleGuide)
-        
-        let tableHeight = options.count > 0 ? CGFloat(options.count) * Layout.cellHeight : 0
         
         let tableHeightConstraint = optionsTableView.heightAnchor.constraint(equalToConstant: 0)
         self.tableHeightConstraint = tableHeightConstraint
@@ -103,8 +101,6 @@ final class StatisticsViewController: UIViewController {
     
     private func configureUINavigationBar() {
         navigationItem.title = Layout.statisticsLabelText
-        navigationItem.searchController = UISearchController(searchResultsController: nil)
-        navigationItem.hidesSearchBarWhenScrolling = true
         
         let appearance = uiNavigationBarAppearance
         
@@ -148,9 +144,20 @@ final class StatisticsViewController: UIViewController {
         }
         
         viewModel.onStatisticsChanged = { [weak self] statistics in
-            self?.options = statistics
-            self?.updateTableHeight()
-            self?.optionsTableView.reloadData()
+            guard let self else { return }
+            options = statistics
+            updateTableHeight()
+            optionsTableView.reloadData()
+        }
+        
+        viewModel.onIdealDaysRecalculated = { [weak self] statisticData in
+            guard let self, let statisticData else { return }
+            if !options.isEmpty {
+                let row = self.options.firstIndex { $0.metric == .idealDays } ?? 0
+                options[row] = statisticData
+                let idealDaysIndex: IndexPath = .init(row: row, section: 0)
+                optionsTableView.reloadRows(at: [idealDaysIndex], with: .none)
+            }
         }
     }
     
@@ -167,7 +174,7 @@ final class StatisticsViewController: UIViewController {
         tableHeightConstraint.constant = min(contentHeight, availableHeight)
         optionsTableView.isScrollEnabled = contentHeight > availableHeight
     }
-
+    
 }
 
 // MARK: - UITableViewDataSource

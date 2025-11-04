@@ -5,6 +5,7 @@ final class StatisticsViewModel {
     // MARK: - Public Properties
     var onStatisticsChanged: Binding<[StatisticsData]>?
     var onEmptyStateChanged: Binding<EmptyStateViewType?>?
+    var onIdealDaysRecalculated: Binding<StatisticsData?>?
     
     // MARK: - Private Properties
     private var statisticsData: [StatisticsData] = []
@@ -34,13 +35,13 @@ final class StatisticsViewModel {
         if completedTrackers > 0 {
             bestPeriod = dataProvider.bestPeriod()
             bestPeriodPerTracker = dataProvider.bestPeriodPerTracker()
-            idealDays = 0
+            idealDays = dataProvider.idealDays()
             averageValue = dataProvider.averagePerDay()
             
-             statisticsData = [
+            statisticsData = [
                 .init(metric: .bestPeriod, data: bestPeriod.description),
                 .init(metric: .bestPeriodPerTracker, data: bestPeriodPerTracker.description),
-                //            .init(metric: .idealDays, data: idealDays.description),
+                .init(metric: .idealDays, data: idealDays.description),
                 .init(metric: .completedTrackers, data: completedTrackers.description),
                 .init(metric: .averageValue, data: Utils.localizedNumber(averageValue))
             ]
@@ -51,10 +52,20 @@ final class StatisticsViewModel {
         }
         updateEmptyState()
     }
+    
+    // MARK: - Private Methods
+    private func updateIdealDays() {
+        idealDays = dataProvider.idealDays()
+        onIdealDaysRecalculated?(StatisticsData(metric: .idealDays, data: idealDays.description))
+    }
 }
 
 extension StatisticsViewModel: StatisticsObserverDelegate {
-    func didUpdateStatistics() {
+    func calculateIdealDays() {
+        updateIdealDays()
+    }
+    
+    func calculateStatistics() {
         loadStatistics()
     }
 }
