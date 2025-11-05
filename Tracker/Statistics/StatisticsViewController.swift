@@ -129,11 +129,11 @@ final class StatisticsViewController: UIViewController {
     // MARK: - Private Properties
     private var options: [StatisticsData] = []
     private let tableStyle: TableStyle = .statistics
-    private let viewModel: StatisticsViewModel
+    private let viewModel: StatisticsViewModelProtocol
     private var tableHeightConstraint: NSLayoutConstraint?
     
     // MARK: - Initializers
-    init(viewModel: StatisticsViewModel) {
+    init(viewModel: StatisticsViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }

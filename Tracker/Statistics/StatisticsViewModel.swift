@@ -1,6 +1,13 @@
 import Foundation
 
-final class StatisticsViewModel {
+protocol StatisticsViewModelProtocol: AnyObject {
+    var onStatisticsChanged: Binding<[StatisticsData]>? { get set }
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>? { get set }
+    var onIdealDaysRecalculated: Binding<StatisticsData?>? { get set }
+    func loadStatistics()
+}
+
+final class StatisticsViewModel: StatisticsViewModelProtocol {
     
     // MARK: - Public Properties
     var onStatisticsChanged: Binding<[StatisticsData]>?
