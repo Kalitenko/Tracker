@@ -118,10 +118,10 @@ final class CategoryListViewController: ModalController {
     private let tableStyle: TableStyle = .checkmark
     private var tableHeightConstraint: NSLayoutConstraint?
     private var selectedIndexPath: IndexPath?
-    private let viewModel: CategoryListViewModel
+    private let viewModel: CategoryListViewModelProtocol
     
     // MARK: - Initializers
-    init(viewModel: CategoryListViewModel) {
+    init(viewModel: CategoryListViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }

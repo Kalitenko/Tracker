@@ -1,4 +1,15 @@
-final class CategoryListViewModel {
+protocol CategoryListViewModelProtocol: AnyObject {
+    var onCategoriesChanged: Binding<[TrackerCategory]>? { get set }
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>? { get set }
+    var onSelectionChanged: Binding<TrackerCategory?>? { get set }
+    var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>? { get set }
+
+    func loadCategories()
+    func selectCategory(at index: Int)
+    func deleteCategory(_ category: TrackerCategory)
+}
+
+final class CategoryListViewModel: CategoryListViewModelProtocol {
     
     // MARK: - Public Properties
     var onCategoriesChanged: Binding<[TrackerCategory]>?
