@@ -6,7 +6,28 @@ struct TrackerCellData {
     let completedCount: Int
 }
 
-final class TrackersViewModel {
+import Foundation
+
+protocol TrackersViewModelProtocol: AnyObject {
+    var onDateChanged: Binding<Date>? { get set }
+    var onVisibleCategoriesChanged: Binding<[TrackerCategory]>? { get set }
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>? { get set }
+    var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>? { get set }
+    var onRecordUpdated: Binding<IndexPath>? { get set }
+    var onFilterChanged: Binding<TrackerFilter>? { get set }
+    var onFilteringAvailableChanged: Binding<Bool>? { get set }
+
+    func selectDate(_ date: Date)
+    func updateSearchQuery(_ text: String)
+    func cellData(for indexPath: IndexPath) -> TrackerCellData
+    func toggleTrackerRecord(at indexPath: IndexPath)
+    func count(for indexPath: IndexPath) -> Int
+    func deleteTracker(_ tracker: Tracker)
+    func selectFilter(_ filter: TrackerFilter)
+    func pinToggle(tracker: Tracker)
+}
+
+final class TrackersViewModel: TrackersViewModelProtocol {
     
     // MARK: - Public Properties
     var onDateChanged: Binding<Date>?

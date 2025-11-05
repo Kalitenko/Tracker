@@ -41,6 +41,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C24FB26A2EBB88B800B963EA /* Exceptions for "TrackerTests" folder in "Tracker" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Trackers/MockData/MockDataProvider.swift,
+			);
+			target = C29E6ED12E4F48ED0031911D /* Tracker */;
+		};
+		C24FB26B2EBB88B800B963EA /* Exceptions for "TrackerTests" folder in "TrackerTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Trackers/MockData/MockDataProvider.swift,
+			);
+			target = C29E6EE72E4F48EF0031911D /* TrackerTests */;
+		};
 		C29E6EFA2E4F48EF0031911D /* Exceptions for "Tracker" folder in "Tracker" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -61,6 +75,10 @@
 		};
 		C29E6EEB2E4F48EF0031911D /* TrackerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C24FB26A2EBB88B800B963EA /* Exceptions for "TrackerTests" folder in "Tracker" target */,
+				C24FB26B2EBB88B800B963EA /* Exceptions for "TrackerTests" folder in "TrackerTests" target */,
+			);
 			path = TrackerTests;
 			sourceTree = "<group>";
 		};

@@ -225,12 +225,12 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
     private var pinnedCategory: TrackerCategory?
-    private let viewModel: TrackersViewModel
+    private let viewModel: TrackersViewModelProtocol
     private var isFiltering = false
     private var selectedFilter: TrackerFilter?
     
     // MARK: - Initializers
-    init(viewModel: TrackersViewModel) {
+    init(viewModel: TrackersViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
