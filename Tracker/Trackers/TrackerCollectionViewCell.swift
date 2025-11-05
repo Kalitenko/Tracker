@@ -91,6 +91,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         counterLabel.text = nil
         quantityManagementButton.isSelected = false
         quantityManagementButton.isEnabled = true
+        isPinned = false
         configureContextMenuDelegate(nil)
     }
     
@@ -160,6 +161,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var isCompletedToday: Bool = false
     private var trackerId: Int32?
     private var indexPath: IndexPath?
+    private var isPinned: Bool = false
     
     // MARK: - Public Methods
     func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath, completedDays counter: Int, datePickerDate date: Date) {
@@ -168,6 +170,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         cardView.backgroundColor = tracker.color
         quantityManagementButton.tintColor = tracker.color
         counterLabel.text = Utils.dayCountString(for: counter)
+        isPinned = tracker.isPinned
         
         self.isCompletedToday = isCompletedToday
         quantityManagementButton.isSelected = isCompletedToday

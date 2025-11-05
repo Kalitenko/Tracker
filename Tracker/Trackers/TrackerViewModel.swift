@@ -150,7 +150,11 @@ final class TrackerViewModel {
         if trackerType == .habit && selectedDays.isEmpty { return nil }
         let isHabit = trackerType == .habit
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
-        guard let emoji = selectedEmoji, let color = selectedColor, let trackerId = trackerForUpdate?.id else { return nil }
+        guard let emoji = selectedEmoji,
+              let color = selectedColor,
+              let trackerId = trackerForUpdate?.id,
+              let isPinned = trackerForUpdate?.isPinned
+        else { return nil }
         
         return Tracker(id: trackerId, name: trimmedName, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
     }

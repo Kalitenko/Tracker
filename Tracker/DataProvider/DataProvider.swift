@@ -90,6 +90,16 @@ final class DataProvider {
         (try? recordStore.fetchRecords(ids: ids)) ?? []
     }
     
+    func pinTracker(_ tracker: Tracker) {
+        let toggledTracker = Tracker(tracker: tracker, isPinned: true)
+        updateTracker(toggledTracker)
+    }
+    
+    func unpinTracker(_ tracker: Tracker) {
+        let toggledTracker = Tracker(tracker: tracker, isPinned: false)
+        updateTracker(toggledTracker)
+    }
+    
     // MARK: - Private Methods
     private func addTracker(_ tracker: Tracker, to categoryTitle: String) {
         do {
@@ -101,6 +111,10 @@ final class DataProvider {
         } catch {
             Logger.error("Ошибка добавления трекера: \(error)")
         }
+    }
+    
+    private func updateTracker(_ tracker: Tracker) {
+        trackerStore.update(tracker)
     }
 }
 

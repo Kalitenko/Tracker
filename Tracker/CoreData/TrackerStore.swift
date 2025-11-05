@@ -29,6 +29,7 @@ final class TrackerStore: NSObject {
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
             NSSortDescriptor(key: #keyPath(TrackerCoreData.category.title), ascending: true),
             NSSortDescriptor(key: "id", ascending: true)
         ]
@@ -36,7 +37,7 @@ final class TrackerStore: NSObject {
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+            sectionNameKeyPath: #keyPath(TrackerCoreData.groupTitle),
             cacheName: nil
         )
         controller.delegate = self
@@ -92,9 +93,16 @@ final class TrackerStore: NSObject {
             return []
         }
         
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(
+        let fetchRequest = fetchedResultsController.fetchRequest
+        fetchRequest.predicate = NSPredicate(
             format: "%K CONTAINS %@", #keyPath(TrackerCoreData.daysString), dayName
         )
+        
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
+            NSSortDescriptor(key: #keyPath(TrackerCoreData.category.title), ascending: true),
+            NSSortDescriptor(key: "id", ascending: true)
+        ]
         
         do {
             try fetchedResultsController.performFetch()
@@ -103,11 +111,12 @@ final class TrackerStore: NSObject {
             var categories: [TrackerCategory] = []
             
             for sectionInfo in frcSections {
-                let objects = sectionInfo.objects as? [TrackerCoreData] ?? []
+                guard let objects = sectionInfo.objects as? [TrackerCoreData] else { continue }
                 let trackers = objects.compactMap { try? EntityMapper.convertToTracker($0) }
                 let sectionName = sectionInfo.name
                 categories.append(TrackerCategory(title: sectionName, trackers: trackers))
             }
+            
             return categories
         } catch {
             Logger.error("Ошибка при выполнении запроса трекеров: \(error)")
@@ -149,6 +158,21 @@ final class TrackerStore: NSObject {
         }
     }
     
+    func update(_ tracker: Tracker) {
+        guard let existingTracker = fetchById(tracker.id) else {
+            Logger.error("Не найден трекер для обновления с id: \(tracker.id)")
+            return
+        }
+        updateExisting(existingTracker, with: tracker)
+        
+        do {
+            try context.save()
+            Logger.success("Трекер '\(tracker.name)' успешно обновлён")
+        } catch {
+            Logger.error("Ошибка при сохранении обновлённого трекера: \(error)")
+        }
+    }
+    
     func delete(_ tracker: Tracker) throws {
         guard let entity = fetchById(tracker.id) else {
             Logger.error("Невозможно удалить несуществующий трекер")
@@ -165,6 +189,7 @@ final class TrackerStore: NSObject {
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
         trackerCoreData.isHabit = tracker.isHabit
+        trackerCoreData.isPinned = tracker.isPinned
     }
     
     @discardableResult

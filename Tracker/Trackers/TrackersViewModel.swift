@@ -93,6 +93,14 @@ final class TrackersViewModel {
         filterCategories()
     }
     
+    func pinToggle(tracker: Tracker) {
+        if tracker.isPinned {
+            dataProvider.unpinTracker(tracker)
+        } else {
+            dataProvider.pinTracker(tracker)
+        }
+    }
+    
     // MARK: - Private Methods
     private func loadCategories(for date: Date) {
         categories = dataProvider.categories(for: date)

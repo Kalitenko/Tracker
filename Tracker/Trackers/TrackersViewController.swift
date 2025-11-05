@@ -10,6 +10,8 @@ final class TrackersViewController: UIViewController {
         static let deleteButtonText = L10n.delete
         static let alertTrackerQuestion = L10n.deleteTrackerConfirmation
         static let filtersButtonText = L10n.filtersTitle
+        static let pinButtonText = "Закрепить"
+        static let unpinButtonText = "Открепить"
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220
@@ -72,7 +74,6 @@ final class TrackersViewController: UIViewController {
     }()
     
     private lazy var emptyStateView = EmptyStateView()
-    
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(
             frame: .zero,
@@ -223,6 +224,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
+    private var pinnedCategory: TrackerCategory?
     private let viewModel: TrackersViewModel
     private var isFiltering = false
     private var selectedFilter: TrackerFilter?
@@ -422,6 +424,11 @@ extension TrackersViewController: UIContextMenuInteractionDelegate {
         let count = viewModel.count(for: indexPath)
         
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let pinToggleText = tracker.isPinned ? Layout.unpinButtonText : Layout.pinButtonText
+            let togglePinStatusAction = UIAction(title: pinToggleText) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.edit.rawValue)
+                self?.pinToggle(tracker: tracker)
+            }
             let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
                 AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.edit.rawValue)
                 self?.editTracker(tracker: tracker, category: category, count: count)
@@ -430,7 +437,7 @@ extension TrackersViewController: UIContextMenuInteractionDelegate {
                 AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.delete.rawValue)
                 self?.showDeleteAlert(for: tracker)
             }
-            return UIMenu(title: "", children: [editAction, deleteAction])
+            return UIMenu(title: "", children: [togglePinStatusAction, editAction, deleteAction])
         }
     }
     
@@ -447,5 +454,9 @@ extension TrackersViewController: UIContextMenuInteractionDelegate {
         ) { [weak self] in
             self?.viewModel.deleteTracker(tracker)
         }
+    }
+    
+    private func pinToggle(tracker: Tracker) {
+        viewModel.pinToggle(tracker: tracker)
     }
 }
