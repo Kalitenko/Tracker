@@ -17,4 +17,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = rootController
         window?.makeKeyAndVisible()
     }
+    
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        DataBaseStore.shared.saveContext()
+    }
 }
