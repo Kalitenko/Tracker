@@ -42,7 +42,7 @@ struct AnalyticsService {
     }
     
     static func clickOnScreen(screenName: String, item: String) {
-        report(event: Event.close.rawValue, params: ["screen": screenName, "item": item])
+        report(event: Event.click.rawValue, params: ["screen": screenName, "item": item])
     }
     
     // MARK: - Private Methods
