@@ -100,6 +100,14 @@
 "what_to_track" = "Was möchtest du verfolgen?";
 "delete_tracker_confirmation" = "Möchtest du den Tracker wirklich löschen?";
 "filters_title" = "Filter";
+"pin" = "Anheften";
+"unpin" = "Lösen";
+
+/* ================================
+   TrackerCoreData
+   ================================ */
+"pinned" = "Angeheftet";
+"without_category" = "Ohne Kategorie";
 
 /* ================================
    TrackerType

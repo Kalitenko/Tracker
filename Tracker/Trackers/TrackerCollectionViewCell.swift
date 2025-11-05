@@ -21,6 +21,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         static let quantityTopInset: CGFloat = 16
         static let quantityButtonTopInset: CGFloat = 8
         static let quantitySideInset: CGFloat = 12
+        static let pinSignTopInset: CGFloat = 12
+        static let pinSignTrailingInset: CGFloat = 4
+        static let pinSignSize: CGFloat = 24
     }
     
     // MARK: - Public Static Properties
@@ -83,6 +86,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    private lazy var pinSignImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(resource: .pin))
+        imageView.isHidden = true
+        
+        return imageView
+    }()
+    
     // MARK: - Lifecycle
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -114,11 +124,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupSubViews() {
-        [cardView, quantityManagementView, trackerLabel, emojiLabel, counterLabel, quantityManagementButton].forEach {
+        [cardView, quantityManagementView, trackerLabel, emojiLabel, counterLabel, quantityManagementButton, pinSignImageView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         [cardView, quantityManagementView].forEach { contentView.addSubview($0) }
-        [trackerLabel, emojiLabel].forEach { cardView.addSubview($0) }
+        [trackerLabel, emojiLabel, pinSignImageView].forEach { cardView.addSubview($0) }
         [counterLabel, quantityManagementButton].forEach { quantityManagementView.addSubview($0) }
     }
     
@@ -137,6 +147,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             trackerLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: Layout.cardSideInset),
             trackerLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Layout.cardSideInset),
             trackerLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -Layout.cardBottomInset),
+            
+            pinSignImageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: Layout.pinSignTopInset),
+            pinSignImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Layout.pinSignTrailingInset),
+            pinSignImageView.widthAnchor.constraint(equalToConstant: Layout.pinSignSize),
+            pinSignImageView.heightAnchor.constraint(equalTo: pinSignImageView.widthAnchor),
             
             quantityManagementView.topAnchor.constraint(equalTo: cardView.bottomAnchor),
             quantityManagementView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
@@ -171,6 +186,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         quantityManagementButton.tintColor = tracker.color
         counterLabel.text = Utils.dayCountString(for: counter)
         isPinned = tracker.isPinned
+        pinSignImageView.isHidden = !isPinned
         
         self.isCompletedToday = isCompletedToday
         quantityManagementButton.isSelected = isCompletedToday

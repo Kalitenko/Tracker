@@ -100,6 +100,14 @@
 "what_to_track" = "What do you want to track?";
 "delete_tracker_confirmation" = "Are you sure you want to delete the tracker?";
 "filters_title" = "Filters";
+"pin" = "Pin";
+"unpin" = "Unpin";
+
+/* ================================
+   TrackerCoreData
+   ================================ */
+"pinned" = "Pinned";
+"without_category" = "Without category";
 
 /* ================================
    TrackerType

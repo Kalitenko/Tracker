@@ -10,8 +10,8 @@ final class TrackersViewController: UIViewController {
         static let deleteButtonText = L10n.delete
         static let alertTrackerQuestion = L10n.deleteTrackerConfirmation
         static let filtersButtonText = L10n.filtersTitle
-        static let pinButtonText = "Закрепить"
-        static let unpinButtonText = "Открепить"
+        static let pinButtonText = L10n.pin
+        static let unpinButtonText = L10n.unpin
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220

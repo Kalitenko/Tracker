@@ -59,8 +59,8 @@ internal enum L10n {
   internal static let deleteAction = L10n.tr("Localizable", "delete_action", fallback: "Удалить")
   /// Эта категория точно не нужна?
   internal static let deleteConfirmation = L10n.tr("Localizable", "delete_confirmation", fallback: "Эта категория точно не нужна?")
-  /// Уверены, что хотите удалить трекер?
-  internal static let deleteTrackerConfirmation = L10n.tr("Localizable", "delete_tracker_confirmation", fallback: "Уверены, что хотите удалить трекер?")
+  /// Уверены что хотите удалить трекер?
+  internal static let deleteTrackerConfirmation = L10n.tr("Localizable", "delete_tracker_confirmation", fallback: "Уверены что хотите удалить трекер?")
   /// Готово
   internal static let done = L10n.tr("Localizable", "done", fallback: "Готово")
   /// ================================
@@ -118,7 +118,7 @@ internal enum L10n {
   ///    ================================
   internal static let newCategory = L10n.tr("Localizable", "new_category", fallback: "Новая категория")
   /// ================================
-  ///    TrackerType
+  ///    TrackerCoreData
   ///    ================================
   internal static let newHabit = L10n.tr("Localizable", "new_habit", fallback: "Новая привычка")
   /// Новое нерегулярное событие
@@ -128,6 +128,12 @@ internal enum L10n {
   internal static let notWaterYoga = L10n.tr("Localizable", "not_water_yoga", fallback: "Даже если это\nне литры воды и йога")
   /// Не завершенные
   internal static let notCompleted = L10n.tr("Localizable", "notCompleted", fallback: "Не завершенные")
+  /// Закрепить
+  internal static let pin = L10n.tr("Localizable", "pin", fallback: "Закрепить")
+  /// ================================
+  ///    TrackerCoreData
+  ///    ================================
+  internal static let pinned = L10n.tr("Localizable", "pinned", fallback: "Закрепленные")
   /// Сб
   internal static let satShort = L10n.tr("Localizable", "sat_short", fallback: "Сб")
   /// Суббота
@@ -188,12 +194,16 @@ internal enum L10n {
   internal static let tueShort = L10n.tr("Localizable", "tue_short", fallback: "Вт")
   /// Вторник
   internal static let tuesday = L10n.tr("Localizable", "tuesday", fallback: "Вторник")
+  /// Открепить
+  internal static let unpin = L10n.tr("Localizable", "unpin", fallback: "Открепить")
   /// Ср
   internal static let wedShort = L10n.tr("Localizable", "wed_short", fallback: "Ср")
   /// Среда
   internal static let wednesday = L10n.tr("Localizable", "wednesday", fallback: "Среда")
   /// Что будем отслеживать?
   internal static let whatToTrack = L10n.tr("Localizable", "what_to_track", fallback: "Что будем отслеживать?")
+  /// Без категории
+  internal static let withoutCategory = L10n.tr("Localizable", "without_category", fallback: "Без категории")
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:enable nesting type_body_length type_name vertical_whitespace_opening_braces
