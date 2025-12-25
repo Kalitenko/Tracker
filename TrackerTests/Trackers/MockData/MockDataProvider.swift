@@ -18,6 +18,8 @@ final class MockDataProvider: DataProviderProtocol {
     func createTracker(_ tracker: Tracker, to categoryTitle: String) {}
     func addRecord(_ record: TrackerRecord) {}
     func deleteRecord(_ record: TrackerRecord) {}
+    func updateTracker(_ tracker: Tracker, to categoryTitle: String) {}
+    func deleteTracker(_ tracker: Tracker) {}
 }
 
 
@@ -33,21 +35,24 @@ private extension MockDataProvider {
                     name: "Утренняя планёрка",
                     color: .systemBlue,
                     emoji: "📋",
-                    schedule: [.monday, .wednesday, .friday]
+                    schedule: [.monday, .wednesday, .friday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 102,
                     name: "Проверка почты",
                     color: .systemTeal,
                     emoji: "📧",
-                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday]
+                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 103,
                     name: "Код-ревью",
                     color: .systemOrange,
                     emoji: "💻",
-                    schedule: [.monday, .thursday]
+                    schedule: [.monday, .thursday],
+                    isHabit: true
                 )
             ]
         )
@@ -60,14 +65,16 @@ private extension MockDataProvider {
                     name: "Утренняя пробежка",
                     color: .systemGreen,
                     emoji: "🏃‍♂️",
-                    schedule: [.monday, .wednesday, .friday, .sunday]
+                    schedule: [.monday, .wednesday, .friday, .sunday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 202,
                     name: "Медитация",
                     color: .systemPurple,
                     emoji: "🧘‍♀️",
-                    schedule: [.wednesday, .sunday]
+                    schedule: [.wednesday, .sunday],
+                    isHabit: true
                 )
             ]
         )
@@ -80,7 +87,8 @@ private extension MockDataProvider {
                     name: "Играть на гитаре",
                     color: .systemRed,
                     emoji: "🎸",
-                    schedule: [.sunday]
+                    schedule: [.sunday],
+                    isHabit: true
                 )
             ]
         )

@@ -6,7 +6,7 @@ class TableCell: UITableViewCell {
     private enum Layout {
         static let horizontalInset: CGFloat = 16
         static let separatorHeight: CGFloat = 1
-        static let stackSpacing: CGFloat = 1
+        static let stackSpacing: CGFloat = 2
     }
     
     // MARK: - UI Elements

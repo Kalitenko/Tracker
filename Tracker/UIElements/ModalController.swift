@@ -3,7 +3,7 @@ import UIKit
 class ModalController: UIViewController {
     // MARK: - Constants
     private enum Layout {
-        
+        static let titleTopInset: CGFloat = 27
     }
     
     // MARK: - Layout
@@ -43,7 +43,7 @@ class ModalController: UIViewController {
         let guide = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: 27),
+            titleLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.titleTopInset),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }

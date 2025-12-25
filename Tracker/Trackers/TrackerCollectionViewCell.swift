@@ -1,7 +1,7 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func didTapQuantityManagementButton(id: Int32, at: IndexPath)
+    func didTapQuantityManagementButton(from cell: UICollectionViewCell)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -21,6 +21,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         static let quantityTopInset: CGFloat = 16
         static let quantityButtonTopInset: CGFloat = 8
         static let quantitySideInset: CGFloat = 12
+        static let pinSignTopInset: CGFloat = 12
+        static let pinSignTrailingInset: CGFloat = 4
+        static let pinSignSize: CGFloat = 24
     }
     
     // MARK: - Public Static Properties
@@ -83,6 +86,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    private lazy var pinSignImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(resource: .pin))
+        imageView.isHidden = true
+        
+        return imageView
+    }()
+    
     // MARK: - Lifecycle
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -91,6 +101,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         counterLabel.text = nil
         quantityManagementButton.isSelected = false
         quantityManagementButton.isEnabled = true
+        isPinned = false
+        configureContextMenuDelegate(nil)
     }
     
     // MARK: - Init
@@ -112,11 +124,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupSubViews() {
-        [cardView, quantityManagementView, trackerLabel, emojiLabel, counterLabel, quantityManagementButton].forEach {
+        [cardView, quantityManagementView, trackerLabel, emojiLabel, counterLabel, quantityManagementButton, pinSignImageView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         [cardView, quantityManagementView].forEach { contentView.addSubview($0) }
-        [trackerLabel, emojiLabel].forEach { cardView.addSubview($0) }
+        [trackerLabel, emojiLabel, pinSignImageView].forEach { cardView.addSubview($0) }
         [counterLabel, quantityManagementButton].forEach { quantityManagementView.addSubview($0) }
     }
     
@@ -136,6 +148,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             trackerLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Layout.cardSideInset),
             trackerLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -Layout.cardBottomInset),
             
+            pinSignImageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: Layout.pinSignTopInset),
+            pinSignImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -Layout.pinSignTrailingInset),
+            pinSignImageView.widthAnchor.constraint(equalToConstant: Layout.pinSignSize),
+            pinSignImageView.heightAnchor.constraint(equalTo: pinSignImageView.widthAnchor),
+            
             quantityManagementView.topAnchor.constraint(equalTo: cardView.bottomAnchor),
             quantityManagementView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             quantityManagementView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
@@ -153,11 +170,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Public Properties
     weak var delegate: TrackerCellDelegate?
+    weak var menuDelegate: (any UIContextMenuInteractionDelegate)?
     
     // MARK: - Private Properties
     private var isCompletedToday: Bool = false
     private var trackerId: Int32?
     private var indexPath: IndexPath?
+    private var isPinned: Bool = false
     
     // MARK: - Public Methods
     func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath, completedDays counter: Int, datePickerDate date: Date) {
@@ -166,6 +185,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         cardView.backgroundColor = tracker.color
         quantityManagementButton.tintColor = tracker.color
         counterLabel.text = Utils.dayCountString(for: counter)
+        isPinned = tracker.isPinned
+        pinSignImageView.isHidden = !isPinned
         
         self.isCompletedToday = isCompletedToday
         quantityManagementButton.isSelected = isCompletedToday
@@ -177,15 +198,24 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         quantityManagementButton.isEnabled = datePickerDay <= today
     }
     
+    func configureContextMenuDelegate(_ delegate: (any UIContextMenuInteractionDelegate)?) {
+        self.menuDelegate = delegate
+        
+        cardView.interactions.forEach { interaction in
+            if interaction is UIContextMenuInteraction {
+                cardView.removeInteraction(interaction)
+            }
+        }
+        
+        if let delegate = delegate {
+            let interaction = UIContextMenuInteraction(delegate: delegate)
+            cardView.addInteraction(interaction)
+        }
+    }
+    
     // MARK: - IB Actions
     @objc private func quantityManagementButtonTapped() {
-        guard let trackerId, let indexPath else {
-            assertionFailure("Missing trackerId or indexPath")
-            Logger.error("Нет trackerId или indexPath")
-            return
-        }
-        Logger.info("Кнопка трекера нажата")
-        delegate?.didTapQuantityManagementButton(id: trackerId, at: indexPath)
+        delegate?.didTapQuantityManagementButton(from: self)
     }
 }
 

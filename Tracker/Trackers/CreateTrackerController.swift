@@ -4,9 +4,9 @@ final class CreateTrackerController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Создание трекера"
-        static let habitButtonText = "Привычка"
-        static let irregularEventButtonText = "Нерегулярное событие"
+        static let titleText = L10n.createTracker
+        static let habitButtonText = L10n.habit
+        static let irregularEventButtonText = L10n.irregularEvent
         
         static let cellHeight: CGFloat = 75
         static let stackSpacing: CGFloat = 16
@@ -83,12 +83,12 @@ final class CreateTrackerController: ModalController {
     
     // MARK: - Actions
     @objc private func didTapHabitButton(_ sender: Any) {
-        let vc = NewTrackerController(trackerType: .habit)
+        let vc = TrackerController(mode: .create(.habit))
         present(vc, animated: true)
     }
     
     @objc private func didTapIrregularEventButton(_ sender: Any) {
-        let vc = NewTrackerController(trackerType: .irregular)
+        let vc = TrackerController(mode: .create(.irregular))
         present(vc, animated: true)
     }
     

@@ -6,14 +6,37 @@ struct TrackerCellData {
     let completedCount: Int
 }
 
-final class TrackersViewModel {
+import Foundation
+
+protocol TrackersViewModelProtocol: AnyObject {
+    var onDateChanged: Binding<Date>? { get set }
+    var onVisibleCategoriesChanged: Binding<[TrackerCategory]>? { get set }
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>? { get set }
+    var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>? { get set }
+    var onRecordUpdated: Binding<IndexPath>? { get set }
+    var onFilterChanged: Binding<TrackerFilter>? { get set }
+    var onFilteringAvailableChanged: Binding<Bool>? { get set }
+
+    func selectDate(_ date: Date)
+    func updateSearchQuery(_ text: String)
+    func cellData(for indexPath: IndexPath) -> TrackerCellData
+    func toggleTrackerRecord(at indexPath: IndexPath)
+    func count(for indexPath: IndexPath) -> Int
+    func deleteTracker(_ tracker: Tracker)
+    func selectFilter(_ filter: TrackerFilter)
+    func pinToggle(tracker: Tracker)
+}
+
+final class TrackersViewModel: TrackersViewModelProtocol {
     
     // MARK: - Public Properties
     var onDateChanged: Binding<Date>?
     var onVisibleCategoriesChanged: Binding<[TrackerCategory]>?
-    var onEmptyStateChanged: Binding<Bool>?
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>?
     var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     var onRecordUpdated: Binding<IndexPath>?
+    var onFilterChanged: Binding<TrackerFilter>?
+    var onFilteringAvailableChanged: Binding<Bool>?
     
     // MARK: - Private Properties
     private var selectedDate: Date {
@@ -27,9 +50,14 @@ final class TrackersViewModel {
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
-    private var currentQuery: String = ""{
+    private var currentQuery: String = "" {
         didSet {
             filterCategories()
+        }
+    }
+    private var selectedFilter: TrackerFilter = .all {
+        didSet {
+            onFilterChanged?(selectedFilter)
         }
     }
     
@@ -37,13 +65,13 @@ final class TrackersViewModel {
     init() {
         self.selectedDate = Date()
         dataObserver.delegate = self
-        loadCompletedTrackers()
     }
     
     // MARK: - Public Methods
     func selectDate(_ date: Date) {
         selectedDate = date
         loadCategories(for: date)
+        loadCompletedTrackers()
     }
     
     func updateSearchQuery(_ text: String) {
@@ -60,12 +88,37 @@ final class TrackersViewModel {
     }
     
     func toggleTrackerRecord(at indexPath: IndexPath) {
+        Logger.debug("indexPath.section \(indexPath.section), indexPath.item \(indexPath.item)")
         let id = visibleCategories[indexPath.section].trackers[indexPath.item].id
+        Logger.debug("id \(id), нажали на трекер c name \(visibleCategories[indexPath.section].trackers[indexPath.item].name)")
         let isCompletedToday = isTrackerCompletedToday(id: id)
         if isCompletedToday {
             removeTrackerRecord(id: id, at: indexPath)
         } else {
             addTrackerRecord(id: id, at: indexPath)
+        }
+    }
+    
+    func count(for indexPath: IndexPath) -> Int {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        return countCompletedTrackers(id: tracker.id)
+    }
+    
+    func deleteTracker(_ tracker: Tracker) {
+        dataProvider.deleteTracker(tracker)
+    }
+    
+    func selectFilter(_ filter: TrackerFilter) {
+        selectedFilter = filter
+        Logger.debug("Выбран фильтр \(filter)")
+        filterCategories()
+    }
+    
+    func pinToggle(tracker: Tracker) {
+        if tracker.isPinned {
+            dataProvider.unpinTracker(tracker)
+        } else {
+            dataProvider.pinTracker(tracker)
         }
     }
     
@@ -75,6 +128,7 @@ final class TrackersViewModel {
         visibleCategories = categories
         onVisibleCategoriesChanged?(visibleCategories)
         updateEmptyState()
+        updateFilteringAvailability()
     }
     
     private func loadCompletedTrackers() {
@@ -112,8 +166,6 @@ final class TrackersViewModel {
     }
     
     private func filterCategories() {
-        let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: selectedDate)
         let filterText = currentQuery
         
         Logger.debug("filterText: \(filterText)")
@@ -121,19 +173,47 @@ final class TrackersViewModel {
         visibleCategories = categories.compactMap { category in
             let trackers = category.trackers.filter { tracker in
                 let textMatch = filterText.isEmpty || tracker.name.range(of: filterText, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-                let dateMatch = tracker.schedule.contains { $0.calendarWeekday == weekday }
-                return textMatch && dateMatch
+                return textMatch
             }
             if trackers.isEmpty { return nil }
             return TrackerCategory(title: category.title, trackers: trackers)
         }
         
+        if selectedFilter == .completed {
+            visibleCategories = visibleCategories.compactMap { category in
+                let trackers = category.trackers.filter { isTrackerCompletedToday(id: $0.id) }
+                if trackers.isEmpty { return nil }
+                return TrackerCategory(title: category.title, trackers: trackers)
+            }
+        }
+        
+        if selectedFilter == .notCompleted {
+            visibleCategories = visibleCategories.compactMap { category in
+                let trackers = category.trackers.filter { !isTrackerCompletedToday(id: $0.id) }
+                if trackers.isEmpty { return nil }
+                return TrackerCategory(title: category.title, trackers: trackers)
+            }
+        }
+        
         onVisibleCategoriesChanged?(visibleCategories)
         updateEmptyState()
+        
     }
     
     private func updateEmptyState() {
-        onEmptyStateChanged?(visibleCategories.isEmpty)
+        let type: EmptyStateViewType?
+        if categories.isEmpty {
+            type = .trackers
+        } else if visibleCategories.isEmpty {
+            type = .filtering
+        } else {
+            type = nil
+        }
+        onEmptyStateChanged?(type)
+    }
+    
+    private func updateFilteringAvailability() {
+        onFilteringAvailableChanged?(visibleCategories.isEmpty)
     }
     
 }
@@ -144,7 +224,17 @@ extension TrackersViewModel: TrackersObserverDelegate {
         categories = dataProvider.categories(for: selectedDate)
         visibleCategories = categories
         onCategoriesChangedWithChanges?((categories, changes))
-        onEmptyStateChanged?(visibleCategories.isEmpty)
+        let isInsert = changes.contains {
+            switch $0 {
+            case .insert, .insertSection: return true
+            default: return false
+            }
+        }
+        if isInsert {
+            loadCompletedTrackers()
+        }
+        updateEmptyState()
+        updateFilteringAvailability()
     }
     
     func didUpdateRecords(record: TrackerRecord, changeType: DataChangeType) {

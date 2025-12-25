@@ -4,12 +4,11 @@ final class CategoryListViewController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let titleText = "Категория"
-        static let buttonText = "Добавить категорию"
-        static let emptyStateLabelText = "Привычки и события можно\nобъединить по смыслу"
-        static let editButtonText = "Редактировать"
-        static let deleteButtonText = "Удалить"
-        static let alertQuestion = "Эта категория точно не нужна?"
+        static let titleText = L10n.category
+        static let buttonText = L10n.addCategory
+        static let editButtonText = L10n.edit
+        static let deleteButtonText = L10n.delete
+        static let alertQuestion = L10n.deleteConfirmation
         
         static let cellHeight: CGFloat = 75
         static let titleTopInset: CGFloat = 27
@@ -48,7 +47,7 @@ final class CategoryListViewController: ModalController {
         return stackView
     }()
     
-    private lazy var emptyStateView = EmptyStateView(text: Layout.emptyStateLabelText)
+    private lazy var emptyStateView = EmptyStateView()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -119,10 +118,10 @@ final class CategoryListViewController: ModalController {
     private let tableStyle: TableStyle = .checkmark
     private var tableHeightConstraint: NSLayoutConstraint?
     private var selectedIndexPath: IndexPath?
-    private let viewModel: CategoryListViewModel
+    private let viewModel: CategoryListViewModelProtocol
     
     // MARK: - Initializers
-    init(viewModel: CategoryListViewModel) {
+    init(viewModel: CategoryListViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -147,8 +146,12 @@ final class CategoryListViewController: ModalController {
             self?.updateTableHeight()
         }
         
-        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
-            isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+        viewModel.onEmptyStateChanged = { [weak self] emptyStateViewType in
+            guard let type = emptyStateViewType else {
+                self?.emptyStateView.hide()
+                return
+            }
+            self?.emptyStateView.show(type: type)
         }
         
         viewModel.onSelectionChanged = { [weak self] category in

@@ -4,8 +4,8 @@ final class TabBarController: UITabBarController {
     
     // MARK: - Constants
     private enum Layout {
-        static let trackersTitle = "Трекеры"
-        static let statisticsTitle = "Статистика"
+        static let trackersTitle = L10n.tabTrackers
+        static let statisticsTitle = L10n.tabStatistics
     }
     
     // MARK: - Layout
@@ -23,14 +23,15 @@ final class TabBarController: UITabBarController {
     }
     
     private func configureTabBar() {
-        let viewModel = TrackersViewModel()
-        let trackersViewController = TrackersViewController(viewModel: viewModel)
+        let trackersViewModel = TrackersViewModel()
+        let trackersViewController = TrackersViewController(viewModel: trackersViewModel)
         trackersViewController.tabBarItem = UITabBarItem(
             title: Layout.trackersTitle,
             image: UIImage(resource: .tabBarTrackers),
             selectedImage: nil
         )
-        let statisticsViewController = StatisticsViewController()
+        let statisticsViewModel = StatisticsViewModel()
+        let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         statisticsViewController.tabBarItem = UITabBarItem(
             title: Layout.statisticsTitle,
             image: UIImage(resource: .tabBarStatistics),
@@ -45,6 +46,8 @@ final class TabBarController: UITabBarController {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(resource: .white)
+        
+        appearance.shadowColor = UIColor(resource: .shadow) 
         
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor(resource: .gray)
         appearance.stackedLayoutAppearance.selected.iconColor = UIColor(resource: .blue)

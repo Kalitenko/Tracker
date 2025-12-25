@@ -6,6 +6,8 @@ protocol DataProviderProtocol {
     func createTracker(_ tracker: Tracker, to categoryTitle: String)
     func addRecord(_ record: TrackerRecord)
     func deleteRecord(_ record: TrackerRecord)
+    func updateTracker(_ tracker: Tracker, to categoryTitle: String)
+    func deleteTracker(_ tracker: Tracker)
 }
 
 final class DataProvider {
@@ -40,18 +42,6 @@ final class DataProvider {
     }
     
     // MARK: - Public Methods
-    func addTracker(_ tracker: Tracker, to categoryTitle: String) {
-        do {
-            guard let category = try categoryStore.fetch(byTitle: categoryTitle) else {
-                Logger.error("Такой категории не существует")
-                return
-            }
-            try trackerStore.add(tracker, to: category)
-        } catch {
-            Logger.error("Ошибка добавления трекера: \(error)")
-        }
-    }
-    
     func trackers(for date: Date) -> [Tracker] {
         trackerStore.fetchTrackers(for: date)
     }
@@ -100,6 +90,32 @@ final class DataProvider {
         (try? recordStore.fetchRecords(ids: ids)) ?? []
     }
     
+    func pinTracker(_ tracker: Tracker) {
+        let toggledTracker = Tracker(tracker: tracker, isPinned: true)
+        updateTracker(toggledTracker)
+    }
+    
+    func unpinTracker(_ tracker: Tracker) {
+        let toggledTracker = Tracker(tracker: tracker, isPinned: false)
+        updateTracker(toggledTracker)
+    }
+    
+    // MARK: - Private Methods
+    private func addTracker(_ tracker: Tracker, to categoryTitle: String) {
+        do {
+            guard let category = try categoryStore.fetch(byTitle: categoryTitle) else {
+                Logger.error("Такой категории не существует")
+                return
+            }
+            try trackerStore.add(tracker, to: category)
+        } catch {
+            Logger.error("Ошибка добавления трекера: \(error)")
+        }
+    }
+    
+    private func updateTracker(_ tracker: Tracker) {
+        trackerStore.update(tracker)
+    }
 }
 
 // MARK: - DataProviderProtocol
@@ -129,6 +145,26 @@ extension DataProvider: DataProviderProtocol {
             try recordStore.delete(record)
         } catch {
             Logger.error("Ошибка удаления записи: \(error)")
+        }
+    }
+    
+    func updateTracker(_ tracker: Tracker, to categoryTitle: String) {
+        do {
+            guard let category = try categoryStore.fetch(byTitle: categoryTitle) else {
+                Logger.error("Такой категории не существует")
+                return
+            }
+            trackerStore.update(tracker, to: category)
+        } catch {
+            Logger.error("Ошибка обновления трекера: \(error)")
+        }
+    }
+    
+    func deleteTracker(_ tracker: Tracker) {
+        do {
+            try trackerStore.delete(tracker)
+        } catch {
+            Logger.error("Ошибка при удалении трекера: \(error)")
         }
     }
 }

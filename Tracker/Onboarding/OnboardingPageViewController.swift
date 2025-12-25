@@ -4,7 +4,7 @@ final class OnboardingPageViewController: UIPageViewController {
     
     // MARK: - Constants
     private enum Layout {
-        static let onboardingButtonText = "Вот это технологии!"
+        static let onboardingButtonText = L10n.techExclamation
         static let bottomOffset: CGFloat = -50
         static let buttonSideInset: CGFloat = 20
         static let pageControlSpacing: CGFloat = 24
@@ -12,7 +12,7 @@ final class OnboardingPageViewController: UIPageViewController {
     
     // MARK: - UI Elements
     private lazy var onboardingButton: UIButton = {
-        let button = BlackButton(title: Layout.onboardingButtonText)
+        let button = OnboardingButton(title: Layout.onboardingButtonText)
         button.addTarget(self, action: #selector(Self.didTapOnboardingButton), for: .touchUpInside)
         
         return button
@@ -67,8 +67,8 @@ final class OnboardingPageViewController: UIPageViewController {
     // MARK: - Private Properties
     private lazy var pages: [UIViewController] = {
         [
-            OnboardingViewController(imageName: "page_1", labelText: "Отслеживайте только то, что хотите"),
-            OnboardingViewController(imageName: "page_2", labelText: "Даже если это\nне литры воды и йога")
+            OnboardingViewController(imageName: "page_1", labelText: L10n.trackOnlyWhatYouWant),
+            OnboardingViewController(imageName: "page_2", labelText: L10n.notWaterYoga)
         ]
     }()
     
@@ -85,7 +85,7 @@ final class OnboardingPageViewController: UIPageViewController {
         
         guard let windowScene = view.window?.windowScene,
               let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
-
+        
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = TabBarController()
         sceneDelegate.window = window

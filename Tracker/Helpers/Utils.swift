@@ -1,29 +1,32 @@
+import Foundation
+
 final class Utils {
-    private enum DayForms {
-        static let singular = "день"
-        static let few = "дня"
-        static let many = "дней"
-    }
     
-    static func dayWord(for number: Int) -> String {
-        let lastTwoDigits = number % 100
-        let lastDigit = number % 10
-        
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            return DayForms.many
+    private static let formatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 2
+        return formatter
+    }()
+    
+    static func localizedNumber(_ number: Double) -> String {
+        guard let string = formatter.string(from: NSNumber(value: number)) else {
+            Logger.warning("Не получилось преобразовать \(number)")
+            return "0.00"
         }
-        
-        switch lastDigit {
-        case 1:
-            return DayForms.singular
-        case 2, 3, 4:
-            return DayForms.few
-        default:
-            return DayForms.many
-        }
+        return string
     }
     
     static func dayCountString(for number: Int) -> String {
-        "\(number) \(dayWord(for: number))"
+        String.localizedStringWithFormat(
+            NSLocalizedString("numberOfDays", comment: "Days count with plural"),
+            number
+        )
+    }
+    static func symbolCountString(for number: Int) -> String {
+        String.localizedStringWithFormat(
+            NSLocalizedString("numberOfSymbols", comment: "Symbols count with plural"),
+            number
+        )
     }
 }

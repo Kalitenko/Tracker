@@ -4,13 +4,20 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Constants
     private enum Layout {
-        static let trackersLabelText = "Трекеры"
-        static let searchBarText = "Поиск"
-        static let emptyStateLabelText = "Что будем отслеживать?"
+        static let trackersLabelText = L10n.trackers
+        static let searchBarText = L10n.search
+        static let editButtonText = L10n.edit
+        static let deleteButtonText = L10n.delete
+        static let alertTrackerQuestion = L10n.deleteTrackerConfirmation
+        static let filtersButtonText = L10n.filtersTitle
+        static let pinButtonText = L10n.pin
+        static let unpinButtonText = L10n.unpin
         
         static let collectionViewTopInset: CGFloat = 24
         static let emptyStateViewTopInset: CGFloat = 220
         static let emptyStateViewHorizontalInset: CGFloat = 16
+        static let filtersButtonsHorizontalInset: CGFloat = 130
+        static let filtersButtonsBottomInset: CGFloat = 16
     }
     
     // MARK: - Layout
@@ -66,13 +73,14 @@ final class TrackersViewController: UIViewController {
         return appearance
     }()
     
-    private lazy var emptyStateView = EmptyStateView(text: Layout.emptyStateLabelText)
-    
+    private lazy var emptyStateView = EmptyStateView()
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(
             frame: .zero,
             collectionViewLayout: UICollectionViewFlowLayout()
         )
+        collectionView.backgroundColor = .clear
+        
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
         collectionView.register(CollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CollectionHeaderView.identifier)
         
@@ -80,6 +88,12 @@ final class TrackersViewController: UIViewController {
         collectionView.delegate = self
         
         return collectionView
+    }()
+    
+    private lazy var filtersButton: BlueButton = {
+        let button = BlueButton(title: Layout.filtersButtonText)
+        button.addTarget(self, action: #selector(Self.didTapFiltersButton), for: .touchUpInside)
+        return button
     }()
     
     // MARK: - Lifecycle
@@ -94,21 +108,41 @@ final class TrackersViewController: UIViewController {
         loadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.openScreen(name: Screen.main.rawValue)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AnalyticsService.closeScreen(name: Screen.main.rawValue)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        let buttonHeight = filtersButton.frame.height
+        
+        collectionView.contentInset.bottom = view.safeAreaInsets.bottom + buttonHeight + Layout.filtersButtonsBottomInset
+        collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
+    }
+    
     // MARK: - Setup Methods
     private func setupView() {
         view.backgroundColor = UIColor(resource: .white)
     }
     
     private func setupSubViews() {
-        [emptyStateView, collectionView].forEach {
+        [emptyStateView, collectionView, filtersButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         view.bringSubviewToFront(emptyStateView)
+        view.bringSubviewToFront(filtersButton)
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Трекеры"
+        navigationItem.title = Layout.trackersLabelText
     }
     
     private func setupConstraints() {
@@ -123,7 +157,11 @@ final class TrackersViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: guide.topAnchor, constant: Layout.collectionViewTopInset),
             collectionView.bottomAnchor.constraint(equalTo: guide.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            filtersButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.filtersButtonsHorizontalInset),
+            filtersButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.filtersButtonsHorizontalInset),
+            filtersButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -Layout.filtersButtonsBottomInset)
         ])
     }
     
@@ -149,8 +187,12 @@ final class TrackersViewController: UIViewController {
             self?.collectionView.reloadData()
         }
         
-        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
-            isEmpty ? self?.emptyStateView.show() : self?.emptyStateView.hide()
+        viewModel.onEmptyStateChanged = { [weak self] emptyStateViewType in
+            guard let type = emptyStateViewType else {
+                self?.emptyStateView.hide()
+                return
+            }
+            self?.emptyStateView.show(type: type)
         }
         
         viewModel.onRecordUpdated = { [weak self] indexPath in
@@ -158,20 +200,37 @@ final class TrackersViewController: UIViewController {
         }
         
         viewModel.onCategoriesChangedWithChanges = { [weak self] data in
-            guard let self = self else { return }
+            guard let self else { return }
             let (categories, changes) = data
             self.visibleCategories = categories
             self.applyCollectionChanges(changes)
+        }
+        
+        viewModel.onFilterChanged = { [weak self] filter in
+            guard let self else { return }
+            self.filtersButton.showActive(filter.isActive)
+            self.selectedFilter = filter
+            if filter == .today {
+                self.datePicker.date = Date()
+                self.datePicker.sendActions(for: .valueChanged)
+            }
+            isFiltering = filter.isActive
+        }
+        
+        viewModel.onFilteringAvailableChanged = { [weak self] isHidden in
+            self?.filtersButton.isHidden = isHidden
         }
     }
     
     // MARK: - Private Properties
     private var visibleCategories: [TrackerCategory] = []
-    private let viewModel: TrackersViewModel
+    private var pinnedCategory: TrackerCategory?
+    private let viewModel: TrackersViewModelProtocol
     private var isFiltering = false
+    private var selectedFilter: TrackerFilter?
     
     // MARK: - Initializers
-    init(viewModel: TrackersViewModel) {
+    init(viewModel: TrackersViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -183,6 +242,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func didTapAddTrackerButton() {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.addTrack.rawValue)
         let vc = CreateTrackerController()
         
         present(vc, animated: true)
@@ -191,6 +251,16 @@ final class TrackersViewController: UIViewController {
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         Logger.info("Выбранная дата: \(sender.date)")
         viewModel.selectDate(sender.date)
+    }
+    
+    @objc private func didTapFiltersButton() {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.filter.rawValue)
+        let vc = FiltersViewController(filter: selectedFilter)
+        vc.onFilterSelected = { [weak self] filter in
+            self?.viewModel.selectFilter(filter)
+        }
+        
+        present(vc, animated: true)
     }
     
     // MARK: - Private Methods
@@ -268,6 +338,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             completedDays: cellData.completedCount,
             datePickerDate: datePicker.date
         )
+        cell.configureContextMenuDelegate(self)
         
         return cell
     }
@@ -328,7 +399,64 @@ extension TrackersViewController: UISearchResultsUpdating {
 
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
-    func didTapQuantityManagementButton(id: Int32, at indexPath: IndexPath) {
+    func didTapQuantityManagementButton(from cell: UICollectionViewCell) {
+        AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.track.rawValue)
+        guard let indexPath = collectionView.indexPath(for: cell) else {
+            Logger.error("Не удалось получить indexPath ячейки")
+            return
+        }
         viewModel.toggleTrackerRecord(at: indexPath)
+    }
+}
+
+// MARK: - UIContextMenuInteractionDelegate
+extension TrackersViewController: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction,
+                                configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let cardView = interaction.view,
+              let cell = cardView.superview(of: UICollectionViewCell.self),
+              let indexPath = collectionView.indexPath(for: cell) else {
+            return nil
+        }
+        
+        let category = visibleCategories[indexPath.section]
+        let tracker = category.trackers[indexPath.item]
+        let count = viewModel.count(for: indexPath)
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let pinToggleText = tracker.isPinned ? Layout.unpinButtonText : Layout.pinButtonText
+            let togglePinStatusAction = UIAction(title: pinToggleText) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.edit.rawValue)
+                self?.pinToggle(tracker: tracker)
+            }
+            let editAction = UIAction(title: Layout.editButtonText) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.edit.rawValue)
+                self?.editTracker(tracker: tracker, category: category, count: count)
+            }
+            let deleteAction = UIAction(title: Layout.deleteButtonText, attributes: .destructive) { [weak self] _ in
+                AnalyticsService.clickOnScreen(screenName: Screen.main.rawValue, item: Item.delete.rawValue)
+                self?.showDeleteAlert(for: tracker)
+            }
+            return UIMenu(title: "", children: [togglePinStatusAction, editAction, deleteAction])
+        }
+    }
+    
+    private func editTracker(tracker: Tracker, category: TrackerCategory, count: Int) {
+        let type: TrackerType = tracker.isHabit ? .habit : .irregular
+        let vc = TrackerController(mode: .edit(type: type, tracker: tracker, category: category, count: count))
+        present(vc, animated: true)
+    }
+    
+    private func showDeleteAlert(for tracker: Tracker) {
+        AlertHelper.showDeleteConfirmation(
+            from: self,
+            message: Layout.alertTrackerQuestion
+        ) { [weak self] in
+            self?.viewModel.deleteTracker(tracker)
+        }
+    }
+    
+    private func pinToggle(tracker: Tracker) {
+        viewModel.pinToggle(tracker: tracker)
     }
 }

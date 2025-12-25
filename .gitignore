@@ -99,4 +99,7 @@ iOSInjectionProject/
 **/xcshareddata/WorkspaceSettings.xcsettings
 **/xcuserdata/
 
+# Generated resources
+Resources/Generated/
+
 # End of https://www.toptal.com/developers/gitignore/api/swift,xcode

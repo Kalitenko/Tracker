@@ -1,11 +1,11 @@
 import UIKit
 
-final class NewTrackerViewModel {
+final class TrackerViewModel {
     
     // MARK: - Constants
     private enum Constants {
         static let limitSymbolsNumber = 38
-        static let limitText = "Ограничение \(limitSymbolsNumber) символов"
+        static let limitText = Utils.symbolCountString(for: limitSymbolsNumber)
     }
     
     // MARK: - Public Properties
@@ -16,28 +16,29 @@ final class NewTrackerViewModel {
     var onCategoryChanged: Binding<TrackerCategory?>?
     
     // MARK: - Private Properties
+    private let mode: TrackerMode
     private let trackerType: TrackerType
     private let dataProvider: DataProviderProtocol = DataProvider.shared
     private var selectedCategory: TrackerCategory? {
         didSet {
-            updateCreateButtonState()
+            updateActionButtonState()
             onCategoryChanged?(selectedCategory)
         }
     }
     private var selectedEmoji: String? {
-        didSet { updateCreateButtonState() }
+        didSet { updateActionButtonState() }
     }
     private var selectedColor: UIColor? {
-        didSet { updateCreateButtonState() }
+        didSet { updateActionButtonState() }
     }
     private var selectedDays: [WeekDay] = [] {
         didSet {
-            updateCreateButtonState()
+            updateActionButtonState()
             onScheduleChanged?(selectedDays)
         }
     }
     private var isNameValid: Bool = false {
-        didSet { updateCreateButtonState() }
+        didSet { updateActionButtonState() }
     }
     private var name: String = "" {
         didSet {
@@ -46,13 +47,22 @@ final class NewTrackerViewModel {
         }
     }
     private var trimmedName: String = ""
+    private var trackerForUpdate: Tracker?
     
     // MARK: - Initializers
-    init(trackerType: TrackerType, category: TrackerCategory?, schedule: [WeekDay]) {
-        self.trackerType = trackerType
+    init(mode: TrackerMode, category: TrackerCategory?, schedule: [WeekDay]) {
+        self.mode = mode
+        trackerType = mode.trackerType
         options = trackerType.options
-        selectedCategory = category
-        selectedDays = schedule
+        switch mode {
+        case .create:
+            selectedCategory = category
+            selectedDays = schedule
+        case .edit(let type, let tracker, let category, let count):
+            trackerForUpdate = tracker
+            break
+        }
+        
     }
     
     // MARK: - Public Methods
@@ -67,6 +77,15 @@ final class NewTrackerViewModel {
         }
         guard let categoryName = selectedCategory?.title else { return }
         createTracker(tracker, to: categoryName)
+    }
+    
+    func updateTracker() {
+        guard let tracker = prepareTrackerForUpdate() else {
+            Logger.error("Ошибка при подготовке трекера к обновлению")
+            return
+        }
+        guard let categoryName = selectedCategory?.title else { return }
+        updateTracker(tracker, to: categoryName)
     }
     
     func selectEmoji(_ emoji: String) {
@@ -85,8 +104,22 @@ final class NewTrackerViewModel {
         selectedDays = days
     }
     
+    func initData() {
+        switch mode {
+        case .create: break
+        case .edit(_, let tracker, let category, let count):
+            name = tracker.name
+            selectedCategory = category
+            selectEmoji(tracker.emoji)
+            selectedColor = tracker.color
+            selectedDays = tracker.schedule
+        }
+        
+        updateActionButtonState()
+    }
+    
     // MARK: - Private Methods
-    private func updateCreateButtonState() {
+    private func updateActionButtonState() {
         let isValid = isNameValid &&
         selectedCategory != nil &&
         selectedEmoji != nil &&
@@ -100,12 +133,30 @@ final class NewTrackerViewModel {
         dataProvider.createTracker(tracker, to: categoryTitle)
     }
     
+    private func updateTracker(_ tracker: Tracker, to categoryTitle: String) {
+        dataProvider.updateTracker(tracker, to: categoryTitle)
+    }
+    
     private func prepareTracker() -> Tracker? {
         if trackerType == .habit && selectedDays.isEmpty { return nil }
+        let isHabit = trackerType == .habit
         let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
         guard let emoji = selectedEmoji, let color = selectedColor else { return nil }
         
-        return Tracker(name: trimmedName, color: color, emoji: emoji, schedule: schedule)
+        return Tracker(name: trimmedName, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
+    }
+    
+    private func prepareTrackerForUpdate() -> Tracker? {
+        if trackerType == .habit && selectedDays.isEmpty { return nil }
+        let isHabit = trackerType == .habit
+        let schedule = trackerType == .habit ? selectedDays : WeekDay.allCases
+        guard let emoji = selectedEmoji,
+              let color = selectedColor,
+              let trackerId = trackerForUpdate?.id,
+              let isPinned = trackerForUpdate?.isPinned
+        else { return nil }
+        
+        return Tracker(id: trackerId, name: trimmedName, color: color, emoji: emoji, schedule: schedule, isHabit: isHabit)
     }
     
     private func validateName() {
@@ -117,6 +168,6 @@ final class NewTrackerViewModel {
         
         onValidationError?(nil)
         isNameValid = !trimmedName.isEmpty
-        updateCreateButtonState()
+        updateActionButtonState()
     }
 }

@@ -89,4 +89,24 @@ final class BlueButton: Button {
     required init?(coder: NSCoder) {
         nil
     }
+    
+    func showActive(_ isActive: Bool) {
+        let color = isActive ? UIColor(resource: .red) : UIColor(resource: .ypWhite)
+        setTitleColor(color, for: .normal)
+    }
+}
+
+final class OnboardingButton: Button {
+    
+    init(title: String, isInitiallyEnabled: Bool = true) {
+        super.init(title: title,
+                   backgroundColor: .ypBlack,
+                   textColor: .ypWhite)
+        isEnabled = isInitiallyEnabled
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
 }

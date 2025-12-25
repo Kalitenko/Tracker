@@ -1,8 +1,19 @@
-final class CategoryListViewModel {
+protocol CategoryListViewModelProtocol: AnyObject {
+    var onCategoriesChanged: Binding<[TrackerCategory]>? { get set }
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>? { get set }
+    var onSelectionChanged: Binding<TrackerCategory?>? { get set }
+    var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>? { get set }
+
+    func loadCategories()
+    func selectCategory(at index: Int)
+    func deleteCategory(_ category: TrackerCategory)
+}
+
+final class CategoryListViewModel: CategoryListViewModelProtocol {
     
     // MARK: - Public Properties
     var onCategoriesChanged: Binding<[TrackerCategory]>?
-    var onEmptyStateChanged: Binding<Bool>?
+    var onEmptyStateChanged: Binding<EmptyStateViewType?>?
     var onSelectionChanged: Binding<TrackerCategory?>?
     var onCategoriesChangedWithChanges: Binding<([TrackerCategory], [DataChange])>?
     
@@ -36,7 +47,12 @@ final class CategoryListViewModel {
     // MARK: - Private Methods
     private func notifyState() {
         onCategoriesChanged?(categories)
-        onEmptyStateChanged?(categories.isEmpty)
+        updateEmptyState()
+    }
+    
+    private func updateEmptyState() {
+        let type = categories.isEmpty ? EmptyStateViewType.categories : nil
+        onEmptyStateChanged?(type)
     }
 }
 
@@ -44,6 +60,6 @@ extension CategoryListViewModel: CategoriesObserverDelegate {
     func didUpdateCategories(_ changes: [DataChange]) {
         categories = dataProvider.categories
         onCategoriesChangedWithChanges?((categories, changes))
-        onEmptyStateChanged?(categories.isEmpty)
+        updateEmptyState()
     }
 }

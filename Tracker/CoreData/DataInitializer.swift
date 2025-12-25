@@ -40,21 +40,24 @@ final class DataInitializer {
                     name: "Утренняя планёрка",
                     color: .systemBlue,
                     emoji: "📋",
-                    schedule: [.monday, .wednesday, .friday]
+                    schedule: [.monday, .wednesday, .friday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 102,
                     name: "Проверка почты",
                     color: .systemTeal,
                     emoji: "📧",
-                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday]
+                    schedule: [.monday, .tuesday, .wednesday, .thursday, .friday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 103,
                     name: "Код-ревью",
                     color: .systemOrange,
                     emoji: "💻",
-                    schedule: [.monday, .thursday]
+                    schedule: [.monday, .thursday],
+                    isHabit: true
                 )
             ]
             
@@ -64,14 +67,16 @@ final class DataInitializer {
                     name: "Утренняя пробежка",
                     color: .systemGreen,
                     emoji: "🏃‍♂️",
-                    schedule: [.monday, .wednesday, .friday, .sunday]
+                    schedule: [.monday, .wednesday, .friday, .sunday],
+                    isHabit: true
                 ),
                 Tracker(
                     id: 202,
                     name: "Медитация",
                     color: .systemPurple,
                     emoji: "🧘‍♀️",
-                    schedule: [.wednesday, .sunday]
+                    schedule: [.wednesday, .sunday],
+                    isHabit: true
                 )
             ]
             
@@ -81,7 +86,8 @@ final class DataInitializer {
                     name: "Играть на гитаре",
                     color: .systemRed,
                     emoji: "🎸",
-                    schedule: [.sunday]
+                    schedule: [.sunday],
+                    isHabit: true
                 )
             ]
             

@@ -102,6 +102,16 @@ final class TrackerRecordStore: NSObject {
         return records
     }
     
+    func totalCompletedTrackers() throws -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        return try context.count(for: fetchRequest)
+    }
+    
+    func fetchAllTrackerRecords() throws -> [TrackerRecord] {
+        let entities = try fetchAll()
+        return try entities.map(EntityMapper.convertToTrackerRecord)
+    }
+    
     // MARK: - Private Methods
     private func performFetch() {
         do {

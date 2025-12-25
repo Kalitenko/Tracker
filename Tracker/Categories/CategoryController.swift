@@ -4,8 +4,8 @@ final class CategoryController: ModalController {
     
     // MARK: - Constants
     private enum Layout {
-        static let buttonText = "Готово"
-        static let textFieldPlaceholderText = "Введите название категории"
+        static let buttonText = L10n.doneButton
+        static let textFieldPlaceholderText = L10n.enterCategoryName
         
         static let nameFieldViewTopInset: CGFloat = 38
         static let sideInset: CGFloat = 16
@@ -42,6 +42,26 @@ final class CategoryController: ModalController {
         setupSubViews()
         setupConstraints()
         bindViewModel()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.openScreen(name: Screen.createCategory.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editCategory.rawValue)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        switch mode {
+        case .create:
+            AnalyticsService.closeScreen(name: Screen.createCategory.rawValue)
+        case .edit:
+            AnalyticsService.closeScreen(name: Screen.editCategory.rawValue)
+        }
     }
     
     // MARK: - Setup Methods
@@ -90,19 +110,18 @@ final class CategoryController: ModalController {
         }
         
     }
-        
+    
     // MARK: - Private Properties
-    private let mode: Mode
+    private let mode: CategoryMode
     private let viewModel: CategoryViewModel
     
     // MARK: - Initializers
-    init(mode: Mode) {
+    init(mode: CategoryMode) {
         self.mode = mode
         self.viewModel = .init(mode: mode)
         super.init(nibName: nil, bundle: nil)
         switch mode {
         case .edit(let category):
-            title = category.title
             nameFieldView.setText(category.title)
         default:
             break

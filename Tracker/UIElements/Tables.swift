@@ -4,20 +4,23 @@ enum TableStyle {
     case checkmark
     case arrow
     case toggle
+    case statistics
     
     var cellType: UITableViewCell.Type {
         switch self {
-        case .checkmark: return CheckmarkCell.self
-        case .arrow: return ArrowCell.self
-        case .toggle: return ToggleCell.self
+        case .checkmark: CheckmarkCell.self
+        case .arrow: ArrowCell.self
+        case .toggle: ToggleCell.self
+        case .statistics: StatisticsCell.self
         }
     }
     
     var reuseIdentifier: String {
         switch self {
-        case .checkmark: return "CheckmarkCell"
-        case .arrow: return "ArrowCell"
-        case .toggle: return "ToggleCell"
+        case .checkmark: "CheckmarkCell"
+        case .arrow: "ArrowCell"
+        case .toggle: "ToggleCell"
+        case .statistics: "StatisticsCell"
         }
     }
 }

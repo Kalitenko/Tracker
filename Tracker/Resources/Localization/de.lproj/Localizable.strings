@@ -1,0 +1,153 @@
+/* ================================
+   CategoryController
+   ================================ */
+"done_button" = "Fertig";
+"enter_category_name" = "Kategoriename eingeben";
+
+/* ================================
+   CategoryListViewController
+   ================================ */
+"category_title" = "Kategorie";
+"add_category" = "Kategorie hinzufügen";
+"category_hint" = "Gewohnheiten und Ereignisse\nkönnen nach Sinn gruppiert werden";
+"empty_filtering" = "Nichts gefunden";
+"empty_statistics" = "Noch nichts zu analysieren";
+"edit" = "Bearbeiten";
+"delete" = "Löschen";
+"delete_confirmation" = "Diese Kategorie wirklich löschen?";
+
+/* ================================
+   CategoryViewModel
+   ================================ */
+"symbol_limit" = "Beschränkung: %d Zeichen";
+"category_exists" = "Eine Kategorie mit diesem Namen existiert bereits";
+
+/* ================================
+   Mode
+   ================================ */
+"new_category" = "Neue Kategorie";
+"edit_category" = "Kategorie bearbeiten";
+
+/* ================================
+   AlertHelper
+   ================================ */
+"delete_action" = "Löschen";
+"cancel_action" = "Abbrechen";
+
+/* ================================
+   OnboardingPageViewController
+   ================================ */
+"tech_exclamation" = "Was für eine Technologie!";
+"track_only_what_you_want" = "Verfolge nur das, was du willst";
+"not_water_yoga" = "Auch wenn es\nkeine Liter Wasser und Yoga sind";
+
+/* ================================
+   WeekDay
+   ================================ */
+"monday" = "Montag";
+"tuesday" = "Dienstag";
+"wednesday" = "Mittwoch";
+"thursday" = "Donnerstag";
+"friday" = "Freitag";
+"saturday" = "Samstag";
+"sunday" = "Sonntag";
+"mon_short" = "Mo";
+"tue_short" = "Di";
+"wed_short" = "Mi";
+"thu_short" = "Do";
+"fri_short" = "Fr";
+"sat_short" = "Sa";
+"sun_short" = "So";
+"every_day" = "Jeden Tag";
+
+/* ================================
+   CollectionHandlers
+   ================================ */
+"emoji" = "Emoji";
+"color" = "Farbe";
+
+/* ================================
+   CreateTrackerController
+   ================================ */
+"create_tracker" = "Tracker erstellen";
+"habit" = "Gewohnheit";
+"irregular_event" = "Unregelmäßiges Ereignis";
+
+/* ================================
+   TrackerController
+   ================================ */
+"enter_tracker_name" = "Name des Trackers eingeben";
+"cancel" = "Abbrechen";
+"create" = "Erstellen";
+"save" = "Speichern";
+
+/* ================================
+   NewTrackerViewModel
+   ================================ */
+"symbol_limit_tracker" = "Beschränkung: %d Zeichen";
+
+/* ================================
+   ScheduleController
+   ================================ */
+"schedule" = "Zeitplan";
+"done" = "Fertig";
+
+/* ================================
+   TrackersViewController
+   ================================ */
+"trackers" = "Tracker";
+"search" = "Suchen";
+"what_to_track" = "Was möchtest du verfolgen?";
+"delete_tracker_confirmation" = "Möchtest du den Tracker wirklich löschen?";
+"filters_title" = "Filter";
+"pin" = "Anheften";
+"unpin" = "Lösen";
+
+/* ================================
+   TrackerCoreData
+   ================================ */
+"pinned" = "Angeheftet";
+"without_category" = "Ohne Kategorie";
+
+/* ================================
+   TrackerType
+   ================================ */
+"new_habit" = "Neue Gewohnheit";
+"new_irregular_event" = "Neues unregelmäßiges Ereignis";
+"category" = "Kategorie";
+"schedule_label" = "Zeitplan";
+"edit_irregular_event" = "Unregelmäßiges Ereignis bearbeiten";
+"edit_habit" = "Gewohnheit bearbeiten";
+
+/* ================================
+   TabBarController
+   ================================ */
+"tab_trackers" = "Tracker";
+"tab_statistics" = "Statistik";
+
+/* ================================
+   StatisticsMetric
+   ================================ */
+"bestPeriod" = "Beste Periode für alle Tracker";
+"bestPeriodPerTracker" = "Beste Periode für einen Tracker";
+"idealDays" = "Ideale Tage";
+"completedTrackers" = "Abgeschlossene Tracker";
+"averageValue" = "Durchschnittswert";
+
+/* ================================
+   StatisticsViewController
+   ================================ */
+"statisticsLabel" = "Statistik";
+
+/* ================================
+   FiltersViewController
+   ================================ */
+"filters" = "Filter";
+
+/* ================================
+   TrackerFilter
+   ================================ */
+"all" = "Alle Tracker";
+"today" = "Tracker für heute";
+"completed" = "Abgeschlossen";
+"notCompleted" = "Nicht abgeschlossen";

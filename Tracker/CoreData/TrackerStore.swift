@@ -5,16 +5,31 @@ protocol TrackerStoreDelegate: AnyObject {
     func trackerStoreDidChange(_ changes: [DataChange])
 }
 
+protocol TrackerStoreStatisticsDelegate: AnyObject {
+    func recalculateIdealDays()
+}
+
 final class TrackerStore: NSObject {
     
     // MARK: - Public Properties
     weak var delegate: TrackerStoreDelegate?
+    weak var statisticsDelegate: TrackerStoreStatisticsDelegate? {
+        didSet {
+            guard statisticsDelegate != nil else { return }
+            do {
+                try allTrackersFRC.performFetch()
+            } catch {
+                Logger.error("Ошибка при fetch allTrackersFRC: \(error)")
+            }
+        }
+    }
     
     // MARK: - Private Properties
     private let context: NSManagedObjectContext
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
             NSSortDescriptor(key: #keyPath(TrackerCoreData.category.title), ascending: true),
             NSSortDescriptor(key: "id", ascending: true)
         ]
@@ -22,7 +37,22 @@ final class TrackerStore: NSObject {
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+            sectionNameKeyPath: #keyPath(TrackerCoreData.groupTitle),
+            cacheName: nil
+        )
+        controller.delegate = self
+        return controller
+    }()
+    private lazy var allTrackersFRC: NSFetchedResultsController<TrackerCoreData> = {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "id", ascending: true)
+        ]
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
             cacheName: nil
         )
         controller.delegate = self
@@ -38,7 +68,7 @@ final class TrackerStore: NSObject {
     
     // MARK: - Public Methods
     func fetchTrackers(for date: Date) -> [Tracker] {
-        guard let dayName = date.dayName as String? else {
+        guard let dayName = date.weekDayRawValue as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }
@@ -58,14 +88,21 @@ final class TrackerStore: NSObject {
     }
     
     func fetchTrackersGroupedByCategory(for date: Date) -> [TrackerCategory] {
-        guard let dayName = date.dayName as String? else {
+        guard let dayName = date.weekDayRawValue as String? else {
             Logger.error("Не удалось определить день недели")
             return []
         }
         
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(
+        let fetchRequest = fetchedResultsController.fetchRequest
+        fetchRequest.predicate = NSPredicate(
             format: "%K CONTAINS %@", #keyPath(TrackerCoreData.daysString), dayName
         )
+        
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
+            NSSortDescriptor(key: #keyPath(TrackerCoreData.category.title), ascending: true),
+            NSSortDescriptor(key: "id", ascending: true)
+        ]
         
         do {
             try fetchedResultsController.performFetch()
@@ -74,11 +111,12 @@ final class TrackerStore: NSObject {
             var categories: [TrackerCategory] = []
             
             for sectionInfo in frcSections {
-                let objects = sectionInfo.objects as? [TrackerCoreData] ?? []
+                guard let objects = sectionInfo.objects as? [TrackerCoreData] else { continue }
                 let trackers = objects.compactMap { try? EntityMapper.convertToTracker($0) }
                 let sectionName = sectionInfo.name
                 categories.append(TrackerCategory(title: sectionName, trackers: trackers))
             }
+            
             return categories
         } catch {
             Logger.error("Ошибка при выполнении запроса трекеров: \(error)")
@@ -101,12 +139,57 @@ final class TrackerStore: NSObject {
         return try EntityMapper.convertToTracker(trackerCoreData)
     }
     
+    func update(_ tracker: Tracker, to category: TrackerCategoryCoreData) {
+        guard let existingTracker = fetchById(tracker.id) else {
+            Logger.error("Не найден трекер для обновления с id: \(tracker.id)")
+            return
+        }
+        updateExisting(existingTracker, with: tracker)
+        
+        if existingTracker.category != category {
+            existingTracker.category = category
+        }
+        
+        do {
+            try context.save()
+            Logger.success("Трекер '\(tracker.name)' успешно обновлён")
+        } catch {
+            Logger.error("Ошибка при сохранении обновлённого трекера: \(error)")
+        }
+    }
+    
+    func update(_ tracker: Tracker) {
+        guard let existingTracker = fetchById(tracker.id) else {
+            Logger.error("Не найден трекер для обновления с id: \(tracker.id)")
+            return
+        }
+        updateExisting(existingTracker, with: tracker)
+        
+        do {
+            try context.save()
+            Logger.success("Трекер '\(tracker.name)' успешно обновлён")
+        } catch {
+            Logger.error("Ошибка при сохранении обновлённого трекера: \(error)")
+        }
+    }
+    
+    func delete(_ tracker: Tracker) throws {
+        guard let entity = fetchById(tracker.id) else {
+            Logger.error("Невозможно удалить несуществующий трекер")
+            return
+        }
+        context.delete(entity)
+        try context.save()
+    }
+    
     func updateExisting(_ trackerCoreData: TrackerCoreData, with tracker: Tracker) {
         trackerCoreData.color = tracker.color
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.name = tracker.name
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.daysString = tracker.schedule.map(\.rawValue).joined(separator: ",")
+        trackerCoreData.isHabit = tracker.isHabit
+        trackerCoreData.isPinned = tracker.isPinned
     }
     
     @discardableResult
@@ -128,6 +211,34 @@ final class TrackerStore: NSObject {
         Logger.success("Добавлен трекер '\(tracker.name)' в категорию '\(categoryName)'")
         return try EntityMapper.convertToTracker(trackerCoreData)
     }
+    
+    func fetchById(_ id: Int32) -> TrackerCoreData? {
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", NSNumber(value: id))
+        request.fetchLimit = 1
+        
+        do {
+            return try context.fetch(request).first
+        } catch {
+            Logger.error("Ошибка при поиске трекера по id: \(error)")
+            return nil
+        }
+    }
+    
+    private func fetchAll() throws -> [TrackerCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        let coreDataTrackers = try context.fetch(fetchRequest)
+        
+        return coreDataTrackers
+    }
+    
+    func fetchAllTrackers() throws -> [Tracker] {
+        let entities = try fetchAll()
+        let records = try entities.map(EntityMapper.convertToTracker)
+        
+        return records
+    }
+    
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
@@ -166,9 +277,15 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        guard !pendingChanges.isEmpty else { return }
-        delegate?.trackerStoreDidChange(pendingChanges)
-        Logger.info("Обновления трекеров: \(pendingChanges.count) изменений")
+        if controller == fetchedResultsController {
+            guard !pendingChanges.isEmpty else { return }
+            delegate?.trackerStoreDidChange(pendingChanges)
+            pendingChanges.removeAll()
+            Logger.info("Обновления трекеров: \(pendingChanges.count) изменений")
+        } else if controller == allTrackersFRC {
+            statisticsDelegate?.recalculateIdealDays()
+            Logger.debug("Пересчет идеальных дней")
+        }
     }
     
     func controller(

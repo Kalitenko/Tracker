@@ -3,8 +3,8 @@ final class CategoryViewModel {
     // MARK: - Constants
     private enum Constants {
         static let limitSymbolsNumber = 38
-        static let limitText = "Ограничение \(limitSymbolsNumber) символов"
-        static let alreadyExistsText = "Категория с таким названием уже существует"
+        static let limitText = Utils.symbolCountString(for: limitSymbolsNumber)
+        static let alreadyExistsText = L10n.categoryExists
     }
     
     // MARK: - Public Properties
@@ -13,7 +13,7 @@ final class CategoryViewModel {
     
     // MARK: - Private Properties
     private let dataProvider: DataProvider = .shared
-    private let mode: Mode
+    private let mode: CategoryMode
     private let currentCategory: TrackerCategory?
     
     private var title: String = "" {
@@ -25,7 +25,7 @@ final class CategoryViewModel {
     private var trimmedTitle: String = ""
     
     // MARK: - Initializers
-    init(mode: Mode) {
+    init(mode: CategoryMode) {
         self.mode = mode
         switch mode {
         case .create:

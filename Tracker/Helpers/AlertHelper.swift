@@ -3,8 +3,8 @@ import UIKit
 final class AlertHelper {
     
     enum Constants {
-        static let deleteText = "Удалить"
-        static let cancelText = "Отменить"
+        static let deleteText = L10n.deleteAction
+        static let cancelText = L10n.cancelAction
     }
     
     static func showDeleteConfirmation(
